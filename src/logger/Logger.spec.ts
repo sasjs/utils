@@ -1,46 +1,51 @@
+import consola from 'consola'
 import { Logger, LogLevel } from '.'
-import { LogOutput } from './LogOutput'
 
-const createTestLogOutput = (): LogOutput => ({
-  log: jest.fn(),
-  debug: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  error: jest.fn()
-})
+jest.mock('consola')
 
 describe('Logger', () => {
   it('should set the log level', () => {
     const logger = new Logger()
+
     logger.logLevel = LogLevel.Off
 
     expect(logger.logLevel).toEqual(LogLevel.Off)
   })
 
-  it('should set the log output', () => {
-    const logger = new Logger()
-    const logOutput = createTestLogOutput()
-    logger.logOutput = logOutput
-
-    expect(logger.logOutput).toEqual(logOutput)
-  })
-
-  it('should log warnings when the log level is below WARNING', () => {
+  it('should log warnings when the log level is below Warn', () => {
     const logger = new Logger()
     logger.logLevel = LogLevel.Debug
-    logger.logOutput = createTestLogOutput()
+    spyOn(consola, 'warn')
 
     logger.warn('This is a warning.')
 
-    expect(logger.logOutput.warn).toHaveBeenCalledTimes(1)
+    expect(consola.warn).toHaveBeenCalledTimes(1)
   })
 
-  it('should not log warnings when the log level is above WARNING', () => {
-    const logger = new Logger()
-    logger.logLevel = LogLevel.Error
-    logger.logOutput = createTestLogOutput()
+  it('should not log warnings when the log level is above Warn', () => {
+    const logger = new Logger(LogLevel.Error)
+    spyOn(consola, 'warn')
+
     logger.warn('This is a warning.')
 
-    expect(logger.logOutput.warn).not.toHaveBeenCalled()
+    expect(consola.warn).not.toHaveBeenCalled()
+  })
+
+  it('should log errors when the log level is Warn', () => {
+    const logger = new Logger(LogLevel.Warn)
+    spyOn(consola, 'error')
+
+    logger.error('This is an error.')
+
+    expect(consola.error).toHaveBeenCalledTimes(1)
+  })
+
+  it('should log info messages when the log level is Info', () => {
+    const logger = new Logger(LogLevel.Info)
+    spyOn(consola, 'info')
+
+    logger.info('This is info.')
+
+    expect(consola.info).toHaveBeenCalledTimes(1)
   })
 })
