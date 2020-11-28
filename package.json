@@ -1,0 +1,44 @@
+{
+  "name": "@sasjs/utils",
+  "description": "Utilities and types for SASjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
+  "scripts": {
+    "build": "rimraf build && webpack",
+    "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm webpack.config.js && rm tsconfig.json",
+    "postpublish": "git clean -fd",
+    "package:lib": "npm run build && cp ./package.json build && cp README.md build && cd build && npm version \"5.0.0\" && npm pack",
+    "test": "jest",
+    "lint:fix": "npx prettier --write '{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}'",
+    "lint": "npx prettier --check '{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sasjs/utils.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sasjs/utils/issues"
+  },
+  "homepage": "https://github.com/sasjs/utils#readme",
+  "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "jest": "^26.6.3",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^26.4.4",
+    "ts-loader": "^8.0.11",
+    "typescript": "^4.0.5",
+    "webpack": "^5.5.1",
+    "webpack-cli": "^4.2.0"
+  },
+  "dependencies": {
+    "consola": "^2.15.0"
+  }
+}

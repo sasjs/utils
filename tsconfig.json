@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/",
+        "lib": [
+            "ES2018",
+            "DOM",
+            "ES2019.String"
+        ],
+        "noImplicitAny": true,
+        "strict": true,
+        "sourceMap": true,
+        "module": "es6",
+        "moduleResolution": "node",
+        "declaration": true,
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true,
+        "esModuleInterop": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
+}
