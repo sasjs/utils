@@ -24,7 +24,5 @@ export const isLowerThanOrEqualTo = (
     return level === LogLevel.Warn || level === LogLevel.Error
   }
 
-  if (currentLevel === LogLevel.Error) {
-    return level === LogLevel.Error
-  }
+  return level === LogLevel.Error
 }
