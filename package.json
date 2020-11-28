@@ -4,6 +4,11 @@
   "publishConfig": {
     "access": "public"
   },
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
   "scripts": {
     "build": "rimraf build && webpack",
     "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm webpack.config.js && rm tsconfig.json",
