@@ -2,10 +2,6 @@
   "name": "@sasjs/utils",
   "version": "1.0.0",
   "description": "Utilities and types for SASjs",
-  "main": "build/index.js",
-  "files": [
-    "/build"
-  ],
   "publishConfig": {
     "access": "public"
   },
