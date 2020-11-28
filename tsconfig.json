@@ -1,7 +1,14 @@
 {
     "compilerOptions": {
         "outDir": "./build/",
+        "lib": [
+            "ES2018",
+            "DOM",
+            "ES2019.String"
+        ],
         "noImplicitAny": true,
+        "strict": true,
+        "sourceMap": true,
         "module": "es6",
         "moduleResolution": "node",
         "declaration": true,
