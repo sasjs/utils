@@ -24,7 +24,9 @@ describe('readAndValidateInput', () => {
 
     await expect(
       readAndValidateInput(type as InputType, fieldName, message, validator)
-    ).rejects.toThrow('Invalid input type. Valid input types are `text` and `number`')
+    ).rejects.toThrow(
+      'Invalid input type. Valid input types are `text` and `number`'
+    )
     done()
   })
 })
