@@ -1,11 +1,19 @@
 import consola from 'consola'
-import { LogLevel } from './LogLevel'
 import { isLowerThanOrEqualTo } from './isLowerThanOrEqualTo'
+import { isNullOrUndefined } from './isNullOrUndefined'
+
+export enum LogLevel {
+  Debug = 'Debug',
+  Info = 'Info',
+  Warn = 'Warn',
+  Error = 'Error',
+  Off = 'Off'
+}
 
 export class Logger {
   constructor(logLevel?: LogLevel) {
-    if (logLevel) {
-      this._logLevel = logLevel
+    if (!isNullOrUndefined(logLevel) && logLevel! in LogLevel) {
+      this._logLevel = logLevel as LogLevel
     }
   }
 
@@ -19,33 +27,33 @@ export class Logger {
 
   private _logLevel: LogLevel = LogLevel.Error
 
-  debug = (message: string): void => {
-    if (isLowerThanOrEqualTo(this.logLevel, LogLevel.Debug)) {
-      consola.debug(message)
+  debug = (message: string, ...args: any): void => {
+    if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Debug)) {
+      consola.debug(message, ...args)
     }
   }
 
-  info = (message: string): void => {
-    if (isLowerThanOrEqualTo(this.logLevel, LogLevel.Info)) {
-      consola.info(message)
+  info = (message: string, ...args: any): void => {
+    if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Info)) {
+      consola.info(message, ...args)
     }
   }
 
-  success = (message: string): void => {
-    if (isLowerThanOrEqualTo(this.logLevel, LogLevel.Info)) {
-      consola.success(message)
+  success = (message: string, ...args: any): void => {
+    if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Info)) {
+      consola.success(message, ...args)
     }
   }
 
-  warn = (message: string): void => {
+  warn = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Warn)) {
-      consola.warn(message)
+      consola.warn(message, ...args)
     }
   }
 
-  error = (message: string): void => {
-    if (isLowerThanOrEqualTo(this.logLevel, LogLevel.Error)) {
-      consola.error(message)
+  error = (message: string, ...args: any): void => {
+    if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Error)) {
+      consola.error(message, ...args)
     }
   }
 }

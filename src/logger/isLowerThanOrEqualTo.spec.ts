@@ -1,5 +1,5 @@
 import { isLowerThanOrEqualTo } from './isLowerThanOrEqualTo'
-import { LogLevel } from './LogLevel'
+import { LogLevel } from './Logger'
 
 describe('isLowerThanOrEqualTo', () => {
   it('should return false when the current level is OFF', () => {
