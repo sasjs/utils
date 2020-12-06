@@ -1,10 +1,18 @@
 import { ServerType } from './serverType'
 
+export interface AuthInfo {
+  access_token: string
+  refresh_token: string
+  client: string
+  secret: string
+}
+
 export interface Target {
   name: string
   serverUrl: string
   serverType: ServerType
   appLoc: string
+  authInfo?: AuthInfo
   buildOutputFileName: string
   deployServicePack: boolean
   tgtBuildInit: string
