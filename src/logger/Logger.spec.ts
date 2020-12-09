@@ -40,6 +40,15 @@ describe('Logger', () => {
     expect(consola.error).toHaveBeenCalledTimes(1)
   })
 
+  it('should not log errors when the log level is Off', () => {
+    const logger = new Logger(LogLevel.Off)
+    spyOn(consola, 'error')
+
+    logger.error('This is an error.')
+
+    expect(consola.error).not.toHaveBeenCalled()
+  })
+
   it('should log info messages when the log level is Info', () => {
     const logger = new Logger(LogLevel.Info)
     spyOn(consola, 'info')
@@ -47,5 +56,59 @@ describe('Logger', () => {
     logger.info('This is info.')
 
     expect(consola.info).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not log info messages when the log level is Error', () => {
+    const logger = new Logger(LogLevel.Error)
+    spyOn(consola, 'info')
+
+    logger.info('This is info.')
+
+    expect(consola.info).not.toHaveBeenCalled()
+  })
+
+  it('should log debug messages when the log level is Debug', () => {
+    const logger = new Logger(LogLevel.Debug)
+    spyOn(consola, 'debug')
+
+    logger.debug('This is debug.')
+
+    expect(consola.debug).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not log debug messages when the log level is Error', () => {
+    const logger = new Logger(LogLevel.Error)
+    spyOn(consola, 'debug')
+
+    logger.debug('This is debug.')
+
+    expect(consola.debug).not.toHaveBeenCalled()
+  })
+
+  it('should log success messages when the log level is Debug', () => {
+    const logger = new Logger(LogLevel.Debug)
+    spyOn(consola, 'success')
+
+    logger.success('This is success.')
+
+    expect(consola.success).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not log success messages when the log level is Error', () => {
+    const logger = new Logger(LogLevel.Error)
+    spyOn(consola, 'success')
+
+    logger.success('This is success.')
+
+    expect(consola.success).not.toHaveBeenCalled()
+  })
+
+  it('should log a message regardless of log level', () => {
+    const logger = new Logger(LogLevel.Off)
+    spyOn(consola, 'log')
+
+    logger.log('This is a log.')
+
+    expect(consola.log).toHaveBeenCalledTimes(1)
   })
 })

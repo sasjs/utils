@@ -29,6 +29,15 @@ describe('isLowerThanOrEqualTo', () => {
     expect(result).toBeTruthy()
   })
 
+  it('should return true when the current level is lower than the level passed in', () => {
+    const currentLevel = LogLevel.Info
+    const level = LogLevel.Error
+
+    const result = isLowerThanOrEqualTo(currentLevel, level)
+
+    expect(result).toBeTruthy()
+  })
+
   it('should return true when the current level is equal to the level passed in', () => {
     const currentLevel = LogLevel.Warn
     const level = LogLevel.Warn
