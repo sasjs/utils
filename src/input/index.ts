@@ -3,5 +3,8 @@ export {
   getNumber,
   getChoice,
   getConfirmation,
-  getUrl
+  getUrl,
+  InputType,
+  InputValidator,
+  Choice
 } from './readAndValidateInput'

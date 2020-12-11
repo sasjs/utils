@@ -117,7 +117,7 @@ export const getChoice = async (
 export const getUrl = async (
   message: string,
   errorMessage: string
-): Promise<{ [key: string]: string }> => {
+): Promise<string> => {
   const { url } = await readAndValidateInput(
     'text',
     'url',
