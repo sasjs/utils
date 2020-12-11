@@ -1,6 +1,9 @@
 import prompts from 'prompts'
-import validUrl from 'valid-url'
-
+import {
+  choiceValidator,
+  confirmationValidator,
+  urlValidator
+} from './validators'
 export type InputType = 'number' | 'text' | 'select' | 'confirm'
 export type InputValidator = (
   value: any
@@ -12,88 +15,125 @@ export interface Choice {
   value?: string | number
 }
 
+const defaultErrorMessage = 'Invalid input.'
+
 const isValidInputType = (type: any): boolean =>
   type === 'number' ||
   type === 'text' ||
   type === 'select' ||
-  type === 'confirm'
+  type === 'confirm' ||
+  type === 'url'
 
 export const getNumber = async (
-  fieldName: string,
   message: string,
   validator: InputValidator,
   defaultValue: number
-): Promise<{ [key: string]: number }> => {
-  return await readAndValidateInput(
+): Promise<number> => {
+  const { number } = await readAndValidateInput(
     'number',
-    fieldName,
+    'number',
     message,
     validator,
     defaultValue
   )
+
+  if (
+    !Number.isNaN(number) &&
+    !(typeof number === 'string') &&
+    number !== null &&
+    number !== undefined
+  ) {
+    return number
+  }
+
+  throw new Error(defaultErrorMessage)
 }
 
 export const getString = async (
-  fieldName: string,
   message: string,
   validator: InputValidator,
   defaultValue: string = ''
-): Promise<{ [key: string]: string }> => {
-  return await readAndValidateInput(
+): Promise<string> => {
+  const { text } = await readAndValidateInput(
     'text',
-    fieldName,
+    'text',
     message,
     validator,
     defaultValue
   )
+
+  if (text !== null && text !== undefined) {
+    return text
+  }
+
+  throw new Error(defaultErrorMessage)
 }
 
 export const getConfirmation = async (
-  fieldName: string,
   message: string,
   defaultValue: boolean
-): Promise<{ [key: string]: boolean }> => {
-  return await readAndValidateInput(
+): Promise<boolean> => {
+  const { confirm } = await readAndValidateInput(
     'confirm',
-    fieldName,
+    'confirm',
     message,
-    (v) => v === true || v === false,
+    confirmationValidator,
     defaultValue
   )
+
+  if (confirm === true || confirm === false) {
+    return confirm
+  }
+
+  throw new Error(defaultErrorMessage)
 }
 
 export const getChoice = async (
-  fieldName: string,
   message: string,
-  validator: InputValidator,
-  defaultValue: string | number,
+  errorMessage: string,
   choices: Choice[] = []
-): Promise<{ [key: string]: number }> => {
-  return await readAndValidateInput(
+): Promise<number> => {
+  const { choice } = await readAndValidateInput(
     'select',
-    fieldName,
+    'choice',
     message,
-    validator,
-    defaultValue,
+    (value) => choiceValidator(value, choices.length, errorMessage),
+    0,
     choices
   )
+
+  if (
+    !Number.isNaN(choice) &&
+    !(typeof choice === 'string') &&
+    choice !== null &&
+    choice !== undefined
+  ) {
+    return choice + 1
+  }
+
+  throw new Error(errorMessage)
 }
 
 export const getUrl = async (
-  fieldName: string,
   message: string,
   errorMessage: string
 ): Promise<{ [key: string]: string }> => {
-  return await readAndValidateInput(
+  const { url } = await readAndValidateInput(
     'text',
-    fieldName,
+    'url',
     message,
-    (v: string) => !!validUrl.isUri(v) || v === '' || errorMessage,
+    (value: string) => urlValidator(value, errorMessage),
     ''
   )
+
+  if (!!url || url === '') {
+    return url
+  }
+
+  throw new Error(errorMessage)
 }
 
-const readAndValidateInput = async (
+export const readAndValidateInput = async (
   type: InputType,
   fieldName: string,
   message: string,
@@ -103,7 +143,7 @@ const readAndValidateInput = async (
 ) => {
   if (!isValidInputType(type)) {
     throw new Error(
-      'Invalid input type. Valid input types are `text`, `number`, `confirm` and `select`'
+      'Invalid input type. Valid input types are `text`, `number`, `url`, `confirm` and `select`'
     )
   }
 
