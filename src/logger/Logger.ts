@@ -56,4 +56,8 @@ export class Logger {
       consola.error(message, ...args)
     }
   }
+
+  log = (message: string, ...args: any): void => {
+    consola.log(message, ...args)
+  }
 }
