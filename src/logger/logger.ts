@@ -1,14 +1,7 @@
 import consola from 'consola'
 import { isLowerThanOrEqualTo } from './isLowerThanOrEqualTo'
 import { isNullOrUndefined } from './isNullOrUndefined'
-
-export enum LogLevel {
-  Debug = 'Debug',
-  Info = 'Info',
-  Warn = 'Warn',
-  Error = 'Error',
-  Off = 'Off'
-}
+import { LogLevel } from './logLevel'
 
 export class Logger {
   constructor(logLevel?: LogLevel) {
