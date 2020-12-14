@@ -22,6 +22,7 @@ interface TargetInterface {
   name: string
   serverUrl: string
   serverType: ServerType
+  contextName?: string
   appLoc: string
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
@@ -36,12 +37,12 @@ export class Target implements TargetInterface {
   get name(): string {
     return this._name
   }
-  private _name = ''
+  private _name
 
   get serverUrl(): string {
     return this._serverUrl
   }
-  private _serverUrl = ''
+  private _serverUrl
 
   get serverType(): ServerType {
     return this._serverType
@@ -51,55 +52,57 @@ export class Target implements TargetInterface {
   get appLoc(): string {
     return this._appLoc
   }
-  private _appLoc = ''
+  private _appLoc
 
   get buildConfig(): BuildConfig {
+    if (!this._buildConfig) {
+      throw new Error(
+        `Build config has not been defined for build target ${this._name}.`
+      )
+    }
     return this._buildConfig
   }
-  private _buildConfig: BuildConfig = {
-    macroVars: {},
-    initProgram: '',
-    termProgram: '',
-    buildOutputFileName: ''
-  }
+  private _buildConfig: BuildConfig | undefined
 
   get deployConfig(): DeployConfig {
+    if (!this._deployConfig) {
+      throw new Error(
+        `Deploy config has not been defined for build target ${this._name}.`
+      )
+    }
     return this._deployConfig
   }
-  private _deployConfig: DeployConfig = {
-    deployServicePack: false,
-    deployScripts: []
-  }
+  private _deployConfig: DeployConfig | undefined
 
   get serviceConfig(): ServiceConfig {
+    if (!this._serviceConfig) {
+      throw new Error(
+        `Service config has not been defined for build target ${this._name}.`
+      )
+    }
     return this._serviceConfig
   }
-  private _serviceConfig: ServiceConfig = {
-    macroVars: {},
-    initProgram: '',
-    termProgram: '',
-    serviceFolders: []
-  }
+  private _serviceConfig: ServiceConfig | undefined
 
   get jobConfig(): JobConfig {
+    if (!this._jobConfig) {
+      throw new Error(
+        `Job config has not been defined for build target ${this._name}.`
+      )
+    }
     return this._jobConfig
   }
-  private _jobConfig: JobConfig = {
-    macroVars: {},
-    initProgram: '',
-    termProgram: '',
-    jobFolders: []
-  }
+  private _jobConfig: JobConfig | undefined
 
   get streamConfig(): StreamConfig {
+    if (!this._streamConfig) {
+      throw new Error(
+        `Stream config has not been defined for build target ${this._name}.`
+      )
+    }
     return this._streamConfig
   }
-  private _streamConfig: StreamConfig = {
-    assetPaths: [],
-    streamWeb: false,
-    streamWebFolder: '',
-    webSourcePath: ''
-  }
+  private _streamConfig: StreamConfig | undefined
 
   get macroFolders(): string[] {
     return this._macroFolders
@@ -111,6 +114,11 @@ export class Target implements TargetInterface {
   }
   private _programFolders: string[] = []
 
+  get contextName(): string {
+    return this._contextName
+  }
+  private _contextName: string
+
   constructor(json: any) {
     try {
       if (!json) {
@@ -121,9 +129,10 @@ export class Target implements TargetInterface {
       this._serverUrl = validateServerUrl(json.serverUrl)
       this._serverType = validateServerType(json.serverType)
       this._appLoc = validateAppLoc(json.appLoc)
+      this._contextName = json.contextName
 
       if (json.buildConfig) {
-        this._buildConfig = validateBuildConfig(json.buildConfig)
+        this._buildConfig = validateBuildConfig(json.buildConfig, this._name)
       }
 
       if (json.deployConfig) {

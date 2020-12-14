@@ -78,26 +78,23 @@ export const validateAppLoc = (appLoc: string): string => {
   return appLoc
 }
 
-export const validateBuildConfig = (buildConfig: BuildConfig): BuildConfig => {
+export const validateBuildConfig = (
+  buildConfig: BuildConfig,
+  defaultName: string
+): BuildConfig => {
   if (!buildConfig) {
     throw new Error('Invalid build config: JSON cannot be null or undefined.')
   }
   if (!buildConfig.buildOutputFileName) {
-    throw new Error(
-      'Invalid build config: `buildOutputFileName` cannot be empty, null or undefined.'
-    )
+    buildConfig.buildOutputFileName = `${defaultName}.sas`
   }
 
   if (!buildConfig.initProgram) {
-    throw new Error(
-      'Invalid build config: `initProgram` cannot be empty, null or undefined.'
-    )
+    buildConfig.initProgram = ''
   }
 
   if (!buildConfig.termProgram) {
-    throw new Error(
-      'Invalid build config: `termProgram` cannot be empty, null or undefined.'
-    )
+    buildConfig.termProgram = ''
   }
 
   if (!buildConfig.macroVars) {
@@ -115,15 +112,11 @@ export const validateServiceConfig = (
   }
 
   if (!serviceConfig.initProgram) {
-    throw new Error(
-      'Invalid service config: `initProgram` cannot be empty, null or undefined.'
-    )
+    serviceConfig.initProgram = ''
   }
 
   if (!serviceConfig.termProgram) {
-    throw new Error(
-      'Invalid service config: `termProgram` cannot be empty, null or undefined.'
-    )
+    serviceConfig.termProgram = ''
   }
 
   if (!serviceConfig.serviceFolders) {
@@ -143,15 +136,11 @@ export const validateJobConfig = (jobConfig: JobConfig): JobConfig => {
   }
 
   if (!jobConfig.initProgram) {
-    throw new Error(
-      'Invalid job config: `initProgram` cannot be empty, null or undefined.'
-    )
+    jobConfig.initProgram = ''
   }
 
   if (!jobConfig.termProgram) {
-    throw new Error(
-      'Invalid job config: `termProgram` cannot be empty, null or undefined.'
-    )
+    jobConfig.termProgram = ''
   }
 
   if (!jobConfig.jobFolders) {

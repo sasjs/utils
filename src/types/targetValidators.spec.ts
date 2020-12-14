@@ -149,121 +149,75 @@ describe('validateServerUrl', () => {
 describe('validateBuildConfig', () => {
   it('should throw an error when input JSON is null', () => {
     expect(() =>
-      validateBuildConfig((null as unknown) as BuildConfig)
+      validateBuildConfig((null as unknown) as BuildConfig, 'test')
     ).toThrowError('Invalid build config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when input JSON is undefined', () => {
     expect(() =>
-      validateBuildConfig((undefined as unknown) as BuildConfig)
+      validateBuildConfig((undefined as unknown) as BuildConfig, 'test')
     ).toThrowError('Invalid build config: JSON cannot be null or undefined.')
   })
 
-  it('should throw an error when build output filename is empty', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: ''
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `buildOutputFileName` cannot be empty, null or undefined.'
+  it('should use the default when build output filename is undefined', () => {
+    expect(validateBuildConfig(({} as unknown) as BuildConfig, 'test')).toEqual(
+      {
+        buildOutputFileName: 'test.sas',
+        initProgram: '',
+        termProgram: '',
+        macroVars: {}
+      }
     )
   })
 
-  it('should throw an error when build output filename is null', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: null
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `buildOutputFileName` cannot be empty, null or undefined.'
-    )
+  it('should set the init program to the empty string if null', () => {
+    expect(
+      validateBuildConfig(
+        ({
+          buildOutputFileName: 'test.sas',
+          initProgram: null
+        } as unknown) as BuildConfig,
+        'test'
+      )
+    ).toEqual({
+      buildOutputFileName: 'test.sas',
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
-  it('should throw an error when build output filename is undefined', () => {
-    expect(() =>
-      validateBuildConfig(({} as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `buildOutputFileName` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when init program is empty', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: 'test',
-        initProgram: ''
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when init program is null', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: 'test',
-        initProgram: null
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when init program is undefined', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: 'test'
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is empty', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: 'test',
-        initProgram: 'test',
-        termProgram: ''
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `termProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is null', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: 'test',
-        initProgram: 'test',
-        termProgram: null
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `termProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is undefined', () => {
-    expect(() =>
-      validateBuildConfig(({
-        buildOutputFileName: 'test',
-        initProgram: 'test'
-      } as unknown) as BuildConfig)
-    ).toThrowError(
-      'Invalid build config: `termProgram` cannot be empty, null or undefined.'
-    )
+  it('should set the term program to the empty string if null', () => {
+    expect(
+      validateBuildConfig(
+        ({
+          buildOutputFileName: 'output.sas',
+          initProgram: 'test',
+          termProgram: ''
+        } as unknown) as BuildConfig,
+        'test'
+      )
+    ).toEqual({
+      buildOutputFileName: 'output.sas',
+      initProgram: 'test',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
   it('should return the build config when valid', () => {
     expect(
-      validateBuildConfig({
-        buildOutputFileName: 'test',
-        initProgram: 'test',
-        termProgram: 'test',
-        macroVars: { foo: 'bar' }
-      })
+      validateBuildConfig(
+        {
+          buildOutputFileName: 'output.sas',
+          initProgram: 'test',
+          termProgram: 'test',
+          macroVars: { foo: 'bar' }
+        },
+        'test'
+      )
     ).toEqual({
-      buildOutputFileName: 'test',
+      buildOutputFileName: 'output.sas',
       initProgram: 'test',
       termProgram: 'test',
       macroVars: { foo: 'bar' }
@@ -272,11 +226,14 @@ describe('validateBuildConfig', () => {
 
   it('should initialise the macro vars if not present', () => {
     expect(
-      validateBuildConfig(({
-        buildOutputFileName: 'test',
-        initProgram: 'test',
-        termProgram: 'test'
-      } as unknown) as BuildConfig)
+      validateBuildConfig(
+        ({
+          buildOutputFileName: 'test',
+          initProgram: 'test',
+          termProgram: 'test'
+        } as unknown) as BuildConfig,
+        'test'
+      )
     ).toEqual({
       buildOutputFileName: 'test',
       initProgram: 'test',
@@ -347,82 +304,33 @@ describe('validateServiceConfig', () => {
     ).toThrowError('Invalid service config: JSON cannot be null or undefined.')
   })
 
-  it('should throw an error when init program is empty', () => {
-    expect(() =>
-      validateServiceConfig({
-        serviceFolders: [],
-        initProgram: '',
-        termProgram: 'term',
-        macroVars: {}
-      })
-    ).toThrowError(
-      'Invalid service config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when init program is null', () => {
-    expect(() =>
+  it('should set the init program to the empty string if null', () => {
+    expect(
       validateServiceConfig(({
         serviceFolders: [],
-        initProgram: null,
-        termProgram: 'term',
-        macroVars: {}
+        initProgram: null
       } as unknown) as ServiceConfig)
-    ).toThrowError(
-      'Invalid service config: `initProgram` cannot be empty, null or undefined.'
-    )
+    ).toEqual({
+      serviceFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
-  it('should throw an error when init program is undefined', () => {
-    expect(() =>
+  it('should set the term program to the empty string if null', () => {
+    expect(
       validateServiceConfig(({
         serviceFolders: [],
-        initProgram: undefined,
-        termProgram: 'term',
-        macroVars: {}
+        initProgram: 'test',
+        termProgram: ''
       } as unknown) as ServiceConfig)
-    ).toThrowError(
-      'Invalid service config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is empty', () => {
-    expect(() =>
-      validateServiceConfig({
-        serviceFolders: [],
-        initProgram: 'init',
-        termProgram: '',
-        macroVars: {}
-      })
-    ).toThrowError(
-      'Invalid service config: `termProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is null', () => {
-    expect(() =>
-      validateServiceConfig(({
-        serviceFolders: [],
-        initProgram: 'init',
-        termProgram: null,
-        macroVars: {}
-      } as unknown) as ServiceConfig)
-    ).toThrowError(
-      'Invalid service config: `termProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is undefined', () => {
-    expect(() =>
-      validateServiceConfig(({
-        serviceFolders: [],
-        initProgram: 'init',
-        termProgram: undefined,
-        macroVars: {}
-      } as unknown) as ServiceConfig)
-    ).toThrowError(
-      'Invalid service config: `termProgram` cannot be empty, null or undefined.'
-    )
+    ).toEqual({
+      serviceFolders: [],
+      initProgram: 'test',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
   it('should return the service config when valid', () => {
@@ -469,82 +377,33 @@ describe('validateJobConfig', () => {
     ).toThrowError('Invalid job config: JSON cannot be null or undefined.')
   })
 
-  it('should throw an error when init program is empty', () => {
-    expect(() =>
-      validateJobConfig({
-        jobFolders: [],
-        initProgram: '',
-        termProgram: 'term',
-        macroVars: {}
-      })
-    ).toThrowError(
-      'Invalid job config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when init program is null', () => {
-    expect(() =>
-      validateJobConfig(({
-        serviceFolders: [],
-        initProgram: null,
-        termProgram: 'term',
-        macroVars: {}
-      } as unknown) as JobConfig)
-    ).toThrowError(
-      'Invalid job config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when init program is undefined', () => {
-    expect(() =>
-      validateJobConfig(({
-        serviceFolders: [],
-        initProgram: undefined,
-        termProgram: 'term',
-        macroVars: {}
-      } as unknown) as JobConfig)
-    ).toThrowError(
-      'Invalid job config: `initProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is empty', () => {
-    expect(() =>
-      validateJobConfig({
-        jobFolders: [],
-        initProgram: 'init',
-        termProgram: '',
-        macroVars: {}
-      })
-    ).toThrowError(
-      'Invalid job config: `termProgram` cannot be empty, null or undefined.'
-    )
-  })
-
-  it('should throw an error when term program is null', () => {
-    expect(() =>
+  it('should set the init program to the empty string if null', () => {
+    expect(
       validateJobConfig(({
         jobFolders: [],
-        initProgram: 'init',
-        termProgram: null,
-        macroVars: {}
+        initProgram: null
       } as unknown) as JobConfig)
-    ).toThrowError(
-      'Invalid job config: `termProgram` cannot be empty, null or undefined.'
-    )
+    ).toEqual({
+      jobFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
-  it('should throw an error when term program is undefined', () => {
-    expect(() =>
+  it('should set the term program to the empty string if null', () => {
+    expect(
       validateJobConfig(({
         jobFolders: [],
-        initProgram: 'init',
-        termProgram: undefined,
-        macroVars: {}
+        initProgram: 'test',
+        termProgram: ''
       } as unknown) as JobConfig)
-    ).toThrowError(
-      'Invalid job config: `termProgram` cannot be empty, null or undefined.'
-    )
+    ).toEqual({
+      jobFolders: [],
+      initProgram: 'test',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
   it('should return the service config when valid', () => {

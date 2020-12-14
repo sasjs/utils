@@ -44,17 +44,20 @@ describe('Target', () => {
     ).toThrowError('Error parsing target: Invalid app location')
   })
 
-  it('should throw an error with an invalid build config', () => {
-    expect(
-      () =>
-        new Target({
-          name: 'test',
-          serverUrl: '',
-          serverType: ServerType.Sas9,
-          appLoc: '/test',
-          buildConfig: {}
-        })
-    ).toThrowError('Error parsing target: Invalid build config')
+  it('should set defaults with an empty build config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      buildConfig: {}
+    })
+
+    expect(target.buildConfig).toBeTruthy()
+    expect(target.buildConfig.buildOutputFileName).toEqual('test.sas')
+    expect(target.buildConfig.initProgram).toEqual('')
+    expect(target.buildConfig.termProgram).toEqual('')
+    expect(target.buildConfig.macroVars).toEqual({})
   })
 
   it('should create an instance when the JSON is valid', () => {
@@ -62,7 +65,8 @@ describe('Target', () => {
       name: 'test',
       serverUrl: '',
       serverType: ServerType.Sas9,
-      appLoc: '/test'
+      appLoc: '/test',
+      contextName: 'Test Context'
     })
 
     expect(target).toBeTruthy()
@@ -71,6 +75,7 @@ describe('Target', () => {
     expect(target.serverUrl).toEqual('')
     expect(target.serverType).toEqual(ServerType.Sas9)
     expect(target.appLoc).toEqual('/test')
+    expect(target.contextName).toEqual('Test Context')
   })
 
   it('should create an instance with build config when the JSON is valid', () => {
@@ -209,5 +214,86 @@ describe('Target', () => {
     expect(target).toBeTruthy()
     expect(target instanceof Target).toEqual(true)
     expect(target.programFolders).toEqual(['foo'])
+  })
+
+  it('should create an instance with the minimum set of attributes', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.name).toEqual('test')
+    expect(target.serverUrl).toEqual('')
+    expect(target.serverType).toEqual(ServerType.SasViya)
+    expect(target.appLoc).toEqual('/test')
+  })
+
+  it('should throw an error when trying to access an undefined build config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    expect(() => target.buildConfig).toThrowError(
+      'Build config has not been defined for build target test.'
+    )
+  })
+
+  it('should throw an error when trying to access an undefined deploy config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    expect(() => target.deployConfig).toThrowError(
+      'Deploy config has not been defined for build target test.'
+    )
+  })
+
+  it('should throw an error when trying to access an undefined job config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    expect(() => target.jobConfig).toThrowError(
+      'Job config has not been defined for build target test.'
+    )
+  })
+
+  it('should throw an error when trying to access an undefined service config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    expect(() => target.serviceConfig).toThrowError(
+      'Service config has not been defined for build target test.'
+    )
+  })
+
+  it('should throw an error when trying to access an undefined stream config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    expect(() => target.streamConfig).toThrowError(
+      'Stream config has not been defined for build target test.'
+    )
   })
 })
