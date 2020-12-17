@@ -1,4 +1,4 @@
-import { LogLevel } from './Logger'
+import { LogLevel } from './logLevel'
 
 export const isLowerThanOrEqualTo = (
   currentLevel: LogLevel,

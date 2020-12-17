@@ -8,5 +8,6 @@ module.exports = {
       lines: 80,
       statements: -10
     }
-  }
+  },
+  collectCoverageFrom: ['src/**/{!(index),}.ts']
 }
