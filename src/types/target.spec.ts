@@ -142,6 +142,8 @@ describe('Target', () => {
     expect(target.serviceConfig.serviceFolders).toEqual([])
     expect(target.serviceConfig.initProgram).toEqual('init')
     expect(target.serviceConfig.termProgram).toEqual('term')
+    expect(target.serverName).toEqual('SASApp')
+    expect(target.repositoryName).toEqual('Foundation')
   })
 
   it('should create an instance with job config when the JSON is valid', () => {
@@ -230,6 +232,30 @@ describe('Target', () => {
     expect(target.serverUrl).toEqual('')
     expect(target.serverType).toEqual(ServerType.SasViya)
     expect(target.appLoc).toEqual('/test')
+  })
+
+  it('should create an instance with the auth config when available', () => {
+    const authConfig = {
+      access_token: 'T35T',
+      refresh_token: 'R3FR35H',
+      client: 'CL13NT',
+      secret: '53CR3T'
+    }
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test',
+      authConfig
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.name).toEqual('test')
+    expect(target.serverUrl).toEqual('')
+    expect(target.serverType).toEqual(ServerType.SasViya)
+    expect(target.appLoc).toEqual('/test')
+    expect(target.authConfig).toEqual(authConfig)
   })
 
   it('should throw an error when trying to access an undefined build config', () => {

@@ -1,4 +1,5 @@
 import {
+  AuthConfig,
   BuildConfig,
   DeployConfig,
   ServiceConfig,
@@ -18,7 +19,8 @@ import {
   validateStreamConfig,
   validateContextName,
   validateServerName,
-  validateRepositoryName
+  validateRepositoryName,
+  validateAuthConfig
 } from './targetValidators'
 
 interface TargetInterface {
@@ -29,6 +31,7 @@ interface TargetInterface {
   serverName?: string
   repositoryName?: string
   appLoc: string
+  authConfig?: AuthConfig
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
   serviceConfig?: ServiceConfig
@@ -58,6 +61,11 @@ export class Target implements TargetInterface {
     return this._appLoc
   }
   private _appLoc
+
+  get authConfig(): AuthConfig | undefined {
+    return this._authConfig
+  }
+  private _authConfig: AuthConfig | undefined
 
   get buildConfig(): BuildConfig {
     if (!this._buildConfig) {
@@ -153,6 +161,10 @@ export class Target implements TargetInterface {
         json.repositoryName,
         this._serverType
       )
+
+      if (json.authConfig) {
+        this._authConfig = validateAuthConfig(json.authConfig)
+      }
 
       if (json.buildConfig) {
         this._buildConfig = validateBuildConfig(json.buildConfig, this._name)

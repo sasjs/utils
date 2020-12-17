@@ -1,4 +1,5 @@
 import {
+  AuthConfig,
   BuildConfig,
   DeployConfig,
   JobConfig,
@@ -18,7 +19,8 @@ import {
   validateStreamConfig,
   validateContextName,
   validateServerName,
-  validateRepositoryName
+  validateRepositoryName,
+  validateAuthConfig
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -575,5 +577,29 @@ describe('validateRepositoryName', () => {
     expect(validateRepositoryName('Test Repository', ServerType.Sas9)).toEqual(
       'Test Repository'
     )
+  })
+})
+
+describe('validateAuthConfig', () => {
+  it('should throw an error when authConfig is null', () => {
+    expect(() =>
+      validateAuthConfig((null as unknown) as AuthConfig)
+    ).toThrowError('Invalid auth config: JSON cannot be null or undefined.')
+  })
+
+  it('should return the auth config when valid', () => {
+    expect(
+      validateAuthConfig({
+        access_token: 'T35T',
+        refresh_token: 'R3FR35H',
+        client: 'CL13NT',
+        secret: '53CR3T'
+      })
+    ).toEqual({
+      access_token: 'T35T',
+      refresh_token: 'R3FR35H',
+      client: 'CL13NT',
+      secret: '53CR3T'
+    })
   })
 })

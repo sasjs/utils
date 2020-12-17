@@ -22,3 +22,10 @@ export interface StreamConfig {
   streamWebFolder: string
   webSourcePath: string
 }
+
+export interface AuthConfig {
+  access_token: string
+  refresh_token: string
+  client: string
+  secret: string
+}

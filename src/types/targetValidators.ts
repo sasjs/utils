@@ -1,6 +1,7 @@
 import validUrl from 'valid-url'
 import { ServerType } from '.'
 import {
+  AuthConfig,
   BuildConfig,
   DeployConfig,
   JobConfig,
@@ -80,6 +81,14 @@ export const validateAppLoc = (appLoc: string): string => {
   }
 
   return appLoc
+}
+
+export const validateAuthConfig = (authConfig: AuthConfig): AuthConfig => {
+  if (!authConfig) {
+    throw new Error('Invalid auth config: JSON cannot be null or undefined.')
+  }
+
+  return authConfig
 }
 
 export const validateBuildConfig = (
