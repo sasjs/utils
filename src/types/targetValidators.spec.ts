@@ -15,7 +15,10 @@ import {
   validateDeployConfig,
   validateServiceConfig,
   validateJobConfig,
-  validateStreamConfig
+  validateStreamConfig,
+  validateContextName,
+  validateServerName,
+  validateRepositoryName
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -534,5 +537,43 @@ describe('validateStreamConfig', () => {
       webSourcePath: '.',
       assetPaths: []
     })
+  })
+})
+
+describe('validateContextName', () => {
+  it('should return the default context name when not specified', () => {
+    expect(validateContextName('', ServerType.SasViya)).toEqual(
+      'SAS Job Execution compute context'
+    )
+  })
+
+  it('should return the context name when valid', () => {
+    expect(validateContextName('Test Context', ServerType.SasViya)).toEqual(
+      'Test Context'
+    )
+  })
+})
+
+describe('validateServerName', () => {
+  it('should return the default server name when not specified', () => {
+    expect(validateServerName('', ServerType.Sas9)).toEqual('SASApp')
+  })
+
+  it('should return the server name when valid', () => {
+    expect(validateServerName('Test Server', ServerType.Sas9)).toEqual(
+      'Test Server'
+    )
+  })
+})
+
+describe('validateRepositoryName', () => {
+  it('should return the default repository name when not specified', () => {
+    expect(validateRepositoryName('', ServerType.Sas9)).toEqual('Foundation')
+  })
+
+  it('should return the repository name when valid', () => {
+    expect(validateRepositoryName('Test Repository', ServerType.Sas9)).toEqual(
+      'Test Repository'
+    )
   })
 })

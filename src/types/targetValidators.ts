@@ -8,6 +8,10 @@ import {
   StreamConfig
 } from './config'
 
+const DEFAULT_CONTEXT_NAME = 'SAS Job Execution compute context'
+const DEFAULT_SERVER_NAME = 'SASApp'
+const DEFAULT_REPOSITORY_NAME = 'Foundation'
+
 export const validateServerType = (serverType: any): ServerType => {
   if (!serverType) {
     throw new Error(
@@ -207,4 +211,37 @@ export const validateStreamConfig = (
   }
 
   return streamConfig
+}
+
+export const validateContextName = (
+  contextName: string,
+  serverType: ServerType
+): string => {
+  if (serverType === ServerType.SasViya && !contextName) {
+    return DEFAULT_CONTEXT_NAME
+  }
+
+  return contextName
+}
+
+export const validateServerName = (
+  serverName: string,
+  serverType: ServerType
+): string => {
+  if (serverType === ServerType.Sas9 && !serverName) {
+    return DEFAULT_SERVER_NAME
+  }
+
+  return serverName
+}
+
+export const validateRepositoryName = (
+  repositoryName: string,
+  serverType: ServerType
+): string => {
+  if (serverType === ServerType.Sas9 && !repositoryName) {
+    return DEFAULT_REPOSITORY_NAME
+  }
+
+  return repositoryName
 }

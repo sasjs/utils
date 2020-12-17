@@ -15,7 +15,10 @@ import {
   validateDeployConfig,
   validateServiceConfig,
   validateJobConfig,
-  validateStreamConfig
+  validateStreamConfig,
+  validateContextName,
+  validateServerName,
+  validateRepositoryName
 } from './targetValidators'
 
 interface TargetInterface {
@@ -23,6 +26,8 @@ interface TargetInterface {
   serverUrl: string
   serverType: ServerType
   contextName?: string
+  serverName?: string
+  repositoryName?: string
   appLoc: string
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
@@ -119,6 +124,16 @@ export class Target implements TargetInterface {
   }
   private _contextName: string
 
+  get serverName(): string {
+    return this._serverName
+  }
+  private _serverName: string
+
+  get repositoryName(): string {
+    return this._repositoryName
+  }
+  private _repositoryName: string
+
   constructor(json: any) {
     try {
       if (!json) {
@@ -129,7 +144,15 @@ export class Target implements TargetInterface {
       this._serverUrl = validateServerUrl(json.serverUrl)
       this._serverType = validateServerType(json.serverType)
       this._appLoc = validateAppLoc(json.appLoc)
-      this._contextName = json.contextName
+      this._contextName = validateContextName(
+        json.contextName,
+        this._serverType
+      )
+      this._serverName = validateServerName(json.serverName, this._serverType)
+      this._repositoryName = validateRepositoryName(
+        json.repositoryName,
+        this._serverType
+      )
 
       if (json.buildConfig) {
         this._buildConfig = validateBuildConfig(json.buildConfig, this._name)
