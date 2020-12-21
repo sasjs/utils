@@ -210,6 +210,10 @@ export class Target implements TargetInterface {
         streamWeb: false,
         webSourcePath: '',
         assetPaths: []
+      },
+      deployConfig: this.deployConfig || {
+        deployScripts: [],
+        deployServicePack: false
       }
     }
   }

@@ -302,5 +302,9 @@ describe('Target', () => {
       webSourcePath: '',
       assetPaths: []
     })
+    expect(json.deployConfig).toEqual({
+      deployScripts: [],
+      deployServicePack: false
+    })
   })
 })
