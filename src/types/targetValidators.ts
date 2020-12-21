@@ -209,7 +209,7 @@ export const validateStreamConfig = (
     )
   }
 
-  if (!streamConfig.webSourcePath) {
+  if (streamConfig.streamWeb && !streamConfig.webSourcePath) {
     throw new Error(
       'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
     )
