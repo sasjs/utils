@@ -46,12 +46,16 @@ describe('validateTargetName', () => {
 
   it('should throw an error with a target name that contains non-alphanumeric characters', () => {
     expect(() => validateTargetName('targetname#€£')).toThrowError(
-      'Invalid target name: `name` can only contain alphanumeric characters.'
+      'Invalid target name: `name` can only contain alphanumeric characters and dashes.'
     )
   })
 
   it('should return target name when valid', () => {
     expect(validateTargetName('validTargetName')).toEqual('validTargetName')
+  })
+
+  it('should return target name when it includes dashes', () => {
+    expect(validateTargetName('valid-target-name')).toEqual('valid-target-name')
   })
 })
 
