@@ -1,0 +1,1 @@
+export { prefixMessage } from './errorModifier'
