@@ -67,52 +67,27 @@ export class Target implements TargetInterface {
   }
   private _authConfig: AuthConfig | undefined
 
-  get buildConfig(): BuildConfig {
-    if (!this._buildConfig) {
-      throw new Error(
-        `Build config has not been defined for build target ${this._name}.`
-      )
-    }
+  get buildConfig(): BuildConfig | undefined {
     return this._buildConfig
   }
   private _buildConfig: BuildConfig | undefined
 
-  get deployConfig(): DeployConfig {
-    if (!this._deployConfig) {
-      throw new Error(
-        `Deploy config has not been defined for build target ${this._name}.`
-      )
-    }
+  get deployConfig(): DeployConfig | undefined {
     return this._deployConfig
   }
   private _deployConfig: DeployConfig | undefined
 
-  get serviceConfig(): ServiceConfig {
-    if (!this._serviceConfig) {
-      throw new Error(
-        `Service config has not been defined for build target ${this._name}.`
-      )
-    }
+  get serviceConfig(): ServiceConfig | undefined {
     return this._serviceConfig
   }
   private _serviceConfig: ServiceConfig | undefined
 
-  get jobConfig(): JobConfig {
-    if (!this._jobConfig) {
-      throw new Error(
-        `Job config has not been defined for build target ${this._name}.`
-      )
-    }
+  get jobConfig(): JobConfig | undefined {
     return this._jobConfig
   }
   private _jobConfig: JobConfig | undefined
 
-  get streamConfig(): StreamConfig {
-    if (!this._streamConfig) {
-      throw new Error(
-        `Stream config has not been defined for build target ${this._name}.`
-      )
-    }
+  get streamConfig(): StreamConfig | undefined {
     return this._streamConfig
   }
   private _streamConfig: StreamConfig | undefined
