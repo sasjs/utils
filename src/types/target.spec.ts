@@ -257,4 +257,50 @@ describe('Target', () => {
     expect(target.appLoc).toEqual('/test')
     expect(target.authConfig).toEqual(authConfig)
   })
+
+  it('should convert to JSON with minimal attributes', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    const json = target.toJson()
+
+    expect(json.name).toEqual(target.name)
+    expect(json.serverUrl).toEqual(target.serverUrl)
+    expect(json.serverType).toEqual(target.serverType)
+    expect(json.appLoc).toEqual(target.appLoc)
+    expect(json.authConfig).toEqual({
+      access_token: '',
+      refresh_token: '',
+      client: '',
+      secret: ''
+    })
+    expect(json.buildConfig).toEqual({
+      initProgram: '',
+      termProgram: '',
+      buildOutputFileName: `${target.name}.sas`,
+      macroVars: {}
+    })
+    expect(json.jobConfig).toEqual({
+      jobFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
+    expect(json.serviceConfig).toEqual({
+      serviceFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
+    expect(json.streamConfig).toEqual({
+      streamWebFolder: '',
+      streamWeb: false,
+      webSourcePath: '',
+      assetPaths: []
+    })
+  })
 })

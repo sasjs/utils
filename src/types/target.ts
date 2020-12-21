@@ -172,4 +172,45 @@ export class Target implements TargetInterface {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
     }
   }
+
+  toJson(): TargetInterface {
+    return {
+      name: this.name,
+      serverUrl: this.serverUrl,
+      serverType: this.serverType,
+      appLoc: this.appLoc,
+      macroFolders: this.macroFolders,
+      programFolders: this.programFolders,
+      authConfig: this.authConfig || {
+        access_token: '',
+        refresh_token: '',
+        client: '',
+        secret: ''
+      },
+      buildConfig: this.buildConfig || {
+        initProgram: '',
+        termProgram: '',
+        buildOutputFileName: `${this.name}.sas`,
+        macroVars: {}
+      },
+      jobConfig: this.jobConfig || {
+        jobFolders: [],
+        initProgram: '',
+        termProgram: '',
+        macroVars: {}
+      },
+      serviceConfig: this.serviceConfig || {
+        serviceFolders: [],
+        initProgram: '',
+        termProgram: '',
+        macroVars: {}
+      },
+      streamConfig: this.streamConfig || {
+        streamWebFolder: '',
+        streamWeb: false,
+        webSourcePath: '',
+        assetPaths: []
+      }
+    }
+  }
 }
