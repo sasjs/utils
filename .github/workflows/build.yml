@@ -31,7 +31,3 @@ jobs:
         run: npm run package:lib
         env:
           CI: true
-      - name: Assign Reviewer
-        uses: uesteibar/reviewer-lottery@v1
-        with:
-          repo-token: ${{ secrets.GH_TOKEN }}
