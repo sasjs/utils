@@ -15,3 +15,4 @@ What code changes have been made to achieve the intent.
 - [ ] Code is formatted correctly (`npm run lint:fix`).
 - [ ] All unit tests are passing (`npm test`).
 - [ ] All `sasjs-cli` unit tests are passing (`npm test`).
+- [ ] Reviewer is assigned.
