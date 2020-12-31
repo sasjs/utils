@@ -266,14 +266,15 @@ describe('validateDeployConfig', () => {
   })
 
   it('should throw an error when deployServicePack is non-boolean', () => {
-    expect(() =>
+    expect(
       validateDeployConfig(({
         deployServicePack: 'test',
         deployScripts: []
       } as unknown) as DeployConfig)
-    ).toThrowError(
-      'Invalid deploy config: `deployServicePack` cannot be a non-boolean value.'
-    )
+    ).toEqual({
+      deployServicePack: true,
+      deployScripts: []
+    })
   })
 
   it('should return the deploy config when valid', () => {

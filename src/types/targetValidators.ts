@@ -174,14 +174,7 @@ export const validateDeployConfig = (
     throw new Error('Invalid deploy config: JSON cannot be null or undefined.')
   }
 
-  if (
-    deployConfig.deployServicePack !== true &&
-    deployConfig.deployServicePack !== false
-  ) {
-    throw new Error(
-      'Invalid deploy config: `deployServicePack` cannot be a non-boolean value.'
-    )
-  }
+  deployConfig.deployServicePack = !!deployConfig.deployServicePack
 
   if (!deployConfig.deployScripts) {
     deployConfig.deployScripts = []
