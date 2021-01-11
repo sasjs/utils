@@ -124,7 +124,7 @@ describe('validateAppLoc', () => {
 })
 
 describe('validateServerUrl', () => {
-  it('should set server URL to the empty string when it is is null', () => {
+  it('should set server URL to the empty string when it is null', () => {
     expect(validateServerUrl((null as unknown) as string)).toEqual('')
   })
 
