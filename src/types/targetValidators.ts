@@ -51,9 +51,7 @@ export const validateTargetName = (targetName: string): string => {
 
 export const validateServerUrl = (serverUrl: string): string => {
   if (serverUrl === null || serverUrl === undefined) {
-    throw new Error(
-      'Invalid server URL: `serverUrl` cannot be null or undefined.'
-    )
+    serverUrl = ''
   }
 
   if (

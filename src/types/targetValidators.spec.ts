@@ -124,18 +124,12 @@ describe('validateAppLoc', () => {
 })
 
 describe('validateServerUrl', () => {
-  it('should throw an error when server URL is null', () => {
-    expect(() => validateServerUrl((null as unknown) as string)).toThrowError(
-      'Invalid server URL: `serverUrl` cannot be null or undefined.'
-    )
+  it('should set server URL to the empty string when it is null', () => {
+    expect(validateServerUrl((null as unknown) as string)).toEqual('')
   })
 
-  it('should throw an error when server URL is undefined', () => {
-    expect(() =>
-      validateServerUrl((undefined as unknown) as string)
-    ).toThrowError(
-      'Invalid server URL: `serverUrl` cannot be null or undefined.'
-    )
+  it('should set server URL to the empty string when it is undefined', () => {
+    expect(validateServerUrl((undefined as unknown) as string)).toEqual('')
   })
 
   it('should throw an error when server URL is not a valid URL', () => {
