@@ -307,4 +307,45 @@ describe('Target', () => {
       deployServicePack: false
     })
   })
+
+  it('should include context name in JSON when server type is SASVIYA', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test',
+      contextName: 'Test Context'
+    })
+
+    const json = target.toJson()
+
+    expect(json.name).toEqual(target.name)
+    expect(json.serverUrl).toEqual(target.serverUrl)
+    expect(json.serverType).toEqual(target.serverType)
+    expect(json.appLoc).toEqual(target.appLoc)
+    expect(json.contextName).toEqual(target.contextName)
+    expect(json.serverName).toBeUndefined()
+    expect(json.repositoryName).toBeUndefined()
+  })
+
+  it('should include server name and repository name in JSON when server type is SAS9', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      serverName: 'Test Server',
+      repositoryName: 'Test Repository'
+    })
+
+    const json = target.toJson()
+
+    expect(json.name).toEqual(target.name)
+    expect(json.serverUrl).toEqual(target.serverUrl)
+    expect(json.serverType).toEqual(target.serverType)
+    expect(json.appLoc).toEqual(target.appLoc)
+    expect(json.contextName).toBeUndefined()
+    expect(json.serverName).toEqual(target.serverName)
+    expect(json.repositoryName).toEqual(target.repositoryName)
+  })
 })
