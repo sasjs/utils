@@ -1,9 +1,19 @@
+import { padWithNumber } from '../formatter'
+
 export const timestampToYYYYMMDDHHMMSS = (timestamp: number = Date.now()) => {
   const date = new Date(timestamp)
 
   return (
-    [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('/') +
+    [
+      date.getFullYear(),
+      padWithNumber(date.getMonth() + 1),
+      padWithNumber(date.getDate())
+    ].join('/') +
     ' ' +
-    [date.getHours(), date.getMinutes(), date.getSeconds()].join(':')
+    [
+      padWithNumber(date.getHours()),
+      padWithNumber(date.getMinutes()),
+      padWithNumber(date.getSeconds())
+    ].join(':')
   )
 }
