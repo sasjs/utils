@@ -1,4 +1,4 @@
-import { padWithNumber } from '../formater'
+import { padWithNumber } from '../formatter'
 
 export const timestampToYYYYMMDDHHMMSS = (timestamp: number = Date.now()) => {
   const date = new Date(timestamp)
