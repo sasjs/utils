@@ -174,7 +174,7 @@ export class Target implements TargetInterface {
   }
 
   toJson(): TargetInterface {
-    return {
+    const json: TargetInterface = {
       name: this.name,
       serverUrl: this.serverUrl,
       serverType: this.serverType,
@@ -216,5 +216,14 @@ export class Target implements TargetInterface {
         deployServicePack: false
       }
     }
+
+    if (this.serverType === ServerType.SasViya) {
+      json.contextName = this.contextName
+    } else {
+      json.serverName = this.serverName
+      json.repositoryName = this.repositoryName
+    }
+
+    return json
   }
 }
