@@ -3,6 +3,10 @@ export interface Config {
   initProgram: string
   termProgram: string
 }
+export interface DocConfig {
+  displayMacroCore: boolean
+  outDirectory: string
+}
 export interface BuildConfig extends Config {
   buildOutputFileName: string
 }
