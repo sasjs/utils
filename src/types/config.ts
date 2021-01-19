@@ -3,16 +3,8 @@ export interface Config {
   initProgram: string
   termProgram: string
 }
-export interface DocConfig {
-  displayMacroCore: boolean
-  outDirectory: string
-}
 export interface BuildConfig extends Config {
   buildOutputFileName: string
-}
-export interface DeployConfig {
-  deployServicePack: boolean
-  deployScripts: string[]
 }
 export interface ServiceConfig extends Config {
   serviceFolders: string[]
@@ -20,13 +12,20 @@ export interface ServiceConfig extends Config {
 export interface JobConfig extends Config {
   jobFolders: string[]
 }
+export interface DocConfig {
+  displayMacroCore: boolean
+  outDirectory: string
+}
+export interface DeployConfig {
+  deployServicePack: boolean
+  deployScripts: string[]
+}
 export interface StreamConfig {
   assetPaths: string[]
   streamWeb: boolean
   streamWebFolder: string
   webSourcePath: string
 }
-
 export interface AuthConfig {
   access_token: string
   refresh_token: string
