@@ -12,7 +12,7 @@ export type InputValidator = (
 export interface Choice {
   title: string
   description?: string
-  value?: string | number
+  value: string | number
 }
 
 const defaultErrorMessage = 'Invalid input.'
@@ -23,6 +23,11 @@ const isValidInputType = (type: any): boolean =>
   type === 'select' ||
   type === 'confirm' ||
   type === 'url'
+
+export const onCancel = () => {
+  console.error('Input cancelled. Exiting...')
+  process.exit(1)
+}
 
 export const getNumber = async (
   message: string,
@@ -108,7 +113,7 @@ export const getChoice = async (
     choice !== null &&
     choice !== undefined
   ) {
-    return choice + 1
+    return choice
   }
 
   throw new Error(errorMessage)
@@ -157,12 +162,32 @@ export const readAndValidateInput = async (
     )
   }
 
-  return await prompts.prompt({
-    type,
-    name: fieldName,
-    initial: defaultValue,
-    message,
-    choices,
-    validate: validator
-  })
+  if (type === 'select') {
+    return await prompts(
+      {
+        type,
+        name: fieldName,
+        initial: defaultValue,
+        message,
+        choices,
+        validate: validator
+      },
+      {
+        onCancel
+      }
+    )
+  }
+
+  return await prompts(
+    {
+      type,
+      name: fieldName,
+      initial: defaultValue,
+      message,
+      validate: validator
+    },
+    {
+      onCancel
+    }
+  )
 }
