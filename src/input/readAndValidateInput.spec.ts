@@ -5,6 +5,7 @@ import {
   getString,
   getUrl,
   InputType,
+  onCancel,
   readAndValidateInput
 } from './readAndValidateInput'
 import prompts from 'prompts'
@@ -28,14 +29,16 @@ describe('getString', () => {
     await getString(message, validator)
 
     expect(prompts.prompt).toHaveBeenCalledTimes(1)
-    expect(prompts.prompt).toHaveBeenCalledWith({
-      type: 'text',
-      name: 'text',
-      initial: '',
-      message,
-      validate: validator,
-      choices: []
-    })
+    expect(prompts.prompt).toHaveBeenCalledWith(
+      {
+        type: 'text',
+        name: 'text',
+        initial: '',
+        message,
+        validate: validator
+      },
+      { onCancel }
+    )
     done()
   })
 
@@ -82,14 +85,16 @@ describe('getNumber', () => {
     await getNumber(message, validator, defaultValue)
 
     expect(prompts.prompt).toHaveBeenCalledTimes(1)
-    expect(prompts.prompt).toHaveBeenCalledWith({
-      type: 'number',
-      name: 'number',
-      initial: defaultValue,
-      message,
-      validate: validator,
-      choices: []
-    })
+    expect(prompts.prompt).toHaveBeenCalledWith(
+      {
+        type: 'number',
+        name: 'number',
+        initial: defaultValue,
+        message,
+        validate: validator
+      },
+      { onCancel }
+    )
     done()
   })
 
@@ -151,14 +156,16 @@ describe('getUrl', () => {
     await getUrl(message, errorMessage)
 
     expect(prompts.prompt).toHaveBeenCalledTimes(1)
-    expect(prompts.prompt).toHaveBeenCalledWith({
-      type: 'text',
-      name: 'url',
-      initial: '',
-      message,
-      validate: expect.anything(),
-      choices: []
-    })
+    expect(prompts.prompt).toHaveBeenCalledWith(
+      {
+        type: 'text',
+        name: 'url',
+        initial: '',
+        message,
+        validate: expect.anything()
+      },
+      { onCancel }
+    )
     done()
   })
 
@@ -203,14 +210,16 @@ describe('getConfirmation', () => {
     await getConfirmation(message, false)
 
     expect(prompts.prompt).toHaveBeenCalledTimes(1)
-    expect(prompts.prompt).toHaveBeenCalledWith({
-      type: 'confirm',
-      name: 'confirm',
-      initial: false,
-      message,
-      validate: confirmationValidator,
-      choices: []
-    })
+    expect(prompts.prompt).toHaveBeenCalledWith(
+      {
+        type: 'confirm',
+        name: 'confirm',
+        initial: false,
+        message,
+        validate: confirmationValidator
+      },
+      { onCancel }
+    )
     done()
   })
 
@@ -235,7 +244,10 @@ describe('getChoice', () => {
   it('should call prompts to get a selection', async (done) => {
     const message = 'Choose: '
     const errorMessage = 'Invalid choice.'
-    const choices = [{ title: 'Option 1' }, { title: 'Option 2' }]
+    const choices = [
+      { title: 'Option 1', value: 1 },
+      { title: 'Option 2', value: 2 }
+    ]
     jest
       .spyOn(prompts, 'prompt')
       .mockImplementation(() => Promise.resolve({ choice: 1 }))
@@ -243,21 +255,27 @@ describe('getChoice', () => {
     await getChoice(message, errorMessage, choices)
 
     expect(prompts.prompt).toHaveBeenCalledTimes(1)
-    expect(prompts.prompt).toHaveBeenCalledWith({
-      type: 'select',
-      name: 'choice',
-      initial: 0,
-      message,
-      validate: expect.anything(),
-      choices
-    })
+    expect(prompts.prompt).toHaveBeenCalledWith(
+      {
+        type: 'select',
+        name: 'choice',
+        initial: 0,
+        message,
+        validate: expect.anything(),
+        choices
+      },
+      { onCancel }
+    )
     done()
   })
 
   it('should throw an error with a non-number choice', async (done) => {
     const message = 'Choose: '
     const errorMessage = 'Invalid choice.'
-    const choices = [{ title: 'Option 1' }, { title: 'Option 2' }]
+    const choices = [
+      { title: 'Option 1', value: 1 },
+      { title: 'Option 2', value: 2 }
+    ]
     jest
       .spyOn(prompts, 'prompt')
       .mockImplementation(() => Promise.resolve({ choice: 'abc' }))
@@ -304,7 +322,7 @@ describe('readAndValidateInput', () => {
 
     await expect(
       readAndValidateInput('number', 'choice', 'Choose', (v) => !!v, 1, [
-        { title: 'Test' }
+        { title: 'Test', value: 1 }
       ])
     ).rejects.toThrowError(
       'Choices are only supported with the `select` input type.'
