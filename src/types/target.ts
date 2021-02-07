@@ -1,4 +1,5 @@
 import {
+  DocConfig,
   AuthConfig,
   BuildConfig,
   DeployConfig,
@@ -11,6 +12,7 @@ import {
   validateTargetName,
   validateServerUrl,
   validateServerType,
+  validateDocConfig,
   validateAppLoc,
   validateBuildConfig,
   validateDeployConfig,
@@ -31,6 +33,7 @@ interface TargetInterface {
   serverName?: string
   repositoryName?: string
   appLoc: string
+  docConfig?: DocConfig
   authConfig?: AuthConfig
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
@@ -61,6 +64,11 @@ export class Target implements TargetInterface {
     return this._appLoc
   }
   private _appLoc
+
+  get docConfig(): DocConfig | undefined {
+    return this._docConfig
+  }
+  private _docConfig: DocConfig | undefined
 
   get authConfig(): AuthConfig | undefined {
     return this._authConfig
@@ -137,6 +145,10 @@ export class Target implements TargetInterface {
         this._serverType
       )
 
+      if (json.docConfig) {
+        this._docConfig = validateDocConfig(json.docConfig)
+      }
+
       if (json.authConfig) {
         this._authConfig = validateAuthConfig(json.authConfig)
       }
@@ -181,6 +193,11 @@ export class Target implements TargetInterface {
       appLoc: this.appLoc,
       macroFolders: this.macroFolders,
       programFolders: this.programFolders,
+      docConfig: this.docConfig || {
+        displayMacroCore: true,
+        outDirectory: '',
+        dataControllerUrl: ''
+      },
       authConfig: this.authConfig || {
         access_token: '',
         refresh_token: '',

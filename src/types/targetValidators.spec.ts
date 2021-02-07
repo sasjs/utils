@@ -1,4 +1,5 @@
 import {
+  DocConfig,
   AuthConfig,
   BuildConfig,
   DeployConfig,
@@ -20,7 +21,8 @@ import {
   validateContextName,
   validateServerName,
   validateRepositoryName,
-  validateAuthConfig
+  validateAuthConfig,
+  validateDocConfig
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -599,6 +601,28 @@ describe('validateAuthConfig', () => {
       refresh_token: 'R3FR35H',
       client: 'CL13NT',
       secret: '53CR3T'
+    })
+  })
+})
+
+describe('validateDocConfig', () => {
+  it('should throw an error when docConfig is null', () => {
+    expect(() =>
+      validateDocConfig((null as unknown) as DocConfig)
+    ).toThrowError('Invalid doc config: JSON cannot be null or undefined.')
+  })
+
+  it('should return the doc config when valid', () => {
+    expect(
+      validateDocConfig({
+        displayMacroCore: false,
+        outDirectory: '',
+        dataControllerUrl: 'http://my-server.com:1234'
+      })
+    ).toEqual({
+      displayMacroCore: false,
+      outDirectory: '',
+      dataControllerUrl: 'http://my-server.com:1234'
     })
   })
 })
