@@ -15,6 +15,7 @@ export interface JobConfig extends Config {
 export interface DocConfig {
   displayMacroCore: boolean
   outDirectory: string
+  dataControllerUrl: string
 }
 export interface DeployConfig {
   deployServicePack: boolean

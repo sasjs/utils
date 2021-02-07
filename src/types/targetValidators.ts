@@ -1,6 +1,7 @@
 import validUrl from 'valid-url'
 import { ServerType } from '.'
 import {
+  DocConfig,
   AuthConfig,
   BuildConfig,
   DeployConfig,
@@ -79,6 +80,26 @@ export const validateAppLoc = (appLoc: string): string => {
   }
 
   return appLoc
+}
+
+export const validateDocConfig = (docConfig: DocConfig): DocConfig => {
+  if (!docConfig) {
+    throw new Error('Invalid doc config: JSON cannot be null or undefined.')
+  }
+
+  if (docConfig.displayMacroCore === undefined) {
+    docConfig.displayMacroCore = true
+  }
+
+  if (!docConfig.outDirectory) {
+    docConfig.outDirectory = ''
+  }
+
+  if (!docConfig.dataControllerUrl) {
+    docConfig.dataControllerUrl = ''
+  }
+
+  return docConfig
 }
 
 export const validateAuthConfig = (authConfig: AuthConfig): AuthConfig => {
