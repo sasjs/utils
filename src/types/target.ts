@@ -13,6 +13,7 @@ import {
   validateServerUrl,
   validateServerType,
   validateDocConfig,
+  validateAllowInsecureRequests,
   validateAppLoc,
   validateBuildConfig,
   validateDeployConfig,
@@ -29,6 +30,7 @@ interface TargetInterface {
   name: string
   serverUrl: string
   serverType: ServerType
+  allowInsecureRequests: boolean
   contextName?: string
   serverName?: string
   repositoryName?: string
@@ -59,6 +61,11 @@ export class Target implements TargetInterface {
     return this._serverType
   }
   private _serverType = ServerType.SasViya
+
+  get allowInsecureRequests(): boolean {
+    return this._allowInsecureRequests
+  }
+  private _allowInsecureRequests
 
   get appLoc(): string {
     return this._appLoc
@@ -134,6 +141,9 @@ export class Target implements TargetInterface {
       this._name = validateTargetName(json.name)
       this._serverUrl = validateServerUrl(json.serverUrl)
       this._serverType = validateServerType(json.serverType)
+      this._allowInsecureRequests = validateAllowInsecureRequests(
+        json.allowInsecureRequests
+      )
       this._appLoc = validateAppLoc(json.appLoc)
       this._contextName = validateContextName(
         json.contextName,
@@ -190,6 +200,7 @@ export class Target implements TargetInterface {
       name: this.name,
       serverUrl: this.serverUrl,
       serverType: this.serverType,
+      allowInsecureRequests: this.allowInsecureRequests,
       appLoc: this.appLoc,
       macroFolders: this.macroFolders,
       programFolders: this.programFolders,
