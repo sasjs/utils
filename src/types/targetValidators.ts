@@ -68,6 +68,20 @@ export const validateServerUrl = (serverUrl: string): string => {
   return serverUrl
 }
 
+export const validateAllowInsecureRequests = (
+  allowInsecureRequests: boolean
+): boolean => {
+  if (allowInsecureRequests === null || allowInsecureRequests === undefined) {
+    allowInsecureRequests = false
+  } else if (typeof allowInsecureRequests !== 'boolean') {
+    throw new Error(
+      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+    )
+  }
+
+  return allowInsecureRequests
+}
+
 export const validateAppLoc = (appLoc: string): string => {
   if (!appLoc) {
     throw new Error(

@@ -11,6 +11,7 @@ import { ServerType } from './serverType'
 import {
   validateTargetName,
   validateServerType,
+  validateAllowInsecureRequests,
   validateAppLoc,
   validateServerUrl,
   validateBuildConfig,
@@ -148,6 +149,41 @@ describe('validateServerUrl', () => {
     expect(validateServerUrl('http://my-server.com:1234')).toEqual(
       'http://my-server.com:1234'
     )
+  })
+})
+
+describe('validateAllowInsecureRequests', () => {
+  it('should set allowInsecureRequests to false when it is null', () => {
+    expect(validateAllowInsecureRequests((null as unknown) as boolean)).toEqual(
+      false
+    )
+  })
+
+  it('should set allowInsecureRequests to false when it is undefined', () => {
+    expect(
+      validateAllowInsecureRequests((undefined as unknown) as boolean)
+    ).toEqual(false)
+  })
+
+  it('should throw an error when allowInsecureRequests is not a boolean', () => {
+    expect(() =>
+      validateAllowInsecureRequests(('some-string' as unknown) as boolean)
+    ).toThrowError(
+      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+    )
+    expect(() =>
+      validateAllowInsecureRequests(({} as unknown) as boolean)
+    ).toThrowError(
+      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+    )
+  })
+
+  it('should return allowInsecureRequests when false', () => {
+    expect(validateAllowInsecureRequests(false)).toEqual(false)
+  })
+
+  it('should return allowInsecureRequests when true', () => {
+    expect(validateAllowInsecureRequests(true)).toEqual(true)
   })
 })
 
