@@ -13,9 +13,10 @@ export interface JobConfig extends Config {
   jobFolders: string[]
 }
 export interface DocConfig {
-  displayMacroCore: boolean
-  outDirectory: string
-  dataControllerUrl: string
+  displayMacroCore?: boolean
+  disableLineage?: boolean
+  outDirectory?: string
+  dataControllerUrl?: string
 }
 export interface DeployConfig {
   deployServicePack: boolean

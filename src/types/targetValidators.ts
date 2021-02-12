@@ -98,19 +98,33 @@ export const validateAppLoc = (appLoc: string): string => {
 
 export const validateDocConfig = (docConfig: DocConfig): DocConfig => {
   if (!docConfig) {
-    throw new Error('Invalid doc config: JSON cannot be null or undefined.')
+    docConfig = {}
   }
 
-  if (docConfig.displayMacroCore === undefined) {
-    docConfig.displayMacroCore = true
+  if (typeof docConfig.displayMacroCore !== 'boolean') {
+    docConfig.displayMacroCore = undefined
   }
 
-  if (!docConfig.outDirectory) {
-    docConfig.outDirectory = ''
+  if (typeof docConfig.disableLineage !== 'boolean') {
+    docConfig.disableLineage = undefined
   }
 
-  if (!docConfig.dataControllerUrl) {
-    docConfig.dataControllerUrl = ''
+  if (typeof docConfig.outDirectory !== 'string') {
+    docConfig.outDirectory = undefined
+  }
+
+  if (typeof docConfig.dataControllerUrl === 'string') {
+    if (
+      docConfig.dataControllerUrl !== '' &&
+      !validUrl.isHttpUri(docConfig.dataControllerUrl) &&
+      !validUrl.isHttpsUri(docConfig.dataControllerUrl)
+    ) {
+      throw new Error(
+        'Invalid Data Controller Url: `dataControllerUrl` should either be an empty string or a valid URL of the form http(s)://your-server.com(:port).'
+      )
+    }
+  } else {
+    docConfig.dataControllerUrl = undefined
   }
 
   return docConfig
