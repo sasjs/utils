@@ -642,23 +642,186 @@ describe('validateAuthConfig', () => {
 })
 
 describe('validateDocConfig', () => {
-  it('should throw an error when docConfig is null', () => {
-    expect(() =>
-      validateDocConfig((null as unknown) as DocConfig)
-    ).toThrowError('Invalid doc config: JSON cannot be null or undefined.')
+  it('should return the doc config when null/undefined', () => {
+    expect(validateDocConfig((null as unknown) as DocConfig)).toMatchObject({})
+    expect(
+      validateDocConfig((undefined as unknown) as DocConfig)
+    ).toMatchObject({})
+    expect(validateDocConfig({} as DocConfig)).toMatchObject({})
   })
 
   it('should return the doc config when valid', () => {
     expect(
       validateDocConfig({
-        displayMacroCore: false,
+        displayMacroCore: true,
+        disableLineage: false,
         outDirectory: '',
+        dataControllerUrl: ''
+      })
+    ).toEqual({
+      displayMacroCore: true,
+      disableLineage: false,
+      outDirectory: '',
+      dataControllerUrl: ''
+    })
+
+    expect(
+      validateDocConfig({
+        displayMacroCore: false,
+        disableLineage: true,
+        outDirectory: 'my-doc',
         dataControllerUrl: 'http://my-server.com:1234'
       })
     ).toEqual({
       displayMacroCore: false,
-      outDirectory: '',
+      disableLineage: true,
+      outDirectory: 'my-doc',
       dataControllerUrl: 'http://my-server.com:1234'
+    })
+
+    expect(validateDocConfig({})).toEqual({
+      displayMacroCore: undefined,
+      disableLineage: undefined,
+      outDirectory: undefined,
+      dataControllerUrl: undefined
+    })
+  })
+
+  it('should set dataControllerUrl to undefined when it is null/undefined', () => {
+    expect(
+      validateDocConfig({
+        dataControllerUrl: (null as unknown) as string
+      })
+    ).toEqual({
+      dataControllerUrl: undefined
+    })
+
+    expect(
+      validateDocConfig({
+        dataControllerUrl: undefined
+      })
+    ).toEqual({
+      dataControllerUrl: undefined
+    })
+  })
+
+  it('should throw an error when dataControllerUrl is not a valid URL', () => {
+    expect(() =>
+      validateDocConfig({
+        dataControllerUrl: 'my-domain-name'
+      })
+    ).toThrowError(
+      'Invalid Data Controller Url: `dataControllerUrl` should either be an empty string or a valid URL of the form http(s)://your-server.com(:port).'
+    )
+  })
+
+  it('should return the dataControllerUrl when empty', () => {
+    expect(
+      validateDocConfig({
+        dataControllerUrl: ''
+      })
+    ).toEqual({
+      dataControllerUrl: ''
+    })
+  })
+
+  it('should return the dataControllerUrl when valid', () => {
+    expect(
+      validateDocConfig({
+        dataControllerUrl: 'http://my-server.com:1234'
+      })
+    ).toEqual({
+      dataControllerUrl: 'http://my-server.com:1234'
+    })
+  })
+
+  it('should set outDirectory to undefined when it is not string', () => {
+    expect(
+      validateDocConfig({
+        outDirectory: (null as unknown) as string
+      })
+    ).toEqual({
+      outDirectory: undefined
+    })
+
+    expect(
+      validateDocConfig({
+        outDirectory: (false as unknown) as string
+      })
+    ).toEqual({
+      outDirectory: undefined
+    })
+
+    expect(
+      validateDocConfig({
+        outDirectory: undefined
+      })
+    ).toEqual({
+      outDirectory: undefined
+    })
+  })
+
+  it('should return the outDirectory when empty', () => {
+    expect(
+      validateDocConfig({
+        outDirectory: ''
+      })
+    ).toEqual({
+      outDirectory: ''
+    })
+  })
+
+  it('should return the outDirectory when valid', () => {
+    expect(
+      validateDocConfig({
+        outDirectory: 'my-docs'
+      })
+    ).toEqual({
+      outDirectory: 'my-docs'
+    })
+  })
+
+  it('should set displayMacroCore/disableLineage to undefined when it is not boolean', () => {
+    expect(
+      validateDocConfig({
+        displayMacroCore: (null as unknown) as boolean,
+        disableLineage: (null as unknown) as boolean
+      })
+    ).toEqual({
+      displayMacroCore: undefined,
+      disableLineage: undefined
+    })
+
+    expect(
+      validateDocConfig({
+        displayMacroCore: undefined,
+        disableLineage: undefined
+      })
+    ).toEqual({
+      displayMacroCore: undefined,
+      disableLineage: undefined
+    })
+  })
+
+  it('should return the displayMacroCore/disableLineage when valid', () => {
+    expect(
+      validateDocConfig({
+        displayMacroCore: true,
+        disableLineage: true
+      })
+    ).toEqual({
+      displayMacroCore: true,
+      disableLineage: true
+    })
+
+    expect(
+      validateDocConfig({
+        displayMacroCore: false,
+        disableLineage: false
+      })
+    ).toEqual({
+      displayMacroCore: false,
+      disableLineage: false
     })
   })
 })

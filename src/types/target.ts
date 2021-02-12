@@ -204,11 +204,7 @@ export class Target implements TargetInterface {
       appLoc: this.appLoc,
       macroFolders: this.macroFolders,
       programFolders: this.programFolders,
-      docConfig: this.docConfig || {
-        displayMacroCore: true,
-        outDirectory: '',
-        dataControllerUrl: ''
-      },
+      docConfig: this.docConfig,
       authConfig: this.authConfig || {
         access_token: '',
         refresh_token: '',
