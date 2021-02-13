@@ -259,6 +259,10 @@ export const validateStreamConfig = (
     streamConfig.assetPaths = []
   }
 
+  if (!streamConfig.streamServiceName) {
+    streamConfig.streamServiceName = 'clickme'
+  }
+
   return streamConfig
 }
 

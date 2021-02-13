@@ -553,17 +553,37 @@ describe('validateStreamConfig', () => {
         streamWeb: true,
         streamWebFolder: '.',
         webSourcePath: '.',
-        assetPaths: []
+        assetPaths: [],
+        streamServiceName: 'streamWebApp'
       })
     ).toEqual({
       streamWeb: true,
       streamWebFolder: '.',
       webSourcePath: '.',
-      assetPaths: []
+      assetPaths: [],
+      streamServiceName: 'streamWebApp'
     })
   })
 
   it('should initialise the asset paths if not set', () => {
+    expect(
+      validateStreamConfig({
+        streamWeb: true,
+        streamWebFolder: '.',
+        webSourcePath: '.',
+        assetPaths: [],
+        streamServiceName: 'test'
+      })
+    ).toEqual({
+      streamWeb: true,
+      streamWebFolder: '.',
+      webSourcePath: '.',
+      assetPaths: [],
+      streamServiceName: 'test'
+    })
+  })
+
+  it('should initialise the stream service name if not set', () => {
     expect(
       validateStreamConfig(({
         streamWeb: true,
@@ -574,7 +594,8 @@ describe('validateStreamConfig', () => {
       streamWeb: true,
       streamWebFolder: '.',
       webSourcePath: '.',
-      assetPaths: []
+      assetPaths: [],
+      streamServiceName: 'clickme'
     })
   })
 })
