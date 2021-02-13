@@ -27,6 +27,7 @@ export interface StreamConfig {
   streamWeb: boolean
   streamWebFolder: string
   webSourcePath: string
+  streamServiceName: string
 }
 export interface AuthConfig {
   access_token: string

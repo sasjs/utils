@@ -233,6 +233,7 @@ export class Target implements TargetInterface {
         streamWebFolder: '',
         streamWeb: false,
         webSourcePath: '',
+        streamServiceName: '',
         assetPaths: []
       },
       deployConfig: this.deployConfig || {
