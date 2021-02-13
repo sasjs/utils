@@ -26,10 +26,7 @@ jobs:
       - name: Check Code Style
         run: npm run lint
       - name: Run Unit Tests
-        uses: ziishaned/jest-reporter-action@v0.0.1
-        with:
-          github-token: ${{ secrets.GH_TOKEN }}
-          test-command: 'npm test'
+        run: npm test
       - name: Build Package
         run: npm run package:lib
         env:
