@@ -26,7 +26,11 @@ jobs:
       - name: Check Code Style
         run: npm run lint
       - name: Run Unit Tests
-        run: npm test
+        uses: mattallty/jest-github-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          test-command: 'npm test'
       - name: Build Package
         run: npm run package:lib
         env:
