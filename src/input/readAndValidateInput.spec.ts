@@ -329,3 +329,15 @@ describe('readAndValidateInput', () => {
     )
   })
 })
+
+describe('onCancel', () => {
+  it('should log an error and exit', () => {
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {})
+    jest.spyOn(process, 'exit').mockImplementationOnce(() => 0 as never)
+
+    onCancel()
+
+    expect(console.error).toHaveBeenCalledWith('Input cancelled. Exiting...')
+    expect(process.exit).toHaveBeenCalledWith(1)
+  })
+})
