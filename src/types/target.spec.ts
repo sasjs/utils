@@ -167,6 +167,29 @@ describe('Target', () => {
     expect(target.jobConfig!.termProgram).toEqual('term')
   })
 
+  it('should create an instance with doc config when the JSON is valid', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      docConfig: {
+        displayMacroCore: true,
+        dataControllerUrl: 'https://test.com',
+        disableLineage: false,
+        outDirectory: '.'
+      }
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.docConfig).toBeTruthy()
+    expect(target.docConfig!.displayMacroCore).toEqual(true)
+    expect(target.docConfig!.dataControllerUrl).toEqual('https://test.com')
+    expect(target.docConfig!.disableLineage).toEqual(false)
+    expect(target.docConfig!.outDirectory).toEqual('.')
+  })
+
   it('should create an instance with stream config when the JSON is valid', () => {
     const target = new Target({
       name: 'test',
@@ -300,7 +323,8 @@ describe('Target', () => {
       streamWebFolder: '',
       streamWeb: false,
       webSourcePath: '',
-      assetPaths: []
+      assetPaths: [],
+      streamServiceName: ''
     })
     expect(json.deployConfig).toEqual({
       deployScripts: [],
