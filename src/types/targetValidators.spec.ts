@@ -675,13 +675,13 @@ describe('validateDocConfig', () => {
     expect(
       validateDocConfig({
         displayMacroCore: true,
-        disableLineage: false,
+        enableLineage: false,
         outDirectory: '',
         dataControllerUrl: ''
       })
     ).toEqual({
       displayMacroCore: true,
-      disableLineage: false,
+      enableLineage: false,
       outDirectory: '',
       dataControllerUrl: ''
     })
@@ -689,20 +689,20 @@ describe('validateDocConfig', () => {
     expect(
       validateDocConfig({
         displayMacroCore: false,
-        disableLineage: true,
+        enableLineage: true,
         outDirectory: 'my-doc',
         dataControllerUrl: 'http://my-server.com:1234'
       })
     ).toEqual({
       displayMacroCore: false,
-      disableLineage: true,
+      enableLineage: true,
       outDirectory: 'my-doc',
       dataControllerUrl: 'http://my-server.com:1234'
     })
 
     expect(validateDocConfig({})).toEqual({
       displayMacroCore: undefined,
-      disableLineage: undefined,
+      enableLineage: undefined,
       outDirectory: undefined,
       dataControllerUrl: undefined
     })
@@ -802,47 +802,47 @@ describe('validateDocConfig', () => {
     })
   })
 
-  it('should set displayMacroCore/disableLineage to undefined when it is not boolean', () => {
+  it('should set displayMacroCore/enableLineage to undefined when it is not boolean', () => {
     expect(
       validateDocConfig({
         displayMacroCore: (null as unknown) as boolean,
-        disableLineage: (null as unknown) as boolean
+        enableLineage: (null as unknown) as boolean
       })
     ).toEqual({
       displayMacroCore: undefined,
-      disableLineage: undefined
+      enableLineage: undefined
     })
 
     expect(
       validateDocConfig({
         displayMacroCore: undefined,
-        disableLineage: undefined
+        enableLineage: undefined
       })
     ).toEqual({
       displayMacroCore: undefined,
-      disableLineage: undefined
+      enableLineage: undefined
     })
   })
 
-  it('should return the displayMacroCore/disableLineage when valid', () => {
+  it('should return the displayMacroCore/enableLineage when valid', () => {
     expect(
       validateDocConfig({
         displayMacroCore: true,
-        disableLineage: true
+        enableLineage: true
       })
     ).toEqual({
       displayMacroCore: true,
-      disableLineage: true
+      enableLineage: true
     })
 
     expect(
       validateDocConfig({
         displayMacroCore: false,
-        disableLineage: false
+        enableLineage: false
       })
     ).toEqual({
       displayMacroCore: false,
-      disableLineage: false
+      enableLineage: false
     })
   })
 })
