@@ -14,7 +14,7 @@ export interface JobConfig extends Config {
 }
 export interface DocConfig {
   displayMacroCore?: boolean
-  disableLineage?: boolean
+  enableLineage?: boolean
   outDirectory?: string
   dataControllerUrl?: string
 }

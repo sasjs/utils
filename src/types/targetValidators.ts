@@ -105,8 +105,8 @@ export const validateDocConfig = (docConfig: DocConfig): DocConfig => {
     docConfig.displayMacroCore = undefined
   }
 
-  if (typeof docConfig.disableLineage !== 'boolean') {
-    docConfig.disableLineage = undefined
+  if (typeof docConfig.enableLineage !== 'boolean') {
+    docConfig.enableLineage = undefined
   }
 
   if (typeof docConfig.outDirectory !== 'string') {

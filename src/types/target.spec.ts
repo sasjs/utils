@@ -176,7 +176,7 @@ describe('Target', () => {
       docConfig: {
         displayMacroCore: true,
         dataControllerUrl: 'https://test.com',
-        disableLineage: false,
+        enableLineage: false,
         outDirectory: '.'
       }
     })
@@ -186,7 +186,7 @@ describe('Target', () => {
     expect(target.docConfig).toBeTruthy()
     expect(target.docConfig!.displayMacroCore).toEqual(true)
     expect(target.docConfig!.dataControllerUrl).toEqual('https://test.com')
-    expect(target.docConfig!.disableLineage).toEqual(false)
+    expect(target.docConfig!.enableLineage).toEqual(false)
     expect(target.docConfig!.outDirectory).toEqual('.')
   })
 
