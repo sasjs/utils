@@ -58,6 +58,7 @@ describe('Target', () => {
     expect(target.buildConfig!.initProgram).toEqual('')
     expect(target.buildConfig!.termProgram).toEqual('')
     expect(target.buildConfig!.macroVars).toEqual({})
+    expect(target.isDefault).toBeFalsy()
   })
 
   it('should create an instance when the JSON is valid', () => {
@@ -66,7 +67,8 @@ describe('Target', () => {
       serverUrl: '',
       serverType: ServerType.Sas9,
       appLoc: '/test',
-      contextName: 'Test Context'
+      contextName: 'Test Context',
+      isDefault: true
     })
 
     expect(target).toBeTruthy()
@@ -76,6 +78,7 @@ describe('Target', () => {
     expect(target.serverType).toEqual(ServerType.Sas9)
     expect(target.appLoc).toEqual('/test')
     expect(target.contextName).toEqual('Test Context')
+    expect(target.isDefault).toBeTruthy()
   })
 
   it('should create an instance with build config when the JSON is valid', () => {
