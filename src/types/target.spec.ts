@@ -295,6 +295,7 @@ describe('Target', () => {
     const json = target.toJson()
 
     expect(json.name).toEqual(target.name)
+    expect(json.isDefault).toBeFalsy()
     expect(json.serverUrl).toEqual(target.serverUrl)
     expect(json.serverType).toEqual(target.serverType)
     expect(json.appLoc).toEqual(target.appLoc)
@@ -333,6 +334,20 @@ describe('Target', () => {
       deployScripts: [],
       deployServicePack: false
     })
+  })
+
+  it('should include isDefault in JSON', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test',
+      isDefault: true
+    })
+
+    const json = target.toJson()
+
+    expect(json.isDefault).toBeTruthy()
   })
 
   it('should include context name in JSON when server type is SASVIYA', () => {
