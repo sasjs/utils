@@ -206,6 +206,7 @@ export class Target implements TargetInterface {
   toJson(): TargetInterface {
     const json: TargetInterface = {
       name: this.name,
+      isDefault: !!this.isDefault,
       serverUrl: this.serverUrl,
       serverType: this.serverType,
       allowInsecureRequests: this.allowInsecureRequests,
