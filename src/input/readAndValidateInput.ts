@@ -121,14 +121,15 @@ export const getChoice = async (
 
 export const getUrl = async (
   message: string,
-  errorMessage: string
+  errorMessage: string,
+  defaultValue: string = ''
 ): Promise<string> => {
   const { url } = await readAndValidateInput(
     'text',
     'url',
     message,
     (value: string) => urlValidator(value, errorMessage),
-    ''
+    defaultValue
   )
 
   if (!!url || url === '') {
