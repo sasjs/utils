@@ -191,7 +191,6 @@ export class Target implements TargetJson {
       if (json.programFolders && json.programFolders.length) {
         this._programFolders = json.programFolders
       }
-
     } catch (e) {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
     }
