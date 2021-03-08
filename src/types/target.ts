@@ -26,7 +26,7 @@ import {
   validateAuthConfig
 } from './targetValidators'
 
-interface TargetInterface {
+export interface TargetJson {
   name: string
   serverUrl: string
   serverType: ServerType
@@ -47,7 +47,7 @@ interface TargetInterface {
   isDefault?: boolean
 }
 
-export class Target implements TargetInterface {
+export class Target implements TargetJson {
   get name(): string {
     return this._name
   }
@@ -133,11 +133,6 @@ export class Target implements TargetInterface {
   }
   private _repositoryName: string
 
-  get isDefault(): boolean {
-    return this._isDefault
-  }
-  private _isDefault: boolean
-
   constructor(json: any) {
     try {
       if (!json) {
@@ -196,17 +191,14 @@ export class Target implements TargetInterface {
       if (json.programFolders && json.programFolders.length) {
         this._programFolders = json.programFolders
       }
-
-      this._isDefault = !!json.isDefault
     } catch (e) {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
     }
   }
 
-  toJson(): TargetInterface {
-    const json: TargetInterface = {
+  toJson(): TargetJson {
+    const json: TargetJson = {
       name: this.name,
-      isDefault: !!this.isDefault,
       serverUrl: this.serverUrl,
       serverType: this.serverType,
       allowInsecureRequests: this.allowInsecureRequests,

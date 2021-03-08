@@ -1,4 +1,5 @@
+export * from './configuration'
 export * from './sasAuthResponse'
 export * from './serverType'
 export * from './serverError'
-export { Target } from './target'
+export * from './target'

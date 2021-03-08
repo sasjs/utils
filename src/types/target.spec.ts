@@ -58,7 +58,6 @@ describe('Target', () => {
     expect(target.buildConfig!.initProgram).toEqual('')
     expect(target.buildConfig!.termProgram).toEqual('')
     expect(target.buildConfig!.macroVars).toEqual({})
-    expect(target.isDefault).toBeFalsy()
   })
 
   it('should create an instance when the JSON is valid', () => {
@@ -67,8 +66,7 @@ describe('Target', () => {
       serverUrl: '',
       serverType: ServerType.Sas9,
       appLoc: '/test',
-      contextName: 'Test Context',
-      isDefault: true
+      contextName: 'Test Context'
     })
 
     expect(target).toBeTruthy()
@@ -78,7 +76,6 @@ describe('Target', () => {
     expect(target.serverType).toEqual(ServerType.Sas9)
     expect(target.appLoc).toEqual('/test')
     expect(target.contextName).toEqual('Test Context')
-    expect(target.isDefault).toBeTruthy()
   })
 
   it('should create an instance with build config when the JSON is valid', () => {
@@ -295,7 +292,6 @@ describe('Target', () => {
     const json = target.toJson()
 
     expect(json.name).toEqual(target.name)
-    expect(json.isDefault).toBeFalsy()
     expect(json.serverUrl).toEqual(target.serverUrl)
     expect(json.serverType).toEqual(target.serverType)
     expect(json.appLoc).toEqual(target.appLoc)
@@ -334,20 +330,6 @@ describe('Target', () => {
       deployScripts: [],
       deployServicePack: false
     })
-  })
-
-  it('should include isDefault in JSON', () => {
-    const target = new Target({
-      name: 'test',
-      serverUrl: '',
-      serverType: ServerType.SasViya,
-      appLoc: '/test',
-      isDefault: true
-    })
-
-    const json = target.toJson()
-
-    expect(json.isDefault).toBeTruthy()
   })
 
   it('should include context name in JSON when server type is SASVIYA', () => {
