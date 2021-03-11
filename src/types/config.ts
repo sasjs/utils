@@ -17,6 +17,15 @@ export interface DocConfig {
   enableLineage?: boolean
   outDirectory?: string
   dataControllerUrl?: string
+  doxyContent?: {
+    favIcon: string
+    footer: string
+    header: string
+    layout: string
+    logo: string
+    readMe: string
+    stylesheet: string
+  }
 }
 export interface DeployConfig {
   deployServicePack: boolean
