@@ -18,13 +18,14 @@ export interface DocConfig {
   outDirectory?: string
   dataControllerUrl?: string
   doxyContent?: {
-    favIcon: string
-    footer: string
-    header: string
-    layout: string
-    logo: string
-    readMe: string
-    stylesheet: string
+    favIcon?: string
+    footer?: string
+    header?: string
+    layout?: string
+    logo?: string
+    readMe?: string
+    stylesheet?: string
+    path?: string
   }
 }
 export interface DeployConfig {
