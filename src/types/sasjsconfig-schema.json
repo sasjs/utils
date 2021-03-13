@@ -102,11 +102,9 @@
             "type": "string",
             "title": "Default Target",
             "description": "If a target is not specified, this target is used by default.  The default target must exist in the (local) targets array.",
-            "default": ["viya"],
+            "default": "viya",
             "examples": [
-                [
-                    "viya"
-                ]
+                "viya"
             ]
         },
         "docConfig": {
@@ -114,12 +112,23 @@
             "type": "object",
             "title": "The docConfig schema",
             "description": "SASjs uses doxygen to auto-generate HTML documentation using the headers in your SAS programs, macros, services & jobs. For more info, see [https://cli.sasjs.io/doc](https://cli.sasjs.io/doc).",
-            "default": {},
+            "default": {
+                "dataControllerUrl": "https://mysasserver.com/web/datacontroller/#",
+                "enableLineage": true,
+                "doxyContent": {
+                    "readMe": "../../README.md"
+                }
+            },
             "examples": [
                 {
                     "displayMacroCore": true,
                     "outDirectory": "/some/output/directory",
-                    "dataControllerUrl": "https://mysasserver.com/web/datacontroller/#"
+                    "dataControllerUrl": "https://mysasserver.com/web/datacontroller/#",
+                    "enableLineage": true,
+                    "doxyContent": {
+                        "readMe": "../../my/custom/homepage.md",
+                        "path": "my/custom/doxy/folder"
+                    }
                 }
             ],
             "properties": {
