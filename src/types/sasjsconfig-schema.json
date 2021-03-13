@@ -97,6 +97,18 @@
         }
     ],
     "properties": {
+        "defaultTarget": {
+            "$id": "#/properties/defaultTarget",
+            "type": "string",
+            "title": "Default Target",
+            "description": "If a target is not specified, this target is used by default.  The default target must exist in the (local) targets array.",
+            "default": ["viya"],
+            "examples": [
+                [
+                    "viya"
+                ]
+            ]
+        },
         "docConfig": {
             "$id": "#/properties/docConfig",
             "type": "object",
