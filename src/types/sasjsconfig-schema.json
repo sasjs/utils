@@ -97,6 +97,17 @@
         }
     ],
     "properties": {
+        "buildOutputFolder": {
+            "$id": "#/properties/buildOutputFolder",
+            "type": "string",
+            "title": "buildOutputFolder",
+            "description": "In a local config, outputs go to the `sasjsbuild` folder by default.  In global, the default is `~/.sasjsbuild`.",
+            "default": "sasjsbuild",
+            "examples": [
+                "sasjsbuild",
+                ".sasjsbuild"
+            ]
+        },
         "defaultTarget": {
             "$id": "#/properties/defaultTarget",
             "type": "string",
