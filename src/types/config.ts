@@ -5,6 +5,7 @@ export interface Config {
 }
 export interface BuildConfig extends Config {
   buildOutputFileName: string
+  buildOutputFolder: string
 }
 export interface ServiceConfig extends Config {
   serviceFolders: string[]

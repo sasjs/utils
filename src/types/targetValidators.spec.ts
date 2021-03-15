@@ -203,6 +203,7 @@ describe('validateBuildConfig', () => {
   it('should use the default when build output filename is undefined', () => {
     expect(validateBuildConfig(({} as unknown) as BuildConfig, 'test')).toEqual(
       {
+        buildOutputFolder: 'sasjsbuild',
         buildOutputFileName: 'test.sas',
         initProgram: '',
         termProgram: '',
@@ -215,12 +216,14 @@ describe('validateBuildConfig', () => {
     expect(
       validateBuildConfig(
         ({
+          buildOutputFolder: 'sasjsbuild',
           buildOutputFileName: 'test.sas',
           initProgram: null
         } as unknown) as BuildConfig,
         'test'
       )
     ).toEqual({
+      buildOutputFolder: 'sasjsbuild',
       buildOutputFileName: 'test.sas',
       initProgram: '',
       termProgram: '',
@@ -232,13 +235,15 @@ describe('validateBuildConfig', () => {
     expect(
       validateBuildConfig(
         ({
+          buildOutputFolder: 'sasjsbuild',
           buildOutputFileName: 'output.sas',
           initProgram: 'test',
-          termProgram: ''
+          termProgram: null
         } as unknown) as BuildConfig,
         'test'
       )
     ).toEqual({
+      buildOutputFolder: 'sasjsbuild',
       buildOutputFileName: 'output.sas',
       initProgram: 'test',
       termProgram: '',
@@ -250,6 +255,7 @@ describe('validateBuildConfig', () => {
     expect(
       validateBuildConfig(
         {
+          buildOutputFolder: 'sasjsbuild',
           buildOutputFileName: 'output.sas',
           initProgram: 'test',
           termProgram: 'test',
@@ -258,6 +264,7 @@ describe('validateBuildConfig', () => {
         'test'
       )
     ).toEqual({
+      buildOutputFolder: 'sasjsbuild',
       buildOutputFileName: 'output.sas',
       initProgram: 'test',
       termProgram: 'test',
@@ -269,6 +276,7 @@ describe('validateBuildConfig', () => {
     expect(
       validateBuildConfig(
         ({
+          buildOutputFolder: 'sasjsbuild',
           buildOutputFileName: 'test',
           initProgram: 'test',
           termProgram: 'test'
@@ -276,6 +284,7 @@ describe('validateBuildConfig', () => {
         'test'
       )
     ).toEqual({
+      buildOutputFolder: 'sasjsbuild',
       buildOutputFileName: 'test',
       initProgram: 'test',
       termProgram: 'test',
