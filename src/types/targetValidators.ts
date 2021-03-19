@@ -145,6 +145,10 @@ export const validateBuildConfig = (
   if (!buildConfig) {
     throw new Error('Invalid build config: JSON cannot be null or undefined.')
   }
+  if (!buildConfig.buildResultsFolder) {
+    buildConfig.buildResultsFolder = 'sasjsresults'
+  }
+
   if (!buildConfig.buildOutputFolder) {
     buildConfig.buildOutputFolder = 'sasjsbuild'
   }

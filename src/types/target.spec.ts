@@ -306,6 +306,7 @@ describe('Target', () => {
       termProgram: '',
       buildOutputFileName: `${target.name}.sas`,
       buildOutputFolder: 'sasjsbuild',
+      buildResultsFolder: 'sasjsresults',
       macroVars: {}
     })
     expect(json.jobConfig).toEqual({
