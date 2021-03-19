@@ -253,7 +253,7 @@
           "type": "string",
           "title": "buildOutputFileName",
           "description": "The name of the generated .sas program, which can be used to deploy the app using only SAS Studio. By default, this will be the name of the target.",
-          "examples": ["viya.sas","sas9.sas"]
+          "examples": ["viya.sas", "sas9.sas"]
         },
         "buildOutputFolder": {
           "$id": "#/properties/buildConfig/properties/buildOutputFolder",
