@@ -217,6 +217,7 @@ export class Target implements TargetJson {
         termProgram: '',
         buildOutputFileName: `${this.name}.sas`,
         buildOutputFolder: 'sasjsbuild',
+        buildResultsFolder: 'sasjsresults',
         macroVars: {}
       },
       jobConfig: this.jobConfig || {
