@@ -248,21 +248,40 @@
         }
       ],
       "properties": {
+        "buildOutputFileName": {
+          "$id": "#/properties/buildConfig/properties/buildOutputFileName",
+          "type": "string",
+          "title": "buildOutputFileName",
+          "description": "The name of the generated .sas program, which can be used to deploy the app using only SAS Studio. By default, this will be the name of the target.",
+          "examples": ["viya.sas","sas9.sas"]
+        },
+        "buildOutputFolder": {
+          "$id": "#/properties/buildConfig/properties/buildOutputFolder",
+          "type": "string",
+          "title": "buildOutputFolder",
+          "description": "The name of the folder containing the compiled output.  The `sasjs build` command will take all of the subfolders here as inputs to create the build pack.  By default this will be named `sasjsbuild`.",
+          "default": "sasjsbuild"
+        },
+        "buildResultsFolder": {
+          "$id": "#/properties/buildConfig/properties/buildResultsFolder",
+          "type": "string",
+          "title": "buildResultsFolder",
+          "description": "The name of the folder containing the output (eg logs, ODS output) from `sasjs run`.  By default this will be named `sasjsresults`.",
+          "default": "sasjsresults"
+        },
         "initProgram": {
           "$id": "#/properties/buildConfig/properties/initProgram",
           "type": "string",
           "title": "The buildConfig initProgram",
           "description": "The path to a .sas program that will be inserted at the start of the build .sas program (created when running `sasjs build`).",
-          "default": "",
-          "examples": ["build/buildinit.sas"]
+          "default": "sasjs/buildinit.sas"
         },
         "termProgram": {
           "$id": "#/properties/buildConfig/properties/termProgram",
           "type": "string",
           "title": "The buildConfig termProgram",
           "description": "The path to a .sas program that will be inserted at the end of the build .sas program (created when running `sasjs build`).",
-          "default": "",
-          "examples": ["build/buildterm.sas"]
+          "default": "sasjs/buildterm.sas"
         },
         "macroVars": {
           "$id": "#/properties/buildConfig/properties/macroVars",
@@ -480,16 +499,21 @@
           "type": "string",
           "title": "The streamConfig streamWebFolder",
           "description": "This is the target SAS folder (relative to the appLoc) where the compiled web assets will be created.",
-          "default": "webv",
-          "examples": ["webv"]
+          "default": "webv"
         },
         "webSourcePath": {
           "$id": "#/properties/streamConfig/properties/webSourcePath",
           "type": "string",
           "title": "The webSourcePath schema",
           "description": "When `streamConfig` is set to `true`, all files in this folder will be converted to streaming web services.  The `index.html` will be taken as a baseline, and all relative URLS will be prefixed such that the links still work and the assets still load.",
-          "default": "",
-          "examples": ["dist"]
+          "default": "dist"
+        },
+        "streamServiceName": {
+          "$id": "#/properties/streamConfig/properties/streamServiceName",
+          "type": "string",
+          "title": "streamServiceName Schema",
+          "description": "The name of the service containing the `index.html` for a streaming web app.  Defaults to `clickme` and is always deployed under the appLoc/services SAS Folder.",
+          "default": "clickme.sas"
         }
       }
     },
