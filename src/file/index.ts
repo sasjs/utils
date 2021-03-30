@@ -3,6 +3,7 @@ export {
   folderExists,
   readFile,
   listFilesInFolder,
+  listSubFoldersInFolder,
   createFile,
   createFolder,
   deleteFile,
