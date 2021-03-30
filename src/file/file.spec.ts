@@ -7,7 +7,9 @@ import {
   deleteFolder,
   unifyFilePath,
   getRelativePath,
-  listFilesInFolder
+  listFilesInFolder,
+  createFolder,
+  listSubFoldersInFolder
 } from './file'
 
 describe('createFile', () => {
@@ -93,6 +95,23 @@ describe('listFilesInFolder', () => {
     ).resolves.toEqual([filename])
 
     await deleteFile(filePath)
+  })
+})
+
+describe('listSubFoldersInFolder', () => {
+  const timestamp = new Date().valueOf()
+  const folderName = `test-create-folder-${timestamp}`
+
+  it('should return a list of folders at the given path', async () => {
+    const folderPath = path.join(__dirname, folderName)
+
+    await createFolder(folderPath)
+
+    await expect(listSubFoldersInFolder(__dirname)).resolves.toEqual([
+      folderName
+    ])
+
+    await deleteFolder(folderPath)
   })
 })
 

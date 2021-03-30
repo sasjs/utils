@@ -25,6 +25,14 @@ export async function listFilesInFolder(folderName: string): Promise<string[]> {
     .then((list) => list.filter((f) => !f.isDirectory()).map((f) => f.name))
 }
 
+export async function listSubFoldersInFolder(
+  folderName: string
+): Promise<string[]> {
+  return fs.promises
+    .readdir(folderName, { withFileTypes: true })
+    .then((list) => list.filter((f) => f.isDirectory()).map((f) => f.name))
+}
+
 export async function createFolder(folderName: string): Promise<string> {
   return fs.promises.mkdir(folderName, { recursive: true })
 }
