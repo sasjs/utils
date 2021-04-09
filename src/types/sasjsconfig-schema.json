@@ -694,6 +694,14 @@
                 "default": "",
                 "examples": ["/Public/app"]
               },
+              "allowInsecureRequests": {
+                "$id": "#/properties/targets/items/anyOf/0/properties/allowInsecureRequests",
+                "type": "boolean",
+                "title": "allowInsecureRequests",
+                "description": "If you are having certificate errors connecting to SAS, that cannot be properly resolved, try setting this value to true.",
+                "default": false,
+                "examples": [true, false]
+              },
               "contextName": {
                 "$id": "#/properties/targets/items/anyOf/0/properties/contextName",
                 "type": "string",
