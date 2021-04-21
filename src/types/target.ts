@@ -254,4 +254,32 @@ export class Target implements TargetJson {
 
     return json
   }
+
+  toJsonNoDefaults(): TargetJson {
+    const json: TargetJson = {
+      name: this.name,
+      serverUrl: this.serverUrl,
+      serverType: this.serverType,
+      allowInsecureRequests: this.allowInsecureRequests,
+      appLoc: this.appLoc,
+      macroFolders: this.macroFolders,
+      programFolders: this.programFolders,
+      docConfig: this.docConfig,
+      authConfig: this.authConfig,
+      buildConfig: this.buildConfig,
+      jobConfig: this.jobConfig,
+      serviceConfig: this.serviceConfig,
+      streamConfig: this.streamConfig,
+      deployConfig: this.deployConfig
+    }
+
+    if (this.serverType === ServerType.SasViya) {
+      json.contextName = this.contextName
+    } else {
+      json.serverName = this.serverName
+      json.repositoryName = this.repositoryName
+    }
+
+    return json
+  }
 }
