@@ -334,6 +334,28 @@ describe('Target', () => {
     })
   })
 
+  it('should convert to JSON without default attributes', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    const json = target.toJson(false)
+
+    expect(json.name).toEqual(target.name)
+    expect(json.serverUrl).toEqual(target.serverUrl)
+    expect(json.serverType).toEqual(target.serverType)
+    expect(json.appLoc).toEqual(target.appLoc)
+    expect(json.authConfig).toEqual(undefined)
+    expect(json.buildConfig).toEqual(undefined)
+    expect(json.jobConfig).toEqual(undefined)
+    expect(json.serviceConfig).toEqual(undefined)
+    expect(json.streamConfig).toEqual(undefined)
+    expect(json.deployConfig).toEqual(undefined)
+  })
+
   it('should include context name in JSON when server type is SASVIYA', () => {
     const target = new Target({
       name: 'test',
