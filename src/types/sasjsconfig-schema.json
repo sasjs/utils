@@ -48,11 +48,11 @@
             "testServiceFolders": ["sasjs/tests/services"],
             "initProgram": "sasjs/tests/testinit.sas",
             "termProgram": "sasjs/tests/testterm.sas",
-            "macroVars":  {
+            "macroVars": {
               "testVar": "testValue"
             },
-           "testSetUp": "sasjs/tests/testsetup.sas",
-           "testTearDown": "sasjs/tests/testteardown.sas"
+            "testSetUp": "sasjs/tests/testsetup.sas",
+            "testTearDown": "sasjs/tests/testteardown.sas"
           },
           "macroFolders": ["targets/viya/macros"],
           "programFolders": []
@@ -92,11 +92,11 @@
             "testServiceFolders": ["sasjs/tests/services"],
             "initProgram": "sasjs/tests/testinit.sas",
             "termProgram": "sasjs/tests/testterm.sas",
-            "macroVars":  {
+            "macroVars": {
               "testVar": "testValue"
             },
-           "testSetUp": "sasjs/tests/testsetup.sas",
-           "testTearDown": "sasjs/tests/testteardown.sas"
+            "testSetUp": "sasjs/tests/testsetup.sas",
+            "testTearDown": "sasjs/tests/testteardown.sas"
           },
           "macroFolders": ["targets/sas9/macros"],
           "programFolders": []
@@ -531,11 +531,11 @@
       "testServiceFolders": ["sasjs/tests/services"],
       "initProgram": "sasjs/tests/testinit.sas",
       "termProgram": "sasjs/tests/testterm.sas",
-      "macroVars":  {
+      "macroVars": {
         "testVar": "testValue"
       },
-     "testSetUp": "sasjs/tests/testsetup.sas",
-     "testTearDown": "sasjs/tests/testteardown.sas"
+      "testSetUp": "sasjs/tests/testsetup.sas",
+      "testTearDown": "sasjs/tests/testteardown.sas"
     },
     "macroFolders": {
       "$id": "#/properties/macroFolders",
@@ -609,11 +609,11 @@
               "testServiceFolders": ["sasjs/tests/services"],
               "initProgram": "sasjs/tests/testinit.sas",
               "termProgram": "sasjs/tests/testterm.sas",
-              "macroVars":  {
+              "macroVars": {
                 "testVar": "testValue"
               },
-             "testSetUp": "sasjs/tests/testsetup.sas",
-             "testTearDown": "sasjs/tests/testteardown.sas"
+              "testSetUp": "sasjs/tests/testsetup.sas",
+              "testTearDown": "sasjs/tests/testteardown.sas"
             },
             "macroFolders": ["targets/viya/macros"]
           },
@@ -652,11 +652,11 @@
               "testServiceFolders": ["sasjs/tests/services"],
               "initProgram": "sasjs/tests/testinit.sas",
               "termProgram": "sasjs/tests/testterm.sas",
-              "macroVars":  {
+              "macroVars": {
                 "testVar": "testValue"
               },
-             "testSetUp": "sasjs/tests/testsetup.sas",
-             "testTearDown": "sasjs/tests/testteardown.sas"
+              "testSetUp": "sasjs/tests/testsetup.sas",
+              "testTearDown": "sasjs/tests/testteardown.sas"
             },
             "macroFolders": ["targets/sas9/macros"],
             "programFolders": []
@@ -719,11 +719,11 @@
                   "testServiceFolders": ["sasjs/tests/services"],
                   "initProgram": "sasjs/tests/testinit.sas",
                   "termProgram": "sasjs/tests/testterm.sas",
-                  "macroVars":  {
+                  "macroVars": {
                     "testVar": "testValue"
                   },
-                 "testSetUp": "sasjs/tests/testsetup.sas",
-                 "testTearDown": "sasjs/tests/testteardown.sas"
+                  "testSetUp": "sasjs/tests/testsetup.sas",
+                  "testTearDown": "sasjs/tests/testteardown.sas"
                 },
                 "macroFolders": ["targets/viya/macros"],
                 "programFolders": []
