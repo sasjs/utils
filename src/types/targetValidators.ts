@@ -7,7 +7,8 @@ import {
   DeployConfig,
   JobConfig,
   ServiceConfig,
-  StreamConfig
+  StreamConfig,
+  TestConfig
 } from './config'
 
 const DEFAULT_CONTEXT_NAME = 'SAS Job Execution compute context'
@@ -196,6 +197,23 @@ export const validateServiceConfig = (
   }
 
   return serviceConfig
+}
+
+export const validateTestConfig = (testConfig: TestConfig): TestConfig => {
+  if (!testConfig) {
+    throw new Error('Invalid test config: JSON cannot be null or undefined.')
+  }
+
+  if (!testConfig.testFolders) testConfig.testFolders = []
+  if (!testConfig.testJobFolders) testConfig.testJobFolders = []
+  if (!testConfig.testServiceFolders) testConfig.testServiceFolders = []
+  if (!testConfig.initProgram) testConfig.initProgram = ''
+  if (!testConfig.termProgram) testConfig.termProgram = ''
+  if (!testConfig.macroVars) testConfig.macroVars = {}
+  if (!testConfig.testSetUp) testConfig.testSetUp = ''
+  if (!testConfig.testTearDown) testConfig.testTearDown = ''
+
+  return testConfig
 }
 
 export const validateJobConfig = (jobConfig: JobConfig): JobConfig => {

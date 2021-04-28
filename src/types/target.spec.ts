@@ -213,6 +213,41 @@ describe('Target', () => {
     expect(target.streamConfig!.webSourcePath).toEqual('.')
   })
 
+  it('should create an instance with test config when the JSON is valid', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      testConfig: {
+        testFolders: ['tests'],
+        testJobFolders: ['tests/jobs'],
+        testServiceFolders: ['tests/services'],
+        initProgram: 'init',
+        termProgram: 'term',
+        macroVars: {
+          testVar: 'testValue'
+        },
+        testSetUp: 'testSetup',
+        testTearDown: 'testTearDown'
+      }
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.testConfig).toBeTruthy()
+    expect(target.testConfig!.testFolders).toEqual(['tests'])
+    expect(target.testConfig!.testJobFolders).toEqual(['tests/jobs'])
+    expect(target.testConfig!.testServiceFolders).toEqual(['tests/services'])
+    expect(target.testConfig!.initProgram).toEqual('init')
+    expect(target.testConfig!.termProgram).toEqual('term')
+    expect(target.testConfig!.macroVars).toEqual({
+      testVar: 'testValue'
+    })
+    expect(target.testConfig!.testSetUp).toEqual('testSetup')
+    expect(target.testConfig!.testTearDown).toEqual('testTearDown')
+  })
+
   it('should create an instance with macro folders when the JSON is valid', () => {
     const target = new Target({
       name: 'test',
@@ -331,6 +366,16 @@ describe('Target', () => {
     expect(json.deployConfig).toEqual({
       deployScripts: [],
       deployServicePack: false
+    })
+    expect(json.testConfig).toEqual({
+      testFolders: [],
+      testJobFolders: [],
+      testServiceFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {},
+      testSetUp: '',
+      testTearDown: ''
     })
   })
 

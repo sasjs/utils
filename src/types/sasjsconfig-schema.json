@@ -42,6 +42,18 @@
             "streamWebFolder": "webv",
             "webSourcePath": "dist"
           },
+          "testConfig": {
+            "testFolders": ["sasjs/tests"],
+            "testJobFolders": ["sasjs/tests/jobs"],
+            "testServiceFolders": ["sasjs/tests/services"],
+            "initProgram": "sasjs/tests/testinit.sas",
+            "termProgram": "sasjs/tests/testterm.sas",
+            "macroVars":  {
+              "testVar": "testValue"
+            },
+           "testSetUp": "sasjs/tests/testsetup.sas",
+           "testTearDown": "sasjs/tests/testteardown.sas"
+          },
           "macroFolders": ["targets/viya/macros"],
           "programFolders": []
         },
@@ -73,6 +85,18 @@
             "streamWeb": false,
             "streamWebFolder": "web9",
             "webSourcePath": "dist"
+          },
+          "testConfig": {
+            "testFolders": ["sasjs/tests"],
+            "testJobFolders": ["sasjs/tests/jobs"],
+            "testServiceFolders": ["sasjs/tests/services"],
+            "initProgram": "sasjs/tests/testinit.sas",
+            "termProgram": "sasjs/tests/testterm.sas",
+            "macroVars":  {
+              "testVar": "testValue"
+            },
+           "testSetUp": "sasjs/tests/testsetup.sas",
+           "testTearDown": "sasjs/tests/testteardown.sas"
           },
           "macroFolders": ["targets/sas9/macros"],
           "programFolders": []
@@ -446,22 +470,6 @@
         }
       }
     },
-    "macroFolders": {
-      "$id": "#/properties/macroFolders",
-      "type": "array",
-      "title": "The macroFolders array",
-      "description": "These local folders are searched for SAS Macros when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-      "default": [],
-      "examples": [["macros", "../../more_macros"]]
-    },
-    "programFolders": {
-      "$id": "#/properties/programFolders",
-      "type": "array",
-      "title": "The programFolders array",
-      "description": "These local folders are searched for SAS Programs when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-      "default": [],
-      "examples": [["programs", "../../more_programs"]]
-    },
     "streamConfig": {
       "$id": "#/properties/streamConfig",
       "type": "object",
@@ -517,6 +525,34 @@
         }
       }
     },
+    "testConfig": {
+      "testFolders": ["sasjs/tests"],
+      "testJobFolders": ["sasjs/tests/jobs"],
+      "testServiceFolders": ["sasjs/tests/services"],
+      "initProgram": "sasjs/tests/testinit.sas",
+      "termProgram": "sasjs/tests/testterm.sas",
+      "macroVars":  {
+        "testVar": "testValue"
+      },
+     "testSetUp": "sasjs/tests/testsetup.sas",
+     "testTearDown": "sasjs/tests/testteardown.sas"
+    },
+    "macroFolders": {
+      "$id": "#/properties/macroFolders",
+      "type": "array",
+      "title": "The macroFolders array",
+      "description": "These local folders are searched for SAS Macros when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+      "default": [],
+      "examples": [["macros", "../../more_macros"]]
+    },
+    "programFolders": {
+      "$id": "#/properties/programFolders",
+      "type": "array",
+      "title": "The programFolders array",
+      "description": "These local folders are searched for SAS Programs when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+      "default": [],
+      "examples": [["programs", "../../more_programs"]]
+    },
     "targets": {
       "$id": "#/properties/targets",
       "type": "array",
@@ -567,6 +603,18 @@
               "streamWebFolder": "webv",
               "webSourcePath": "dist"
             },
+            "testConfig": {
+              "testFolders": ["sasjs/tests"],
+              "testJobFolders": ["sasjs/tests/jobs"],
+              "testServiceFolders": ["sasjs/tests/services"],
+              "initProgram": "sasjs/tests/testinit.sas",
+              "termProgram": "sasjs/tests/testterm.sas",
+              "macroVars":  {
+                "testVar": "testValue"
+              },
+             "testSetUp": "sasjs/tests/testsetup.sas",
+             "testTearDown": "sasjs/tests/testteardown.sas"
+            },
             "macroFolders": ["targets/viya/macros"]
           },
           {
@@ -597,6 +645,18 @@
               "streamWeb": false,
               "streamWebFolder": "web9",
               "webSourcePath": "dist"
+            },
+            "testConfig": {
+              "testFolders": ["sasjs/tests"],
+              "testJobFolders": ["sasjs/tests/jobs"],
+              "testServiceFolders": ["sasjs/tests/services"],
+              "initProgram": "sasjs/tests/testinit.sas",
+              "termProgram": "sasjs/tests/testterm.sas",
+              "macroVars":  {
+                "testVar": "testValue"
+              },
+             "testSetUp": "sasjs/tests/testsetup.sas",
+             "testTearDown": "sasjs/tests/testteardown.sas"
             },
             "macroFolders": ["targets/sas9/macros"],
             "programFolders": []
@@ -652,6 +712,18 @@
                   "streamWeb": false,
                   "streamWebFolder": "webv",
                   "webSourcePath": "dist"
+                },
+                "testConfig": {
+                  "testFolders": ["sasjs/tests"],
+                  "testJobFolders": ["sasjs/tests/jobs"],
+                  "testServiceFolders": ["sasjs/tests/services"],
+                  "initProgram": "sasjs/tests/testinit.sas",
+                  "termProgram": "sasjs/tests/testterm.sas",
+                  "macroVars":  {
+                    "testVar": "testValue"
+                  },
+                 "testSetUp": "sasjs/tests/testsetup.sas",
+                 "testTearDown": "sasjs/tests/testteardown.sas"
                 },
                 "macroFolders": ["targets/viya/macros"],
                 "programFolders": []
@@ -727,6 +799,9 @@
               },
               "streamConfig": {
                 "$ref": "#/properties/streamConfig"
+              },
+              "testConfig": {
+                "$ref": "#/properties/testConfig"
               },
               "macroFolders": {
                 "$ref": "#/properties/macroFolders"

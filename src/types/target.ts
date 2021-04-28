@@ -5,7 +5,8 @@ import {
   DeployConfig,
   ServiceConfig,
   JobConfig,
-  StreamConfig
+  StreamConfig,
+  TestConfig
 } from './config'
 import { ServerType } from './serverType'
 import {
@@ -23,7 +24,8 @@ import {
   validateContextName,
   validateServerName,
   validateRepositoryName,
-  validateAuthConfig
+  validateAuthConfig,
+  validateTestConfig
 } from './targetValidators'
 
 export interface TargetJson {
@@ -45,6 +47,7 @@ export interface TargetJson {
   macroFolders: string[]
   programFolders: string[]
   isDefault?: boolean
+  testConfig?: TestConfig
 }
 
 export class Target implements TargetJson {
@@ -133,6 +136,11 @@ export class Target implements TargetJson {
   }
   private _repositoryName: string
 
+  get testConfig(): TestConfig | undefined {
+    return this._testConfig
+  }
+  private _testConfig: TestConfig | undefined
+
   constructor(json: any) {
     try {
       if (!json) {
@@ -182,6 +190,10 @@ export class Target implements TargetJson {
 
       if (json.streamConfig) {
         this._streamConfig = validateStreamConfig(json.streamConfig)
+      }
+
+      if (json.testConfig) {
+        this._testConfig = validateTestConfig(json.testConfig)
       }
 
       if (json.macroFolders && json.macroFolders.length) {
@@ -242,6 +254,16 @@ export class Target implements TargetJson {
       deployConfig: this.deployConfig || {
         deployScripts: [],
         deployServicePack: false
+      },
+      testConfig: this.testConfig || {
+        testFolders: [],
+        testJobFolders: [],
+        testServiceFolders: [],
+        initProgram: '',
+        termProgram: '',
+        macroVars: {},
+        testSetUp: '',
+        testTearDown: ''
       }
     }
 
