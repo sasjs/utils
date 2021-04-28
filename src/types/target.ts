@@ -279,8 +279,12 @@ export class Target implements TargetJson {
       json.deployConfig = {
         deployScripts: [],
         deployServicePack: false
-      },
-      testConfig: this.testConfig || {
+      }
+
+    if (this.testConfig) {
+      json.testConfig = this.testConfig
+    } else if (withDefaults)
+      json.testConfig = {
         testFolders: [],
         testJobFolders: [],
         testServiceFolders: [],
