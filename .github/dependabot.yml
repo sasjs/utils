@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: ts-loader
+    versions:
+    - 9.0.2
+    - 9.1.0
+  - dependency-name: "@types/jest"
+    versions:
+    - 26.0.22
