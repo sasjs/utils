@@ -220,9 +220,6 @@ describe('Target', () => {
       serverType: ServerType.Sas9,
       appLoc: '/test',
       testConfig: {
-        testFolders: ['tests'],
-        testJobFolders: ['tests/jobs'],
-        testServiceFolders: ['tests/services'],
         initProgram: 'init',
         termProgram: 'term',
         macroVars: {
@@ -236,9 +233,6 @@ describe('Target', () => {
     expect(target).toBeTruthy()
     expect(target instanceof Target).toEqual(true)
     expect(target.testConfig).toBeTruthy()
-    expect(target.testConfig!.testFolders).toEqual(['tests'])
-    expect(target.testConfig!.testJobFolders).toEqual(['tests/jobs'])
-    expect(target.testConfig!.testServiceFolders).toEqual(['tests/services'])
     expect(target.testConfig!.initProgram).toEqual('init')
     expect(target.testConfig!.termProgram).toEqual('term')
     expect(target.testConfig!.macroVars).toEqual({
@@ -368,9 +362,6 @@ describe('Target', () => {
       deployServicePack: false
     })
     expect(json.testConfig).toEqual({
-      testFolders: [],
-      testJobFolders: [],
-      testServiceFolders: [],
       initProgram: '',
       termProgram: '',
       macroVars: {},

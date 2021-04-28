@@ -204,9 +204,6 @@ export const validateTestConfig = (testConfig: TestConfig): TestConfig => {
     throw new Error('Invalid test config: JSON cannot be null or undefined.')
   }
 
-  if (!testConfig.testFolders) testConfig.testFolders = []
-  if (!testConfig.testJobFolders) testConfig.testJobFolders = []
-  if (!testConfig.testServiceFolders) testConfig.testServiceFolders = []
   if (!testConfig.initProgram) testConfig.initProgram = ''
   if (!testConfig.termProgram) testConfig.termProgram = ''
   if (!testConfig.macroVars) testConfig.macroVars = {}

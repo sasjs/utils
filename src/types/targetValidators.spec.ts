@@ -882,9 +882,6 @@ describe('validateTestConfig', () => {
 
   let testInput = {}
   let testOutput = {
-    testFolders: [],
-    testJobFolders: [],
-    testServiceFolders: [],
     initProgram: '',
     termProgram: '',
     macroVars: {},
@@ -895,30 +892,9 @@ describe('validateTestConfig', () => {
     validateTestConfig((testInput as unknown) as TestConfig)
   ).toEqual(testOutput)
 
-  it('should set test folders to the empty array if null', () => {
-    testInput = { ...testInput, testFolders: null }
-
-    testAssertion
-  })
-
-  it('should set test job folders to the empty array if null', () => {
-    testInput = { ...testInput, testJobFolders: null }
-
-    testAssertion
-  })
-
-  it('should set test service folders to the empty array if null', () => {
-    testInput = { ...testInput, testServiceFolders: null }
-
-    testAssertion
-  })
-
   it('should set init program to the empty string if null', () => {
     testInput = {
       ...testInput,
-      testFolders: [],
-      testJobFolders: [],
-      testServiceFolders: [],
       initProgram: null
     }
 

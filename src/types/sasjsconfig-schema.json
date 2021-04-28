@@ -43,9 +43,6 @@
             "webSourcePath": "dist"
           },
           "testConfig": {
-            "testFolders": ["sasjs/tests"],
-            "testJobFolders": ["sasjs/tests/jobs"],
-            "testServiceFolders": ["sasjs/tests/services"],
             "initProgram": "sasjs/tests/testinit.sas",
             "termProgram": "sasjs/tests/testterm.sas",
             "macroVars": {
@@ -87,9 +84,6 @@
             "webSourcePath": "dist"
           },
           "testConfig": {
-            "testFolders": ["sasjs/tests"],
-            "testJobFolders": ["sasjs/tests/jobs"],
-            "testServiceFolders": ["sasjs/tests/services"],
             "initProgram": "sasjs/tests/testinit.sas",
             "termProgram": "sasjs/tests/testterm.sas",
             "macroVars": {
@@ -529,9 +523,6 @@
       }
     },
     "testConfig": {
-      "testFolders": ["sasjs/tests"],
-      "testJobFolders": ["sasjs/tests/jobs"],
-      "testServiceFolders": ["sasjs/tests/services"],
       "initProgram": "sasjs/tests/testinit.sas",
       "termProgram": "sasjs/tests/testterm.sas",
       "macroVars": {
@@ -607,9 +598,6 @@
               "webSourcePath": "dist"
             },
             "testConfig": {
-              "testFolders": ["sasjs/tests"],
-              "testJobFolders": ["sasjs/tests/jobs"],
-              "testServiceFolders": ["sasjs/tests/services"],
               "initProgram": "sasjs/tests/testinit.sas",
               "termProgram": "sasjs/tests/testterm.sas",
               "macroVars": {
@@ -650,9 +638,6 @@
               "webSourcePath": "dist"
             },
             "testConfig": {
-              "testFolders": ["sasjs/tests"],
-              "testJobFolders": ["sasjs/tests/jobs"],
-              "testServiceFolders": ["sasjs/tests/services"],
               "initProgram": "sasjs/tests/testinit.sas",
               "termProgram": "sasjs/tests/testterm.sas",
               "macroVars": {
@@ -717,9 +702,6 @@
                   "webSourcePath": "dist"
                 },
                 "testConfig": {
-                  "testFolders": ["sasjs/tests"],
-                  "testJobFolders": ["sasjs/tests/jobs"],
-                  "testServiceFolders": ["sasjs/tests/services"],
                   "initProgram": "sasjs/tests/testinit.sas",
                   "termProgram": "sasjs/tests/testterm.sas",
                   "macroVars": {

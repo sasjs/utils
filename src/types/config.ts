@@ -49,9 +49,6 @@ export interface AuthConfig {
 }
 
 export interface TestConfig {
-  testFolders: string[]
-  testJobFolders: string[]
-  testServiceFolders: string[]
   initProgram: string
   termProgram: string
   macroVars: { [key: string]: string }

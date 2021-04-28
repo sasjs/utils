@@ -285,9 +285,6 @@ export class Target implements TargetJson {
       json.testConfig = this.testConfig
     } else if (withDefaults)
       json.testConfig = {
-        testFolders: [],
-        testJobFolders: [],
-        testServiceFolders: [],
         initProgram: '',
         termProgram: '',
         macroVars: {},
