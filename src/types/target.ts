@@ -208,7 +208,7 @@ export class Target implements TargetJson {
     }
   }
 
-  toJson(): TargetJson {
+  toJson(withDefaults: boolean = true): TargetJson {
     const json: TargetJson = {
       name: this.name,
       serverUrl: this.serverUrl,
@@ -217,41 +217,66 @@ export class Target implements TargetJson {
       appLoc: this.appLoc,
       macroFolders: this.macroFolders,
       programFolders: this.programFolders,
-      docConfig: this.docConfig,
-      authConfig: this.authConfig || {
+      docConfig: this.docConfig
+    }
+
+    if (this.authConfig) {
+      json.authConfig = this.authConfig
+    } else if (withDefaults)
+      json.authConfig = {
         access_token: '',
         refresh_token: '',
         client: '',
         secret: ''
-      },
-      buildConfig: this.buildConfig || {
+      }
+
+    if (this.buildConfig) {
+      json.buildConfig = this.buildConfig
+    } else if (withDefaults)
+      json.buildConfig = {
         initProgram: '',
         termProgram: '',
         buildOutputFileName: `${this.name}.sas`,
         buildOutputFolder: 'sasjsbuild',
         buildResultsFolder: 'sasjsresults',
         macroVars: {}
-      },
-      jobConfig: this.jobConfig || {
+      }
+
+    if (this.jobConfig) {
+      json.jobConfig = this.jobConfig
+    } else if (withDefaults)
+      json.jobConfig = {
         jobFolders: [],
         initProgram: '',
         termProgram: '',
         macroVars: {}
-      },
-      serviceConfig: this.serviceConfig || {
+      }
+
+    if (this.serviceConfig) {
+      json.serviceConfig = this.serviceConfig
+    } else if (withDefaults)
+      json.serviceConfig = {
         serviceFolders: [],
         initProgram: '',
         termProgram: '',
         macroVars: {}
-      },
-      streamConfig: this.streamConfig || {
+      }
+
+    if (this.streamConfig) {
+      json.streamConfig = this.streamConfig
+    } else if (withDefaults)
+      json.streamConfig = {
         streamWebFolder: '',
         streamWeb: false,
         webSourcePath: '',
         streamServiceName: '',
         assetPaths: []
-      },
-      deployConfig: this.deployConfig || {
+      }
+
+    if (this.deployConfig) {
+      json.deployConfig = this.deployConfig
+    } else if (withDefaults)
+      json.deployConfig = {
         deployScripts: [],
         deployServicePack: false
       },
@@ -265,7 +290,6 @@ export class Target implements TargetJson {
         testSetUp: '',
         testTearDown: ''
       }
-    }
 
     if (this.serverType === ServerType.SasViya) {
       json.contextName = this.contextName
