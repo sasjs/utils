@@ -4,10 +4,12 @@ export {
   readFile,
   listFilesInFolder,
   listSubFoldersInFolder,
+  listFilesAndSubFoldersInFolder,
   createFile,
   createFolder,
   deleteFile,
   deleteFolder,
   getRelativePath,
-  unifyFilePath
+  unifyFilePath,
+  moveFile
 } from './file'

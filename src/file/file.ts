@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { asyncForEach } from '../utils'
 
 export async function fileExists(filePath: string): Promise<boolean> {
   return fs.promises
@@ -31,6 +32,46 @@ export async function listSubFoldersInFolder(
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
     .then((list) => list.filter((f) => f.isDirectory()).map((f) => f.name))
+}
+
+export async function listFilesAndSubFoldersInFolder(
+  folderName: string,
+  recurse: boolean = true
+): Promise<string[]> {
+  return fs.promises
+    .readdir(folderName, { withFileTypes: true })
+    .then(async (list) => {
+      if (recurse) {
+        const subFolders = list.filter((f) => f.isDirectory())
+
+        if (subFolders.length) {
+          let subFoldersFilesAndFolders: string[] = []
+          const rootFolder = folderName.split(path.sep).pop() as string
+
+          await asyncForEach(
+            list.filter((f) => f.isDirectory()),
+            async (f) => {
+              const subFolder = f.name
+              const subPath = path.join(folderName, subFolder)
+
+              subFoldersFilesAndFolders = [
+                ...subFoldersFilesAndFolders,
+                ...(await listFilesAndSubFoldersInFolder(subPath)).map((f) =>
+                  path.join(subFolder, f)
+                )
+              ]
+            }
+          )
+
+          return [
+            ...list.filter((f) => !f.isDirectory()).map((f) => f.name),
+            ...subFoldersFilesAndFolders
+          ]
+        }
+      }
+
+      return list.map((f) => f.name)
+    })
 }
 
 export async function createFolder(folderName: string): Promise<string> {
@@ -120,4 +161,11 @@ export function getRelativePath(from: string, to: string): string {
       .replace(trailingPathSepRegExp, '')
 
   return relativePath
+}
+
+export async function moveFile(
+  oldFilePath: string,
+  newFilePath: string
+): Promise<void> {
+  return fs.promises.rename(oldFilePath, newFilePath)
 }
