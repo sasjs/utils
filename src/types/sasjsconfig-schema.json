@@ -268,7 +268,10 @@
           "macroVars": {
             "name": "value",
             "numvar": "42"
-          }
+          },
+          "buildOutputFileName": "buildpack.sas",
+          "buildOutputFolder": "sasjsbuild",
+          "buildResultsFolder": "sasjsresults"
         }
       ],
       "properties": {
