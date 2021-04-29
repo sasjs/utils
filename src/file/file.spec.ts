@@ -7,18 +7,21 @@ import {
   deleteFolder,
   unifyFilePath,
   getRelativePath,
-  listFilesInFolder,
   createFolder,
-  listSubFoldersInFolder
+  listFilesInFolder,
+  listSubFoldersInFolder,
+  listFilesAndSubFoldersInFolder,
+  moveFile
 } from './file'
+
+const content = 'test content'
 
 describe('createFile', () => {
   const timestamp = new Date().valueOf()
-  const filename = `test-create-file-${timestamp}.txt`
+  const fileName = `test-create-file-${timestamp}.txt`
 
   it('should create a file', async () => {
-    const filePath = path.join(process.cwd(), filename)
-    const content = 'test content'
+    const filePath = path.join(process.cwd(), fileName)
 
     await createFile(filePath, content)
 
@@ -29,8 +32,7 @@ describe('createFile', () => {
   })
 
   it('should create a file in the home directory', async () => {
-    const filePath = path.join(filename)
-    const content = 'test content'
+    const filePath = path.join(fileName)
 
     await createFile(filePath, content)
 
@@ -45,9 +47,8 @@ describe('createFile', () => {
       process.cwd(),
       'testFolder_1',
       'testFolder_2',
-      filename
+      fileName
     )
-    const content = 'test content'
 
     await createFile(filePath, content)
 
@@ -60,11 +61,10 @@ describe('createFile', () => {
 
 describe('fileExists', () => {
   const timestamp = new Date().valueOf()
-  const filename = `test-create-file-${timestamp}.txt`
+  const fileName = `test-create-file-${timestamp}.txt`
 
   it('should return true if a file exists at the given path', async () => {
-    const filePath = path.join(process.cwd(), filename)
-    const content = 'test content'
+    const filePath = path.join(process.cwd(), fileName)
 
     await createFile(filePath, content)
 
@@ -74,7 +74,7 @@ describe('fileExists', () => {
   })
 
   it('should return true if a file exists at the given path', async () => {
-    const filePath = path.join(process.cwd(), filename)
+    const filePath = path.join(process.cwd(), fileName)
 
     await expect(fileExists(filePath)).resolves.toEqual(false)
   })
@@ -82,17 +82,16 @@ describe('fileExists', () => {
 
 describe('listFilesInFolder', () => {
   const timestamp = new Date().valueOf()
-  const filename = `test-create-file-${timestamp}.txt`
+  const fileName = `test-create-file-${timestamp}.txt`
 
   it('should return a list of files at the given path', async () => {
-    const filePath = path.join(process.cwd(), 'test-folder', filename)
-    const content = 'test content'
+    const filePath = path.join(process.cwd(), 'test-folder', fileName)
 
     await createFile(filePath, content)
 
     await expect(
       listFilesInFolder(path.join(process.cwd(), 'test-folder'))
-    ).resolves.toEqual([filename])
+    ).resolves.toEqual([fileName])
 
     await deleteFile(filePath)
   })
@@ -216,5 +215,85 @@ describe('getRelativePath', () => {
     const fromFolder = process.cwd()
     const toFolder = fromFolder
     expect(getRelativePath(fromFolder, toFolder)).toEqual(`.${path.sep}`)
+  })
+})
+
+describe('listFilesAndSubFoldersInFolder', () => {
+  const timestamp = new Date().valueOf()
+
+  const fileName = `test-create-file-${timestamp}.txt`
+  const subFolderFileName = `test-create-sub-file-${timestamp}.txt`
+  const subSubFolderFileName = `test-create-sub-sub-file-${timestamp}.txt`
+
+  const testFolderName = `test-create-folder-${timestamp}`
+  const subFolderName = `test-create-sub-folder-${timestamp}`
+  const subSubFolderName = `test-create-sub-sub-folder-${timestamp}`
+
+  const createTestFoldersAndFiles = async () => {
+    const testFolderPath = path.join(__dirname, testFolderName)
+    await createFolder(testFolderPath)
+
+    const testSubFolderPath = path.join(testFolderPath, subFolderName)
+    await createFolder(testSubFolderPath)
+
+    const testSubSubFolderPath = path.join(testSubFolderPath, subSubFolderName)
+    await createFolder(testSubSubFolderPath)
+
+    await createFile(path.join(testFolderPath, fileName), content)
+    await createFile(path.join(testSubFolderPath, subFolderFileName), content)
+    await createFile(
+      path.join(testSubSubFolderPath, subSubFolderFileName),
+      content
+    )
+
+    return testFolderPath
+  }
+
+  it('should return a list files and folders at all levels recursively', async () => {
+    const testFolderPath = await createTestFoldersAndFiles()
+
+    const expectedResult = [
+      fileName,
+      path.join(subFolderName, subFolderFileName),
+      path.join(subFolderName, subSubFolderName, subSubFolderFileName)
+    ]
+
+    await expect(
+      listFilesAndSubFoldersInFolder(testFolderPath)
+    ).resolves.toEqual(expectedResult)
+
+    await deleteFolder(testFolderPath)
+  })
+
+  it('should return a list files and folders in current folder only', async () => {
+    const testFolderPath = await createTestFoldersAndFiles()
+
+    const expectedResult = [fileName, subFolderName]
+
+    await expect(
+      listFilesAndSubFoldersInFolder(testFolderPath, false)
+    ).resolves.toEqual(expectedResult)
+
+    await deleteFolder(testFolderPath)
+  })
+})
+
+describe('moveFile', () => {
+  it('should move file', async () => {
+    const timestamp = new Date().valueOf()
+
+    const fileName = `test-create-file-${timestamp}.txt`
+    const movedFileName = `test-moved-file-${timestamp}.txt`
+    const oldFilePath = path.join(__dirname, fileName)
+    const newFilePath = path.join(__dirname, movedFileName)
+
+    await createFile(oldFilePath, content)
+
+    await moveFile(oldFilePath, newFilePath)
+
+    await expect(fileExists(oldFilePath)).resolves.toEqual(false)
+    await expect(fileExists(newFilePath)).resolves.toEqual(true)
+
+    await deleteFile(newFilePath)
   })
 })

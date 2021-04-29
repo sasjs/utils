@@ -47,3 +47,11 @@ export interface AuthConfig {
   client: string
   secret: string
 }
+
+export interface TestConfig {
+  initProgram: string
+  termProgram: string
+  macroVars: { [key: string]: string }
+  testSetUp: string
+  testTearDown: string
+}

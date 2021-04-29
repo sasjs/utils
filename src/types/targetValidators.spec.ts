@@ -5,7 +5,8 @@ import {
   DeployConfig,
   JobConfig,
   ServiceConfig,
-  StreamConfig
+  StreamConfig,
+  TestConfig
 } from './config'
 import { ServerType } from './serverType'
 import {
@@ -23,7 +24,8 @@ import {
   validateServerName,
   validateRepositoryName,
   validateAuthConfig,
-  validateDocConfig
+  validateDocConfig,
+  validateTestConfig
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -862,5 +864,75 @@ describe('validateDocConfig', () => {
       displayMacroCore: false,
       enableLineage: false
     })
+  })
+})
+
+describe('validateTestConfig', () => {
+  it('should throw an error when input JSON is null', () => {
+    expect(() =>
+      validateTestConfig((null as unknown) as TestConfig)
+    ).toThrowError('Invalid test config: JSON cannot be null or undefined.')
+  })
+
+  it('should throw an error when input JSON is undefined', () => {
+    expect(() =>
+      validateTestConfig((undefined as unknown) as TestConfig)
+    ).toThrowError('Invalid test config: JSON cannot be null or undefined.')
+  })
+
+  let testInput = {}
+  let testOutput = {
+    initProgram: '',
+    termProgram: '',
+    macroVars: {},
+    testSetUp: '',
+    testTearDown: ''
+  }
+  const testAssertion = expect(
+    validateTestConfig((testInput as unknown) as TestConfig)
+  ).toEqual(testOutput)
+
+  it('should set init program to the empty string if null', () => {
+    testInput = {
+      ...testInput,
+      initProgram: null
+    }
+
+    testAssertion
+  })
+
+  it('should set term program to the empty string if null', () => {
+    testInput = { ...testInput, initProgram: 'init', termProgram: null }
+    testOutput = { ...testOutput, initProgram: 'init', termProgram: '' }
+
+    testAssertion
+  })
+
+  it('should initialise macro vars if not present', () => {
+    testInput = { ...testInput, termProgram: 'term', macroVars: null }
+    testOutput = { ...testOutput, termProgram: 'term', macroVars: {} }
+
+    testAssertion
+  })
+
+  it('should set test set up to the empty string if null', () => {
+    testInput = { ...testInput, macroVars: {}, testSetUp: null }
+    testOutput = { ...testOutput, testSetUp: '' }
+
+    testAssertion
+  })
+
+  it('should set test tear down to the empty string if null', () => {
+    testInput = { ...testInput, testSetUp: 'testSetup', testTearDown: null }
+    testOutput = { ...testOutput, testSetUp: 'testSetup', testTearDown: '' }
+
+    testAssertion
+  })
+
+  it('should return the service config when valid', () => {
+    testInput = { ...testInput, testTearDown: 'testTearDown' }
+    testOutput = { ...testOutput, testTearDown: 'testTearDown' }
+
+    testAssertion
   })
 })

@@ -5,7 +5,8 @@ import {
   ServiceConfig,
   JobConfig,
   StreamConfig,
-  AuthConfig
+  AuthConfig,
+  TestConfig
 } from './config'
 import { ServerType } from './serverType'
 import { TargetJson } from './target'
@@ -25,4 +26,5 @@ export interface Configuration {
   serverType?: ServerType
   targets?: TargetJson[]
   defaultTarget?: string
+  testConfig?: TestConfig
 }
