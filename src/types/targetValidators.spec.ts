@@ -888,9 +888,10 @@ describe('validateTestConfig', () => {
     testSetUp: '',
     testTearDown: ''
   }
-  const testAssertion = expect(
-    validateTestConfig((testInput as unknown) as TestConfig)
-  ).toEqual(testOutput)
+  const testAssertion = () =>
+    expect(validateTestConfig((testInput as unknown) as TestConfig)).toEqual(
+      testOutput
+    )
 
   it('should set init program to the empty string if null', () => {
     testInput = {
@@ -898,41 +899,41 @@ describe('validateTestConfig', () => {
       initProgram: null
     }
 
-    testAssertion
+    testAssertion()
   })
 
   it('should set term program to the empty string if null', () => {
     testInput = { ...testInput, initProgram: 'init', termProgram: null }
     testOutput = { ...testOutput, initProgram: 'init', termProgram: '' }
 
-    testAssertion
+    testAssertion()
   })
 
   it('should initialise macro vars if not present', () => {
     testInput = { ...testInput, termProgram: 'term', macroVars: null }
     testOutput = { ...testOutput, termProgram: 'term', macroVars: {} }
 
-    testAssertion
+    testAssertion()
   })
 
   it('should set test set up to the empty string if null', () => {
     testInput = { ...testInput, macroVars: {}, testSetUp: null }
     testOutput = { ...testOutput, testSetUp: '' }
 
-    testAssertion
+    testAssertion()
   })
 
   it('should set test tear down to the empty string if null', () => {
     testInput = { ...testInput, testSetUp: 'testSetup', testTearDown: null }
     testOutput = { ...testOutput, testSetUp: 'testSetup', testTearDown: '' }
 
-    testAssertion
+    testAssertion()
   })
 
   it('should return the service config when valid', () => {
     testInput = { ...testInput, testTearDown: 'testTearDown' }
     testOutput = { ...testOutput, testTearDown: 'testTearDown' }
 
-    testAssertion
+    testAssertion()
   })
 })
