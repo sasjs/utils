@@ -187,7 +187,12 @@ describe('Logger', () => {
 `)
 
       expect(consola.log).toHaveBeenCalledTimes(1)
-      expect(consola.log).not.toHaveBeenCalledWith(expectedOutput)
+
+      try {
+        expect(consola.log).toHaveBeenCalledWith(expectedOutput)
+      } catch (error) {
+        expect(error.matcherResult.pass).toEqual(false)
+      }
     })
 
     it('should log a table with custom border style', () => {
