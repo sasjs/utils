@@ -1,5 +1,7 @@
 import consola from 'consola'
 import { Logger, LogLevel } from '.'
+import chalk from 'chalk'
+import { sanitizeSpecialChars } from '../formatter'
 
 jest.mock('consola')
 
@@ -110,5 +112,112 @@ describe('Logger', () => {
     logger.log('This is a log.')
 
     expect(consola.log).toHaveBeenCalledTimes(1)
+  })
+
+  describe('logger.table', () => {
+    it('should log a table with default border style without head', () => {
+      const logger = new Logger(LogLevel.Debug)
+      spyOn(consola, 'log')
+
+      logger.table(
+        [
+          ['test_1_1', 'test_1_2'],
+          ['test_2_1', 'tes_t2_2']
+        ],
+        {},
+        true
+      )
+
+      const expectedOutput = sanitizeSpecialChars(`╔══════════╤══════════╗
+║ test_1_1 │ test_1_2 ║
+╟──────────┼──────────╢
+║ test_2_1 │ tes_t2_2 ║
+╚══════════╧══════════╝
+`)
+
+      expect(consola.log).toHaveBeenCalledTimes(1)
+      expect(consola.log).toHaveBeenCalledWith(expectedOutput)
+    })
+
+    it('should log a table with default border style', () => {
+      const logger = new Logger(LogLevel.Debug)
+      spyOn(consola, 'log')
+
+      logger.table(
+        [
+          ['test_1_1', 'test_1_2'],
+          ['test_2_1', 'tes_t2_2']
+        ],
+        { head: ['title 1', 'title 2'] },
+        true
+      )
+
+      const expectedOutput = sanitizeSpecialChars(`╔══════════╤══════════╗
+║ ${chalk.white.bold('title 1')}  │ ${chalk.white.bold('title 2')}  ║
+╟──────────┼──────────╢
+║ test_1_1 │ test_1_2 ║
+╟──────────┼──────────╢
+║ test_2_1 │ tes_t2_2 ║
+╚══════════╧══════════╝
+`)
+
+      expect(consola.log).toHaveBeenCalledTimes(1)
+      expect(consola.log).toHaveBeenCalledWith(expectedOutput)
+    })
+
+    it('should log a table with default border and special chars', () => {
+      const logger = new Logger(LogLevel.Debug)
+      spyOn(consola, 'log')
+
+      logger.table(
+        [
+          ['test_1_1', 'test_1_2'],
+          ['test_2_1', 'tes_t2_2']
+        ],
+        { head: ['title 1', 'title 2'] }
+      )
+
+      const expectedOutput = sanitizeSpecialChars(`╔══════════╤══════════╗
+║ ${chalk.white.bold('title 1')}  │ ${chalk.white.bold('title 2')}  ║
+╟──────────┼──────────╢
+║ test_1_1 │ test_1_2 ║
+╟──────────┼──────────╢
+║ test_2_1 │ tes_t2_2 ║
+╚══════════╧══════════╝
+`)
+
+      expect(consola.log).toHaveBeenCalledTimes(1)
+
+      try {
+        expect(consola.log).toHaveBeenCalledWith(expectedOutput)
+      } catch (error) {
+        expect(error.matcherResult.pass).toEqual(false)
+      }
+    })
+
+    it('should log a table with custom border style', () => {
+      const logger = new Logger(LogLevel.Debug)
+      spyOn(consola, 'log')
+
+      logger.table(
+        [
+          ['test_1_1', 'test_1_2'],
+          ['test_2_1', 'tes_t2_2']
+        ],
+        {
+          chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
+        },
+        true
+      )
+
+      const expectedOutput = sanitizeSpecialChars(`┌──────────┬──────────┐
+│ test_1_1 │ test_1_2 │
+│ test_2_1 │ tes_t2_2 │
+└──────────┴──────────┘
+`)
+
+      expect(consola.log).toHaveBeenCalledTimes(1)
+      expect(consola.log).toHaveBeenCalledWith(expectedOutput)
+    })
   })
 })

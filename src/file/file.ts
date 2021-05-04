@@ -74,7 +74,9 @@ export async function listFilesAndSubFoldersInFolder(
     })
 }
 
-export async function createFolder(folderName: string): Promise<string> {
+export async function createFolder(
+  folderName: string
+): Promise<string | undefined> {
   return fs.promises.mkdir(folderName, { recursive: true })
 }
 
