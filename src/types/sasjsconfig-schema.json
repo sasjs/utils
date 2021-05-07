@@ -523,13 +523,66 @@
       }
     },
     "testConfig": {
-      "initProgram": "sasjs/tests/testinit.sas",
-      "termProgram": "sasjs/tests/testterm.sas",
-      "macroVars": {
-        "testVar": "testValue"
+      "$id": "#/properties/testConfig",
+      "type": "object",
+      "title": "testConfig",
+      "description": "Create tests for Macros, Services & Jobs by simply adding a '.test.sas' extension. ",
+      "default": {
+        "initProgram": "sasjs/tests/testinit.sas",
+        "termProgram": "sasjs/tests/testterm.sas",
+        "macroVars": {
+          "testVar": "testValue"
+        },
+        "testSetUp": "sasjs/tests/testsetup.sas",
+        "testTearDown": "sasjs/tests/testteardown.sas"
       },
-      "testSetUp": "sasjs/tests/testsetup.sas",
-      "testTearDown": "sasjs/tests/testteardown.sas"
+      "properties": {
+        "initProgram": {
+          "$id": "#/properties/testConfig/properties/initProgram",
+          "type": "string",
+          "title": "The jobConfig initProgram",
+          "description": "The testConfig `initProgram` is a local .sas file that is inserted at the start of every Test (after compiled macros and any `macroVars`, and before the Test itself). ",
+          "default": "",
+          "examples": ["sasjs/tests/testinit.sas"]
+        },
+        "termProgram": {
+          "$id": "#/properties/testConfig/properties/termProgram",
+          "type": "string",
+          "title": "The jobConfig termProgram",
+          "description": "The testConfig termProgram is inserted at the end of every Test as part of `sasjs compile`.",
+          "default": "",
+          "examples": ["jobs/jobterm.sas"]
+        },
+        "macroVars": {
+          "$id": "#/properties/testConfig/properties/macroVars",
+          "type": "object",
+          "title": "The `jobConfig` macroVars",
+          "description": "This object allows `sasjs compile` to insert specific macro variables at the start of every Test.  In this case, the code generated would be:\n```\n%let mac1=value;\n%let mac2=42;\n```",
+          "default": {},
+          "examples": [
+            {
+              "mac1": "value",
+              "mac2": "42"
+            }
+          ]
+        },
+        "testSetUp": {
+          "$id": "#/properties/testConfig/properties/testsetup",
+          "type": "string",
+          "title": "The jobConfig testSetUp",
+          "description": "This program is the first to execute as part of 'sasjs test'.  It does not contain the testInit, testTerm or macroVariables.  It IS compiled.",
+          "default": "sasjs/tests/testsetup.sas",
+          "examples": ["sasjs/tests/testsetup.sas"]
+        },
+        "testTearDown": {
+          "$id": "#/properties/testConfig/properties/testTearDown",
+          "type": "string",
+          "title": "The jobConfig testTearDown",
+          "description": "The last program to execute as part of 'sasjs test'.",
+          "default": "sasjs/tests/testteardown.sas",
+          "examples": ["sasjs/tests/testteardown.sas"]
+        }
+      }
     },
     "macroFolders": {
       "$id": "#/properties/macroFolders",
