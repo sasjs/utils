@@ -11,5 +11,6 @@ export {
   deleteFolder,
   getRelativePath,
   unifyFilePath,
-  moveFile
+  moveFile,
+  pathSepEscaped
 } from './file'
