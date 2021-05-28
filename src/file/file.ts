@@ -171,3 +171,5 @@ export async function moveFile(
 ): Promise<void> {
   return fs.promises.rename(oldFilePath, newFilePath)
 }
+
+export const pathSepEscaped = path.sep.replace(/\\/g, '\\\\')
