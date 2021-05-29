@@ -193,3 +193,7 @@ export async function base64EncodeImageFile(filePath: string) {
 export async function base64EncodeFile(filePath: string) {
   return fs.promises.readFile(filePath, { encoding: 'base64' })
 }
+
+export function getRealPath(file: string) {
+  return fs.realpathSync(file)
+}
