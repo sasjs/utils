@@ -172,4 +172,31 @@ export async function moveFile(
   return fs.promises.rename(oldFilePath, newFilePath)
 }
 
+export async function copy(source: string, destination: string) {
+  return new Promise((resolve, reject) => {
+    fs.copy(source, destination, function (error) {
+      if (error) {
+        return reject(error)
+      }
+      return resolve(true)
+    })
+  })
+}
+
 export const pathSepEscaped = path.sep.replace(/\\/g, '\\\\')
+
+export async function base64EncodeImageFile(fileName: string) {
+  return fs.promises.readFile(fileName).then((data) => {
+    let extname = path.extname(fileName).substr(1) || 'png'
+
+    if (extname === 'svg') {
+      extname = 'svg+xml'
+    }
+
+    return 'data:image/' + extname + ';base64,' + data.toString('base64')
+  })
+}
+
+export async function base64EncodeFile(fileName: string) {
+  return fs.promises.readFile(fileName, { encoding: 'base64' })
+}
