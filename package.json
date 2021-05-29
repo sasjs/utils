@@ -42,7 +42,7 @@
     "typescript": "^4.3.2"
   },
   "dependencies": {
-    "@types/prompts": "^2.0.11",
+    "@types/prompts": "^2.0.12",
     "chalk": "^4.1.1",
     "cli-table": "^0.3.6",
     "consola": "^2.15.0",
