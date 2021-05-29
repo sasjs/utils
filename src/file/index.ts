@@ -12,6 +12,7 @@ export {
   getRelativePath,
   unifyFilePath,
   moveFile,
+  pathSepEscaped,
   copy,
   base64EncodeImageFile,
   base64EncodeFile
