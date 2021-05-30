@@ -15,5 +15,6 @@ export {
   pathSepEscaped,
   copy,
   base64EncodeImageFile,
-  base64EncodeFile
+  base64EncodeFile,
+  getRealPath
 } from './file'
