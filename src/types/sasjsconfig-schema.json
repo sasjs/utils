@@ -119,7 +119,7 @@
       "$id": "#/properties/docConfig",
       "type": "object",
       "title": "The docConfig schema",
-      "description": "SASjs uses doxygen to auto-generate HTML documentation using the headers in your SAS programs, macros, services & jobs. For more info, see [https://cli.sasjs.io/doc](https://cli.sasjs.io/doc).",
+      "description": "SASjs uses doxygen to auto-generate HTML documentation using the headers in your SAS programs, macros, services & jobs. For more info, see [https://cli.sasjs.io/doc](https://cli.sasjs.io/doc).  Some properties are taken from package.json (such as the project Name).",
       "default": {
         "dataControllerUrl": "https://mysasserver.com/web/datacontroller/#",
         "enableLineage": true,
@@ -152,8 +152,8 @@
           "$id": "#/properties/docConfig/properties/outDirectory",
           "type": "string",
           "title": "The outDirectory docConfig option",
-          "description": "This is the location to which the generated HTML SAS documentation will be written.  If missing, or left blank, the files will be written to the `sasjsbuild/doc` directory (default behaviour).",
-          "default": "$projectroot/sasjsbuild/doc",
+          "description": "The location to which the generated HTML SAS documentation is written.  If missing, or left blank, the files will be written to the `sasjsbuild/doc` directory (default behaviour).",
+          "default": "sasjsbuild/doc",
           "examples": ["/my/preferred/docs/directory"]
         },
         "dataControllerUrl": {
