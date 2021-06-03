@@ -32,8 +32,9 @@ export function generateTimestamp(sep = '', sepIndex?: number): string {
 
   timestamp = timestamp.map((item) => padWithNumber(item as number))
 
-  if (sepIndex && sep && sepIndex < timestamp.length && sepIndex >= 0)
+  if (sepIndex && sep && sepIndex < timestamp.length && sepIndex >= 0) {
     timestamp.splice(sepIndex, 0, sep)
+  }
 
   timestamp = timestamp.join(sepIndex ? '' : sep)
 
