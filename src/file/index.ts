@@ -11,5 +11,10 @@ export {
   deleteFolder,
   getRelativePath,
   unifyFilePath,
-  moveFile
+  moveFile,
+  pathSepEscaped,
+  copy,
+  base64EncodeImageFile,
+  base64EncodeFile,
+  getRealPath
 } from './file'

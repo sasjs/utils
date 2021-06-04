@@ -1,5 +1,7 @@
+import { MacroVar } from './'
+
 export interface Config {
-  macroVars: { [key: string]: string }
+  macroVars: MacroVar
   initProgram: string
   termProgram: string
 }
@@ -51,7 +53,7 @@ export interface AuthConfig {
 export interface TestConfig {
   initProgram: string
   termProgram: string
-  macroVars: { [key: string]: string }
+  macroVars: MacroVar
   testSetUp: string
   testTearDown: string
 }

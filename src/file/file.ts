@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs-extra'
 import path from 'path'
 import { asyncForEach } from '../utils'
 
@@ -170,4 +170,30 @@ export async function moveFile(
   newFilePath: string
 ): Promise<void> {
   return fs.promises.rename(oldFilePath, newFilePath)
+}
+
+export async function copy(source: string, destination: string) {
+  return fs.copy(source, destination)
+}
+
+export const pathSepEscaped = path.sep.replace(/\\/g, '\\\\')
+
+export async function base64EncodeImageFile(filePath: string) {
+  return fs.promises.readFile(filePath).then((data) => {
+    let extname = path.extname(filePath).substr(1) || 'png'
+
+    if (extname === 'svg') {
+      extname = 'svg+xml'
+    }
+
+    return 'data:image/' + extname + ';base64,' + data.toString('base64')
+  })
+}
+
+export async function base64EncodeFile(filePath: string) {
+  return fs.promises.readFile(filePath, { encoding: 'base64' })
+}
+
+export function getRealPath(file: string) {
+  return fs.realpathSync(file)
 }
