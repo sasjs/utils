@@ -26,6 +26,12 @@ export async function listFilesInFolder(folderName: string): Promise<string[]> {
     .then((list) => list.filter((f) => !f.isDirectory()).map((f) => f.name))
 }
 
+export async function listIniFilesInFolder(folderName: string) {
+  return (await listFilesInFolder(folderName)).filter((name) =>
+    name.endsWith('.ini')
+  )
+}
+
 export async function listSubFoldersInFolder(
   folderName: string
 ): Promise<string[]> {

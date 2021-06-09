@@ -9,6 +9,7 @@ import {
   getRelativePath,
   createFolder,
   listFilesInFolder,
+  listIniFilesInFolder,
   listSubFoldersInFolder,
   listFilesAndSubFoldersInFolder,
   moveFile,
@@ -97,6 +98,31 @@ describe('listFilesInFolder', () => {
     ).resolves.toEqual([fileName])
 
     await deleteFile(filePath)
+  })
+})
+
+describe('listIniFilesInFolder', () => {
+  const timestamp = new Date().valueOf()
+  const fileName = `test-create-file-${timestamp}.ini`
+  const fileName2 = `test-create-file-${timestamp}.ini.txt`
+  const fileName3 = `test-create-file-${timestamp}.temp`
+
+  it('should return a list of files at the given path', async () => {
+    const filePath = path.join(process.cwd(), 'test-folder', fileName)
+    const filePath2 = path.join(process.cwd(), 'test-folder', fileName2)
+    const filePath3 = path.join(process.cwd(), 'test-folder', fileName3)
+
+    await createFile(filePath, content)
+    await createFile(filePath2, content)
+    await createFile(filePath3, content)
+
+    await expect(
+      listIniFilesInFolder(path.join(process.cwd(), 'test-folder'))
+    ).resolves.toEqual([fileName])
+
+    await deleteFile(filePath)
+    await deleteFile(filePath2)
+    await deleteFile(filePath3)
   })
 })
 
