@@ -34,7 +34,7 @@ describe('urlValidator', () => {
   it('should return an error message when the URL is null', () => {
     const url = null
 
-    expect(urlValidator((url as unknown) as string, errorMessage)).toEqual(
+    expect(urlValidator(url as unknown as string, errorMessage)).toEqual(
       errorMessage
     )
   })
@@ -42,7 +42,7 @@ describe('urlValidator', () => {
   it('should return an error message when the URL is undefined', () => {
     const url = undefined
 
-    expect(urlValidator((url as unknown) as string, errorMessage)).toEqual(
+    expect(urlValidator(url as unknown as string, errorMessage)).toEqual(
       errorMessage
     )
   })

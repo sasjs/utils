@@ -42,6 +42,15 @@
             "streamWebFolder": "webv",
             "webSourcePath": "dist"
           },
+          "testConfig": {
+            "initProgram": "sasjs/tests/testinit.sas",
+            "termProgram": "sasjs/tests/testterm.sas",
+            "macroVars": {
+              "testVar": "testValue"
+            },
+            "testSetUp": "sasjs/tests/testsetup.sas",
+            "testTearDown": "sasjs/tests/testteardown.sas"
+          },
           "macroFolders": ["targets/viya/macros"],
           "programFolders": []
         },
@@ -74,6 +83,15 @@
             "streamWebFolder": "web9",
             "webSourcePath": "dist"
           },
+          "testConfig": {
+            "initProgram": "sasjs/tests/testinit.sas",
+            "termProgram": "sasjs/tests/testterm.sas",
+            "macroVars": {
+              "testVar": "testValue"
+            },
+            "testSetUp": "sasjs/tests/testsetup.sas",
+            "testTearDown": "sasjs/tests/testteardown.sas"
+          },
           "macroFolders": ["targets/sas9/macros"],
           "programFolders": []
         }
@@ -101,7 +119,7 @@
       "$id": "#/properties/docConfig",
       "type": "object",
       "title": "The docConfig schema",
-      "description": "SASjs uses doxygen to auto-generate HTML documentation using the headers in your SAS programs, macros, services & jobs. For more info, see [https://cli.sasjs.io/doc](https://cli.sasjs.io/doc).",
+      "description": "SASjs uses doxygen to auto-generate HTML documentation using the headers in your SAS programs, macros, services & jobs. For more info, see [https://cli.sasjs.io/doc](https://cli.sasjs.io/doc).  Some properties are taken from package.json (such as the project Name).",
       "default": {
         "dataControllerUrl": "https://mysasserver.com/web/datacontroller/#",
         "enableLineage": true,
@@ -134,8 +152,8 @@
           "$id": "#/properties/docConfig/properties/outDirectory",
           "type": "string",
           "title": "The outDirectory docConfig option",
-          "description": "This is the location to which the generated HTML SAS documentation will be written.  If missing, or left blank, the files will be written to the `sasjsbuild/doc` directory (default behaviour).",
-          "default": "$projectroot/sasjsbuild/doc",
+          "description": "The location to which the generated HTML SAS documentation is written.  If missing, or left blank, the files will be written to the `sasjsbuild/doc` directory (default behaviour).",
+          "default": "sasjsbuild/doc",
           "examples": ["/my/preferred/docs/directory"]
         },
         "dataControllerUrl": {
@@ -449,22 +467,6 @@
         }
       }
     },
-    "macroFolders": {
-      "$id": "#/properties/macroFolders",
-      "type": "array",
-      "title": "The macroFolders array",
-      "description": "These local folders are searched for SAS Macros when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-      "default": [],
-      "examples": [["macros", "../../more_macros"]]
-    },
-    "programFolders": {
-      "$id": "#/properties/programFolders",
-      "type": "array",
-      "title": "The programFolders array",
-      "description": "These local folders are searched for SAS Programs when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-      "default": [],
-      "examples": [["programs", "../../more_programs"]]
-    },
     "streamConfig": {
       "$id": "#/properties/streamConfig",
       "type": "object",
@@ -520,6 +522,84 @@
         }
       }
     },
+    "testConfig": {
+      "$id": "#/properties/testConfig",
+      "type": "object",
+      "title": "testConfig",
+      "description": "Create tests for Macros, Services & Jobs by simply adding a '.test.sas' extension. ",
+      "default": {
+        "initProgram": "sasjs/tests/testinit.sas",
+        "termProgram": "sasjs/tests/testterm.sas",
+        "macroVars": {
+          "testVar": "testValue"
+        },
+        "testSetUp": "sasjs/tests/testsetup.sas",
+        "testTearDown": "sasjs/tests/testteardown.sas"
+      },
+      "properties": {
+        "initProgram": {
+          "$id": "#/properties/testConfig/properties/initProgram",
+          "type": "string",
+          "title": "The jobConfig initProgram",
+          "description": "The testConfig `initProgram` is a local .sas file that is inserted at the start of every Test (after compiled macros and any `macroVars`, and before the Test itself). ",
+          "default": "",
+          "examples": ["sasjs/tests/testinit.sas"]
+        },
+        "termProgram": {
+          "$id": "#/properties/testConfig/properties/termProgram",
+          "type": "string",
+          "title": "The jobConfig termProgram",
+          "description": "The testConfig termProgram is inserted at the end of every Test as part of `sasjs compile`.",
+          "default": "",
+          "examples": ["jobs/jobterm.sas"]
+        },
+        "macroVars": {
+          "$id": "#/properties/testConfig/properties/macroVars",
+          "type": "object",
+          "title": "The `jobConfig` macroVars",
+          "description": "This object allows `sasjs compile` to insert specific macro variables at the start of every Test.  In this case, the code generated would be:\n```\n%let mac1=value;\n%let mac2=42;\n```",
+          "default": {},
+          "examples": [
+            {
+              "mac1": "value",
+              "mac2": "42"
+            }
+          ]
+        },
+        "testSetUp": {
+          "$id": "#/properties/testConfig/properties/testsetup",
+          "type": "string",
+          "title": "The jobConfig testSetUp",
+          "description": "This program is the first to execute as part of 'sasjs test'.  It does not contain the testInit, testTerm or macroVariables.  It IS compiled.",
+          "default": "sasjs/tests/testsetup.sas",
+          "examples": ["sasjs/tests/testsetup.sas"]
+        },
+        "testTearDown": {
+          "$id": "#/properties/testConfig/properties/testTearDown",
+          "type": "string",
+          "title": "The jobConfig testTearDown",
+          "description": "The last program to execute as part of 'sasjs test'.",
+          "default": "sasjs/tests/testteardown.sas",
+          "examples": ["sasjs/tests/testteardown.sas"]
+        }
+      }
+    },
+    "macroFolders": {
+      "$id": "#/properties/macroFolders",
+      "type": "array",
+      "title": "The macroFolders array",
+      "description": "These local folders are searched for SAS Macros when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+      "default": [],
+      "examples": [["macros", "../../more_macros"]]
+    },
+    "programFolders": {
+      "$id": "#/properties/programFolders",
+      "type": "array",
+      "title": "The programFolders array",
+      "description": "These local folders are searched for SAS Programs when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+      "default": [],
+      "examples": [["programs", "../../more_programs"]]
+    },
     "targets": {
       "$id": "#/properties/targets",
       "type": "array",
@@ -570,6 +650,15 @@
               "streamWebFolder": "webv",
               "webSourcePath": "dist"
             },
+            "testConfig": {
+              "initProgram": "sasjs/tests/testinit.sas",
+              "termProgram": "sasjs/tests/testterm.sas",
+              "macroVars": {
+                "testVar": "testValue"
+              },
+              "testSetUp": "sasjs/tests/testsetup.sas",
+              "testTearDown": "sasjs/tests/testteardown.sas"
+            },
             "macroFolders": ["targets/viya/macros"]
           },
           {
@@ -600,6 +689,15 @@
               "streamWeb": false,
               "streamWebFolder": "web9",
               "webSourcePath": "dist"
+            },
+            "testConfig": {
+              "initProgram": "sasjs/tests/testinit.sas",
+              "termProgram": "sasjs/tests/testterm.sas",
+              "macroVars": {
+                "testVar": "testValue"
+              },
+              "testSetUp": "sasjs/tests/testsetup.sas",
+              "testTearDown": "sasjs/tests/testteardown.sas"
             },
             "macroFolders": ["targets/sas9/macros"],
             "programFolders": []
@@ -655,6 +753,15 @@
                   "streamWeb": false,
                   "streamWebFolder": "webv",
                   "webSourcePath": "dist"
+                },
+                "testConfig": {
+                  "initProgram": "sasjs/tests/testinit.sas",
+                  "termProgram": "sasjs/tests/testterm.sas",
+                  "macroVars": {
+                    "testVar": "testValue"
+                  },
+                  "testSetUp": "sasjs/tests/testsetup.sas",
+                  "testTearDown": "sasjs/tests/testteardown.sas"
                 },
                 "macroFolders": ["targets/viya/macros"],
                 "programFolders": []
@@ -730,6 +837,9 @@
               },
               "streamConfig": {
                 "$ref": "#/properties/streamConfig"
+              },
+              "testConfig": {
+                "$ref": "#/properties/testConfig"
               },
               "macroFolders": {
                 "$ref": "#/properties/macroFolders"

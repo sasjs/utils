@@ -4,10 +4,17 @@ export {
   readFile,
   listFilesInFolder,
   listSubFoldersInFolder,
+  listFilesAndSubFoldersInFolder,
   createFile,
   createFolder,
   deleteFile,
   deleteFolder,
   getRelativePath,
-  unifyFilePath
+  unifyFilePath,
+  moveFile,
+  pathSepEscaped,
+  copy,
+  base64EncodeImageFile,
+  base64EncodeFile,
+  getRealPath
 } from './file'

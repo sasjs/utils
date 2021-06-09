@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "sasjs.sasjs-for-vscode",
+        "esbenp.prettier-vscode"
+    ]
+}

@@ -1,1 +1,1 @@
-export { timestampToYYYYMMDDHHMMSS } from './timestamp'
+export { timestampToYYYYMMDDHHMMSS, generateTimestamp } from './timestamp'

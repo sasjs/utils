@@ -5,7 +5,8 @@ import {
   DeployConfig,
   JobConfig,
   ServiceConfig,
-  StreamConfig
+  StreamConfig,
+  TestConfig
 } from './config'
 import { ServerType } from './serverType'
 import {
@@ -23,19 +24,20 @@ import {
   validateServerName,
   validateRepositoryName,
   validateAuthConfig,
-  validateDocConfig
+  validateDocConfig,
+  validateTestConfig
 } from './targetValidators'
 
 describe('validateTargetName', () => {
   it('should throw an error with null target name', () => {
-    expect(() => validateTargetName((null as unknown) as string)).toThrowError(
+    expect(() => validateTargetName(null as unknown as string)).toThrowError(
       'Invalid target name: `name` cannot be empty, null or undefined.'
     )
   })
 
   it('should throw an error with undefined target name', () => {
     expect(() =>
-      validateTargetName((undefined as unknown) as string)
+      validateTargetName(undefined as unknown as string)
     ).toThrowError(
       'Invalid target name: `name` cannot be empty, null or undefined.'
     )
@@ -65,7 +67,7 @@ describe('validateTargetName', () => {
 describe('validateServerType', () => {
   it('should throw an error when server type is null', () => {
     expect(() =>
-      validateServerType((null as unknown) as ServerType)
+      validateServerType(null as unknown as ServerType)
     ).toThrowError(
       'Invalid server type: `serverType` cannot be null or undefined.'
     )
@@ -73,7 +75,7 @@ describe('validateServerType', () => {
 
   it('should throw an error when server type is undefined', () => {
     expect(() =>
-      validateServerType((undefined as unknown) as ServerType)
+      validateServerType(undefined as unknown as ServerType)
     ).toThrowError(
       'Invalid server type: `serverType` cannot be null or undefined.'
     )
@@ -81,7 +83,7 @@ describe('validateServerType', () => {
 
   it('should throw an error when server type is not SAS9 or SASViya', () => {
     expect(() =>
-      validateServerType(('garbage' as unknown) as ServerType)
+      validateServerType('garbage' as unknown as ServerType)
     ).toThrowError(
       `Invalid server type: Supported values for  \`serverType\` are ${ServerType.SasViya} and ${ServerType.Sas9}.`
     )
@@ -98,13 +100,13 @@ describe('validateServerType', () => {
 
 describe('validateAppLoc', () => {
   it('should throw an error when appLoc is null', () => {
-    expect(() => validateAppLoc((null as unknown) as string)).toThrowError(
+    expect(() => validateAppLoc(null as unknown as string)).toThrowError(
       'Invalid app location: `appLoc` cannot be empty, null or undefined.'
     )
   })
 
   it('should throw an error when appLoc is undefined', () => {
-    expect(() => validateAppLoc((undefined as unknown) as string)).toThrowError(
+    expect(() => validateAppLoc(undefined as unknown as string)).toThrowError(
       'Invalid app location: `appLoc` cannot be empty, null or undefined.'
     )
   })
@@ -128,11 +130,11 @@ describe('validateAppLoc', () => {
 
 describe('validateServerUrl', () => {
   it('should set server URL to the empty string when it is null', () => {
-    expect(validateServerUrl((null as unknown) as string)).toEqual('')
+    expect(validateServerUrl(null as unknown as string)).toEqual('')
   })
 
   it('should set server URL to the empty string when it is undefined', () => {
-    expect(validateServerUrl((undefined as unknown) as string)).toEqual('')
+    expect(validateServerUrl(undefined as unknown as string)).toEqual('')
   })
 
   it('should throw an error when server URL is not a valid URL', () => {
@@ -154,25 +156,25 @@ describe('validateServerUrl', () => {
 
 describe('validateAllowInsecureRequests', () => {
   it('should set allowInsecureRequests to false when it is null', () => {
-    expect(validateAllowInsecureRequests((null as unknown) as boolean)).toEqual(
+    expect(validateAllowInsecureRequests(null as unknown as boolean)).toEqual(
       false
     )
   })
 
   it('should set allowInsecureRequests to false when it is undefined', () => {
     expect(
-      validateAllowInsecureRequests((undefined as unknown) as boolean)
+      validateAllowInsecureRequests(undefined as unknown as boolean)
     ).toEqual(false)
   })
 
   it('should throw an error when allowInsecureRequests is not a boolean', () => {
     expect(() =>
-      validateAllowInsecureRequests(('some-string' as unknown) as boolean)
+      validateAllowInsecureRequests('some-string' as unknown as boolean)
     ).toThrowError(
       'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
     )
     expect(() =>
-      validateAllowInsecureRequests(({} as unknown) as boolean)
+      validateAllowInsecureRequests({} as unknown as boolean)
     ).toThrowError(
       'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
     )
@@ -190,38 +192,36 @@ describe('validateAllowInsecureRequests', () => {
 describe('validateBuildConfig', () => {
   it('should throw an error when input JSON is null', () => {
     expect(() =>
-      validateBuildConfig((null as unknown) as BuildConfig, 'test')
+      validateBuildConfig(null as unknown as BuildConfig, 'test')
     ).toThrowError('Invalid build config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when input JSON is undefined', () => {
     expect(() =>
-      validateBuildConfig((undefined as unknown) as BuildConfig, 'test')
+      validateBuildConfig(undefined as unknown as BuildConfig, 'test')
     ).toThrowError('Invalid build config: JSON cannot be null or undefined.')
   })
 
   it('should use the default when build output filename is undefined', () => {
-    expect(validateBuildConfig(({} as unknown) as BuildConfig, 'test')).toEqual(
-      {
-        buildOutputFolder: 'sasjsbuild',
-        buildResultsFolder: 'sasjsresults',
-        buildOutputFileName: 'test.sas',
-        initProgram: '',
-        termProgram: '',
-        macroVars: {}
-      }
-    )
+    expect(validateBuildConfig({} as unknown as BuildConfig, 'test')).toEqual({
+      buildOutputFolder: 'sasjsbuild',
+      buildResultsFolder: 'sasjsresults',
+      buildOutputFileName: 'test.sas',
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
   })
 
   it('should set the init program to the empty string if null', () => {
     expect(
       validateBuildConfig(
-        ({
+        {
           buildOutputFolder: 'sasjsbuild',
           buildResultsFolder: 'sasjsresults',
           buildOutputFileName: 'test.sas',
           initProgram: null
-        } as unknown) as BuildConfig,
+        } as unknown as BuildConfig,
         'test'
       )
     ).toEqual({
@@ -237,13 +237,13 @@ describe('validateBuildConfig', () => {
   it('should set the term program to the empty string if null', () => {
     expect(
       validateBuildConfig(
-        ({
+        {
           buildOutputFolder: 'sasjsbuild',
           buildResultsFolder: 'sasjsresults',
           buildOutputFileName: 'output.sas',
           initProgram: 'test',
           termProgram: null
-        } as unknown) as BuildConfig,
+        } as unknown as BuildConfig,
         'test'
       )
     ).toEqual({
@@ -282,13 +282,13 @@ describe('validateBuildConfig', () => {
   it('should initialise the macro vars if not present', () => {
     expect(
       validateBuildConfig(
-        ({
+        {
           buildOutputFolder: 'sasjsbuild',
           buildResultsFolder: 'sasjsresults',
           buildOutputFileName: 'test',
           initProgram: 'test',
           termProgram: 'test'
-        } as unknown) as BuildConfig,
+        } as unknown as BuildConfig,
         'test'
       )
     ).toEqual({
@@ -305,22 +305,22 @@ describe('validateBuildConfig', () => {
 describe('validateDeployConfig', () => {
   it('should throw an error when deployConfig is null', () => {
     expect(() =>
-      validateDeployConfig((null as unknown) as DeployConfig)
+      validateDeployConfig(null as unknown as DeployConfig)
     ).toThrowError('Invalid deploy config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when deployConfig is undefined', () => {
     expect(() =>
-      validateDeployConfig((undefined as unknown) as DeployConfig)
+      validateDeployConfig(undefined as unknown as DeployConfig)
     ).toThrowError('Invalid deploy config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when deployServicePack is non-boolean', () => {
     expect(
-      validateDeployConfig(({
+      validateDeployConfig({
         deployServicePack: 'test',
         deployScripts: []
-      } as unknown) as DeployConfig)
+      } as unknown as DeployConfig)
     ).toEqual({
       deployServicePack: true,
       deployScripts: []
@@ -341,9 +341,9 @@ describe('validateDeployConfig', () => {
 
   it('should initialise deployScripts when not initialised', () => {
     expect(
-      validateDeployConfig(({
+      validateDeployConfig({
         deployServicePack: true
-      } as unknown) as DeployConfig)
+      } as unknown as DeployConfig)
     ).toEqual({
       deployServicePack: true,
       deployScripts: []
@@ -354,22 +354,22 @@ describe('validateDeployConfig', () => {
 describe('validateServiceConfig', () => {
   it('should throw an error when input JSON is null', () => {
     expect(() =>
-      validateServiceConfig((null as unknown) as ServiceConfig)
+      validateServiceConfig(null as unknown as ServiceConfig)
     ).toThrowError('Invalid service config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when input JSON is undefined', () => {
     expect(() =>
-      validateServiceConfig((undefined as unknown) as ServiceConfig)
+      validateServiceConfig(undefined as unknown as ServiceConfig)
     ).toThrowError('Invalid service config: JSON cannot be null or undefined.')
   })
 
   it('should set the init program to the empty string if null', () => {
     expect(
-      validateServiceConfig(({
+      validateServiceConfig({
         serviceFolders: [],
         initProgram: null
-      } as unknown) as ServiceConfig)
+      } as unknown as ServiceConfig)
     ).toEqual({
       serviceFolders: [],
       initProgram: '',
@@ -380,11 +380,11 @@ describe('validateServiceConfig', () => {
 
   it('should set the term program to the empty string if null', () => {
     expect(
-      validateServiceConfig(({
+      validateServiceConfig({
         serviceFolders: [],
         initProgram: 'test',
         termProgram: ''
-      } as unknown) as ServiceConfig)
+      } as unknown as ServiceConfig)
     ).toEqual({
       serviceFolders: [],
       initProgram: 'test',
@@ -411,10 +411,10 @@ describe('validateServiceConfig', () => {
 
   it('should initialise the macro vars if not present', () => {
     expect(
-      validateServiceConfig(({
+      validateServiceConfig({
         initProgram: 'init',
         termProgram: 'term'
-      } as unknown) as ServiceConfig)
+      } as unknown as ServiceConfig)
     ).toEqual({
       serviceFolders: [],
       initProgram: 'init',
@@ -426,23 +426,23 @@ describe('validateServiceConfig', () => {
 
 describe('validateJobConfig', () => {
   it('should throw an error when input JSON is null', () => {
-    expect(() =>
-      validateJobConfig((null as unknown) as JobConfig)
-    ).toThrowError('Invalid job config: JSON cannot be null or undefined.')
+    expect(() => validateJobConfig(null as unknown as JobConfig)).toThrowError(
+      'Invalid job config: JSON cannot be null or undefined.'
+    )
   })
 
   it('should throw an error when input JSON is undefined', () => {
     expect(() =>
-      validateJobConfig((undefined as unknown) as JobConfig)
+      validateJobConfig(undefined as unknown as JobConfig)
     ).toThrowError('Invalid job config: JSON cannot be null or undefined.')
   })
 
   it('should set the init program to the empty string if null', () => {
     expect(
-      validateJobConfig(({
+      validateJobConfig({
         jobFolders: [],
         initProgram: null
-      } as unknown) as JobConfig)
+      } as unknown as JobConfig)
     ).toEqual({
       jobFolders: [],
       initProgram: '',
@@ -453,11 +453,11 @@ describe('validateJobConfig', () => {
 
   it('should set the term program to the empty string if null', () => {
     expect(
-      validateJobConfig(({
+      validateJobConfig({
         jobFolders: [],
         initProgram: 'test',
         termProgram: ''
-      } as unknown) as JobConfig)
+      } as unknown as JobConfig)
     ).toEqual({
       jobFolders: [],
       initProgram: 'test',
@@ -484,10 +484,10 @@ describe('validateJobConfig', () => {
 
   it('should initialise the macro vars if not present', () => {
     expect(
-      validateJobConfig(({
+      validateJobConfig({
         initProgram: 'init',
         termProgram: 'term'
-      } as unknown) as JobConfig)
+      } as unknown as JobConfig)
     ).toEqual({
       jobFolders: [],
       initProgram: 'init',
@@ -500,19 +500,19 @@ describe('validateJobConfig', () => {
 describe('validateStreamConfig', () => {
   it('should throw an error when input JSON is null', () => {
     expect(() =>
-      validateStreamConfig((null as unknown) as StreamConfig)
+      validateStreamConfig(null as unknown as StreamConfig)
     ).toThrowError('Invalid stream config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when input JSON is undefined', () => {
     expect(() =>
-      validateStreamConfig((undefined as unknown) as StreamConfig)
+      validateStreamConfig(undefined as unknown as StreamConfig)
     ).toThrowError('Invalid stream config: JSON cannot be null or undefined.')
   })
 
   it('should throw an error when streamWeb is a non-boolean value', () => {
     expect(() =>
-      validateStreamConfig(({ streamWeb: 'foo' } as unknown) as StreamConfig)
+      validateStreamConfig({ streamWeb: 'foo' } as unknown as StreamConfig)
     ).toThrowError(
       'Invalid stream config: `streamWeb` cannot be a non-boolean value.'
     )
@@ -520,10 +520,10 @@ describe('validateStreamConfig', () => {
 
   it('should throw an error when streamWeb is true and a streamWebFolder is not specified', () => {
     expect(() =>
-      validateStreamConfig(({
+      validateStreamConfig({
         streamWeb: true,
         streamWebFolder: ''
-      } as unknown) as StreamConfig)
+      } as unknown as StreamConfig)
     ).toThrowError(
       'Invalid stream config: `streamWebFolder` cannot be empty, null or undefined when `streamWeb` is true.'
     )
@@ -531,11 +531,11 @@ describe('validateStreamConfig', () => {
 
   it('should throw an error when webSourcePath is empty', () => {
     expect(() =>
-      validateStreamConfig(({
+      validateStreamConfig({
         streamWeb: true,
         streamWebFolder: '.',
         webSourcePath: ''
-      } as unknown) as StreamConfig)
+      } as unknown as StreamConfig)
     ).toThrowError(
       'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
     )
@@ -543,11 +543,11 @@ describe('validateStreamConfig', () => {
 
   it('should throw an error when webSourcePath is null', () => {
     expect(() =>
-      validateStreamConfig(({
+      validateStreamConfig({
         streamWeb: true,
         streamWebFolder: '.',
         webSourcePath: null
-      } as unknown) as StreamConfig)
+      } as unknown as StreamConfig)
     ).toThrowError(
       'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
     )
@@ -555,11 +555,11 @@ describe('validateStreamConfig', () => {
 
   it('should throw an error when webSourcePath is undefined', () => {
     expect(() =>
-      validateStreamConfig(({
+      validateStreamConfig({
         streamWeb: true,
         streamWebFolder: '.',
         webSourcePath: undefined
-      } as unknown) as StreamConfig)
+      } as unknown as StreamConfig)
     ).toThrowError(
       'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
     )
@@ -603,11 +603,11 @@ describe('validateStreamConfig', () => {
 
   it('should initialise the stream service name if not set', () => {
     expect(
-      validateStreamConfig(({
+      validateStreamConfig({
         streamWeb: true,
         streamWebFolder: '.',
         webSourcePath: '.'
-      } as unknown) as StreamConfig)
+      } as unknown as StreamConfig)
     ).toEqual({
       streamWeb: true,
       streamWebFolder: '.',
@@ -659,7 +659,7 @@ describe('validateRepositoryName', () => {
 describe('validateAuthConfig', () => {
   it('should throw an error when authConfig is null', () => {
     expect(() =>
-      validateAuthConfig((null as unknown) as AuthConfig)
+      validateAuthConfig(null as unknown as AuthConfig)
     ).toThrowError('Invalid auth config: JSON cannot be null or undefined.')
   })
 
@@ -682,10 +682,10 @@ describe('validateAuthConfig', () => {
 
 describe('validateDocConfig', () => {
   it('should return the doc config when null/undefined', () => {
-    expect(validateDocConfig((null as unknown) as DocConfig)).toMatchObject({})
-    expect(
-      validateDocConfig((undefined as unknown) as DocConfig)
-    ).toMatchObject({})
+    expect(validateDocConfig(null as unknown as DocConfig)).toMatchObject({})
+    expect(validateDocConfig(undefined as unknown as DocConfig)).toMatchObject(
+      {}
+    )
     expect(validateDocConfig({} as DocConfig)).toMatchObject({})
   })
 
@@ -729,7 +729,7 @@ describe('validateDocConfig', () => {
   it('should set dataControllerUrl to undefined when it is null/undefined', () => {
     expect(
       validateDocConfig({
-        dataControllerUrl: (null as unknown) as string
+        dataControllerUrl: null as unknown as string
       })
     ).toEqual({
       dataControllerUrl: undefined
@@ -777,7 +777,7 @@ describe('validateDocConfig', () => {
   it('should set outDirectory to undefined when it is not string', () => {
     expect(
       validateDocConfig({
-        outDirectory: (null as unknown) as string
+        outDirectory: null as unknown as string
       })
     ).toEqual({
       outDirectory: undefined
@@ -785,7 +785,7 @@ describe('validateDocConfig', () => {
 
     expect(
       validateDocConfig({
-        outDirectory: (false as unknown) as string
+        outDirectory: false as unknown as string
       })
     ).toEqual({
       outDirectory: undefined
@@ -823,8 +823,8 @@ describe('validateDocConfig', () => {
   it('should set displayMacroCore/enableLineage to undefined when it is not boolean', () => {
     expect(
       validateDocConfig({
-        displayMacroCore: (null as unknown) as boolean,
-        enableLineage: (null as unknown) as boolean
+        displayMacroCore: null as unknown as boolean,
+        enableLineage: null as unknown as boolean
       })
     ).toEqual({
       displayMacroCore: undefined,
@@ -862,5 +862,76 @@ describe('validateDocConfig', () => {
       displayMacroCore: false,
       enableLineage: false
     })
+  })
+})
+
+describe('validateTestConfig', () => {
+  it('should throw an error when input JSON is null', () => {
+    expect(() =>
+      validateTestConfig(null as unknown as TestConfig)
+    ).toThrowError('Invalid test config: JSON cannot be null or undefined.')
+  })
+
+  it('should throw an error when input JSON is undefined', () => {
+    expect(() =>
+      validateTestConfig(undefined as unknown as TestConfig)
+    ).toThrowError('Invalid test config: JSON cannot be null or undefined.')
+  })
+
+  let testInput = {}
+  let testOutput = {
+    initProgram: '',
+    termProgram: '',
+    macroVars: {},
+    testSetUp: '',
+    testTearDown: ''
+  }
+  const testAssertion = () =>
+    expect(validateTestConfig(testInput as unknown as TestConfig)).toEqual(
+      testOutput
+    )
+
+  it('should set init program to the empty string if null', () => {
+    testInput = {
+      ...testInput,
+      initProgram: null
+    }
+
+    testAssertion()
+  })
+
+  it('should set term program to the empty string if null', () => {
+    testInput = { ...testInput, initProgram: 'init', termProgram: null }
+    testOutput = { ...testOutput, initProgram: 'init', termProgram: '' }
+
+    testAssertion()
+  })
+
+  it('should initialise macro vars if not present', () => {
+    testInput = { ...testInput, termProgram: 'term', macroVars: null }
+    testOutput = { ...testOutput, termProgram: 'term', macroVars: {} }
+
+    testAssertion()
+  })
+
+  it('should set test set up to the empty string if null', () => {
+    testInput = { ...testInput, macroVars: {}, testSetUp: null }
+    testOutput = { ...testOutput, testSetUp: '' }
+
+    testAssertion()
+  })
+
+  it('should set test tear down to the empty string if null', () => {
+    testInput = { ...testInput, testSetUp: 'testSetup', testTearDown: null }
+    testOutput = { ...testOutput, testSetUp: 'testSetup', testTearDown: '' }
+
+    testAssertion()
+  })
+
+  it('should return the service config when valid', () => {
+    testInput = { ...testInput, testTearDown: 'testTearDown' }
+    testOutput = { ...testOutput, testTearDown: 'testTearDown' }
+
+    testAssertion()
   })
 })
