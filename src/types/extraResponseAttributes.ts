@@ -3,4 +3,4 @@
  * response object on top of default `webout` object.
  *
  */
-export type ExtraResponseAttributes = 'file' | 'data' | 'output'
+export type ExtraResponseAttributes = 'file' | 'data' | 'log'
