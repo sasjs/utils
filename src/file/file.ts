@@ -20,6 +20,10 @@ export async function readFile(fileName: string): Promise<string> {
   return fs.promises.readFile(fileName, 'utf-8')
 }
 
+export async function readFileBinary(fileName: string): Promise<Buffer> {
+  return fs.promises.readFile(fileName)
+}
+
 export async function listFilesInFolder(folderName: string): Promise<string[]> {
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
