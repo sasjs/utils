@@ -2,6 +2,7 @@ export {
   fileExists,
   folderExists,
   readFile,
+  readFileBinary,
   listFilesInFolder,
   listIniFilesInFolder,
   listSubFoldersInFolder,
