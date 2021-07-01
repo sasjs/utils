@@ -6,15 +6,17 @@ import jwtDecode from 'jwt-decode'
  * Access Token. In the case that the Refresh Token is expired, 1 hour is enough to let
  * most jobs finish.
  * @param {string} token- token string that will be evaluated
+ * @param {number} timeToLiveSeconds - the amount of time that the token has before it expires, defaults to 3600
+ * @returns {boolean} a value indicating whether the token is about to expire
  */
-export function isAccessTokenExpiring(token?: string): boolean {
+export function isAccessTokenExpiring(
+  token?: string,
+  timeToLiveSeconds = 3600
+): boolean {
   if (!token) {
     return true
   }
-  const payload = jwtDecode<{ exp: number }>(token)
-  const timeToLive = payload.exp - new Date().valueOf() / 1000
-
-  return timeToLive <= 60 * 60 // 1 hour
+  return isTokenExpiring(token, timeToLiveSeconds)
 }
 
 /**
@@ -23,13 +25,22 @@ export function isAccessTokenExpiring(token?: string): boolean {
  * credentials in a browser to obtain an authorisation code). 30 seconds is enough time
  * to make a request for a final Access Token.
  * @param {string} token- token string that will be evaluated
+ * @param {number} timeToLiveSeconds - the amount of time that the token has before it expires, defaults to 30
+ * @returns {boolean} a value indicating whether the token is about to expire
  */
-export function isRefreshTokenExpiring(token?: string): boolean {
+export function isRefreshTokenExpiring(
+  token?: string,
+  timeToLiveSeconds = 30
+): boolean {
   if (!token) {
     return true
   }
+  return isTokenExpiring(token, timeToLiveSeconds)
+}
+
+function isTokenExpiring(token: string, timeToLiveSeconds: number) {
   const payload = jwtDecode<{ exp: number }>(token)
   const timeToLive = payload.exp - new Date().valueOf() / 1000
 
-  return timeToLive <= 30 // 30 seconds
+  return timeToLive <= timeToLiveSeconds
 }

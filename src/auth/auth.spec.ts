@@ -20,6 +20,16 @@ describe('isAccessTokenExpiring', () => {
     const token = generateToken(7200)
     expect(isAccessTokenExpiring(token)).toBeFalsy()
   })
+
+  it('should return true if the token is expiring within the given time', () => {
+    const token = generateToken(7200)
+    expect(isAccessTokenExpiring(token, 8000)).toBeTruthy()
+  })
+
+  it('should return false if the token is not expiring within the given time', () => {
+    const token = generateToken(120)
+    expect(isAccessTokenExpiring(token, 60)).toBeFalsy()
+  })
 })
 
 describe('isRefreshTokenExpiring', () => {
@@ -41,6 +51,16 @@ describe('isRefreshTokenExpiring', () => {
   it('should return false if the token is not expiring within 30 seconds', () => {
     const token = generateToken(120)
     expect(isRefreshTokenExpiring(token)).toBeFalsy()
+  })
+
+  it('should return true if the token is expiring within the given time', () => {
+    const token = generateToken(7200)
+    expect(isRefreshTokenExpiring(token, 8000)).toBeTruthy()
+  })
+
+  it('should return false if the token is not expiring within the given time', () => {
+    const token = generateToken(120)
+    expect(isRefreshTokenExpiring(token, 60)).toBeFalsy()
   })
 })
 
