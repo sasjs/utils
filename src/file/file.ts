@@ -20,6 +20,10 @@ export async function readFile(fileName: string): Promise<string> {
   return fs.promises.readFile(fileName, 'utf-8')
 }
 
+export async function readFileBinary(fileName: string): Promise<Buffer> {
+  return fs.promises.readFile(fileName)
+}
+
 export async function listFilesInFolder(folderName: string): Promise<string[]> {
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
@@ -185,7 +189,7 @@ export async function copy(source: string, destination: string) {
 export const pathSepEscaped = path.sep.replace(/\\/g, '\\\\')
 
 export async function base64EncodeImageFile(filePath: string) {
-  return fs.promises.readFile(filePath).then((data) => {
+  return readFileBinary(filePath).then((data) => {
     let extname = path.extname(filePath).substr(1) || 'png'
 
     if (extname === 'svg') {
