@@ -1,3 +1,4 @@
+import { AuthConfigForSas9 } from '.'
 import {
   DocConfig,
   AuthConfig,
@@ -25,7 +26,8 @@ import {
   validateRepositoryName,
   validateAuthConfig,
   validateDocConfig,
-  validateTestConfig
+  validateTestConfig,
+  validateAuthConfigForSas9
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -657,25 +659,48 @@ describe('validateRepositoryName', () => {
 })
 
 describe('validateAuthConfig', () => {
-  it('should throw an error when authConfig is null', () => {
-    expect(() =>
-      validateAuthConfig(null as unknown as AuthConfig)
-    ).toThrowError('Invalid auth config: JSON cannot be null or undefined.')
-  })
+  describe('For SASVIYA', () => {
+    it('should throw an error when authConfig is null', () => {
+      expect(() =>
+        validateAuthConfig(null as unknown as AuthConfig)
+      ).toThrowError('Invalid auth config: JSON cannot be null or undefined.')
+    })
 
-  it('should return the auth config when valid', () => {
-    expect(
-      validateAuthConfig({
+    it('should return the auth config when valid', () => {
+      expect(
+        validateAuthConfig({
+          access_token: 'T35T',
+          refresh_token: 'R3FR35H',
+          client: 'CL13NT',
+          secret: '53CR3T'
+        })
+      ).toEqual({
         access_token: 'T35T',
         refresh_token: 'R3FR35H',
         client: 'CL13NT',
         secret: '53CR3T'
       })
-    ).toEqual({
-      access_token: 'T35T',
-      refresh_token: 'R3FR35H',
-      client: 'CL13NT',
-      secret: '53CR3T'
+    })
+  })
+  describe('For SAS(', () => {
+    it('should throw an error when authConfigForSas9 is null', () => {
+      expect(() =>
+        validateAuthConfigForSas9(null as unknown as AuthConfigForSas9)
+      ).toThrowError(
+        'Invalid auth config for sas9: JSON cannot be null or undefined.'
+      )
+    })
+
+    it('should return the auth config for sas9 when valid', () => {
+      expect(
+        validateAuthConfigForSas9({
+          userName: 'TestUser',
+          password: 'TestPassword'
+        })
+      ).toEqual({
+        userName: 'TestUser',
+        password: 'TestPassword'
+      })
     })
   })
 })
