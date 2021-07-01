@@ -1,7 +1,7 @@
-import { AuthConfigForSas9 } from '.'
 import {
   DocConfig,
   AuthConfig,
+  AuthConfigSas9,
   BuildConfig,
   DeployConfig,
   JobConfig,
@@ -27,7 +27,7 @@ import {
   validateAuthConfig,
   validateDocConfig,
   validateTestConfig,
-  validateAuthConfigForSas9
+  validateAuthConfigSas9
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -667,40 +667,40 @@ describe('validateAuthConfig', () => {
     })
 
     it('should return the auth config when valid', () => {
-      expect(
-        validateAuthConfig({
-          access_token: 'T35T',
-          refresh_token: 'R3FR35H',
-          client: 'CL13NT',
-          secret: '53CR3T'
-        })
-      ).toEqual({
+      const authConfig: AuthConfig = {
         access_token: 'T35T',
         refresh_token: 'R3FR35H',
         client: 'CL13NT',
         secret: '53CR3T'
-      })
+      }
+      expect(validateAuthConfig(authConfig)).toEqual(authConfig)
     })
   })
-  describe('For SAS(', () => {
-    it('should throw an error when authConfigForSas9 is null', () => {
+  describe('For SAS9', () => {
+    it('should throw an error when authConfigSas9 is null', () => {
       expect(() =>
-        validateAuthConfigForSas9(null as unknown as AuthConfigForSas9)
+        validateAuthConfigSas9(null as unknown as AuthConfigSas9)
       ).toThrowError(
         'Invalid auth config for sas9: JSON cannot be null or undefined.'
       )
     })
 
+    it('should throw an error when authConfigSas9 contains empty  userName or password', () => {
+      const authConfigSas9: AuthConfigSas9 = {
+        userName: '',
+        password: ''
+      }
+      expect(() => validateAuthConfigSas9(authConfigSas9)).toThrowError(
+        'Invalid auth config for sas9: userName and password can not be empty'
+      )
+    })
+
     it('should return the auth config for sas9 when valid', () => {
-      expect(
-        validateAuthConfigForSas9({
-          userName: 'TestUser',
-          password: 'TestPassword'
-        })
-      ).toEqual({
+      const authConfigSas9: AuthConfigSas9 = {
         userName: 'TestUser',
         password: 'TestPassword'
-      })
+      }
+      expect(validateAuthConfigSas9(authConfigSas9)).toEqual(authConfigSas9)
     })
   })
 })

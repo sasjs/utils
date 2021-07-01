@@ -311,7 +311,7 @@ describe('Target', () => {
   })
 
   it('should create an instance with the auth config for sas9 when available', () => {
-    const authConfigForSas9 = {
+    const authConfigSas9 = {
       userName: 'TestUser',
       password: 'hello-world'
     }
@@ -320,19 +320,12 @@ describe('Target', () => {
       serverUrl: '',
       serverType: ServerType.Sas9,
       appLoc: '/test',
-      authConfigForSas9
+      authConfigSas9
     })
 
-    expect(target).toBeTruthy()
-    expect(target instanceof Target).toEqual(true)
-    expect(target.name).toEqual('test')
-    expect(target.serverUrl).toEqual('')
-    expect(target.serverType).toEqual(ServerType.Sas9)
-    expect(target.appLoc).toEqual('/test')
-    expect(target.authConfigForSas9).toEqual(authConfigForSas9)
+    expect(target.authConfigSas9).toEqual(authConfigSas9)
   })
 
-  //224,234,246,256,266,277,285
   it('should convert to JSON with minimal attributes', () => {
     const target = new Target({
       name: 'test',
@@ -415,7 +408,7 @@ describe('Target', () => {
     expect(json.deployConfig).toEqual(undefined)
   })
 
-  it('should convert to JSON with authConfig is equal to this.authConfig', () => {
+  it('should return a JSON which contains authConfig whose value should be equal to authConfig that was passed in creation of target', () => {
     const authConfig = {
       access_token: 'T35T',
       refresh_token: 'R3FR35H',
@@ -433,8 +426,8 @@ describe('Target', () => {
     expect(target.authConfig).toEqual(authConfig)
   })
 
-  it('should convert to JSON with authConfigForSas9 is equal to this.authConfigForSas9', () => {
-    const authConfigForSas9 = {
+  it('should return a JSON which contains authConfigSas9 whose value should be equal to authConfigSas9 that was passed in creation of target', () => {
+    const authConfigSas9 = {
       userName: 'TestUser',
       password: 'Hello-World'
     }
@@ -443,10 +436,10 @@ describe('Target', () => {
       serverUrl: '',
       serverType: ServerType.Sas9,
       appLoc: '/test',
-      authConfigForSas9
+      authConfigSas9
     })
     const json = target.toJson()
-    expect(target.authConfigForSas9).toEqual(authConfigForSas9)
+    expect(target.authConfigSas9).toEqual(authConfigSas9)
   })
 
   it('should include context name in JSON when server type is SASVIYA', () => {
