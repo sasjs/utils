@@ -3,6 +3,7 @@ import { ServerType } from '.'
 import {
   DocConfig,
   AuthConfig,
+  AuthConfigForSas9,
   BuildConfig,
   DeployConfig,
   JobConfig,
@@ -137,6 +138,18 @@ export const validateAuthConfig = (authConfig: AuthConfig): AuthConfig => {
   }
 
   return authConfig
+}
+
+export const validateAuthConfigForSas9 = (
+  authConfigForSas9: AuthConfigForSas9
+): AuthConfigForSas9 => {
+  if (!authConfigForSas9) {
+    throw new Error(
+      'Invalid auth config for sas9: JSON cannot be null or undefined.'
+    )
+  }
+
+  return authConfigForSas9
 }
 
 export const validateBuildConfig = (

@@ -1,6 +1,7 @@
 import {
   DocConfig,
   AuthConfig,
+  AuthConfigForSas9,
   BuildConfig,
   DeployConfig,
   ServiceConfig,
@@ -25,6 +26,7 @@ import {
   validateServerName,
   validateRepositoryName,
   validateAuthConfig,
+  validateAuthConfigForSas9,
   validateTestConfig
 } from './targetValidators'
 
@@ -39,6 +41,7 @@ export interface TargetJson {
   appLoc: string
   docConfig?: DocConfig
   authConfig?: AuthConfig
+  authConfigForSas9?: AuthConfigForSas9
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
   serviceConfig?: ServiceConfig
@@ -85,6 +88,11 @@ export class Target implements TargetJson {
     return this._authConfig
   }
   private _authConfig: AuthConfig | undefined
+
+  get authConfigForSas9(): AuthConfigForSas9 | undefined {
+    return this._authConfigForSas9
+  }
+  private _authConfigForSas9: AuthConfigForSas9 | undefined
 
   get buildConfig(): BuildConfig | undefined {
     return this._buildConfig
@@ -172,6 +180,12 @@ export class Target implements TargetJson {
         this._authConfig = validateAuthConfig(json.authConfig)
       }
 
+      if (json.authConfigForSas9) {
+        this._authConfigForSas9 = validateAuthConfigForSas9(
+          json.authConfigForSas9
+        )
+      }
+
       if (json.buildConfig) {
         this._buildConfig = validateBuildConfig(json.buildConfig, this._name)
       }
@@ -228,6 +242,14 @@ export class Target implements TargetJson {
         refresh_token: '',
         client: '',
         secret: ''
+      }
+
+    if (this.authConfigForSas9) {
+      json.authConfigForSas9 = this.authConfigForSas9
+    } else if (withDefaults)
+      json.authConfigForSas9 = {
+        userName: '',
+        password: ''
       }
 
     if (this.buildConfig) {

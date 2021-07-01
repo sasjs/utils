@@ -50,6 +50,11 @@ export interface AuthConfig {
   secret: string
 }
 
+export interface AuthConfigForSas9 {
+  userName: string
+  password: string
+}
+
 export interface TestConfig {
   initProgram: string
   termProgram: string
