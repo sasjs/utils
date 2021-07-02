@@ -234,21 +234,11 @@ export class Target implements TargetJson {
 
     if (this.authConfig) {
       json.authConfig = this.authConfig
-    } else if (withDefaults)
-      json.authConfig = {
-        access_token: '',
-        refresh_token: '',
-        client: '',
-        secret: ''
-      }
+    }
 
     if (this.authConfigSas9) {
       json.authConfigSas9 = this.authConfigSas9
-    } else if (withDefaults)
-      json.authConfigSas9 = {
-        userName: '',
-        password: ''
-      }
+    }
 
     if (this.buildConfig) {
       json.buildConfig = this.buildConfig
