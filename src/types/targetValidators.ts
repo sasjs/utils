@@ -3,6 +3,7 @@ import { ServerType } from '.'
 import {
   DocConfig,
   AuthConfig,
+  AuthConfigSas9,
   BuildConfig,
   DeployConfig,
   JobConfig,
@@ -137,6 +138,23 @@ export const validateAuthConfig = (authConfig: AuthConfig): AuthConfig => {
   }
 
   return authConfig
+}
+
+export const validateAuthConfigSas9 = (
+  authConfigSas9: AuthConfigSas9
+): AuthConfigSas9 => {
+  if (!authConfigSas9) {
+    throw new Error(
+      'Invalid auth config for sas9: JSON cannot be null or undefined.'
+    )
+  }
+  if (!authConfigSas9.userName || !authConfigSas9.password) {
+    throw new Error(
+      'Invalid auth config for sas9: userName and password can not be empty'
+    )
+  }
+
+  return authConfigSas9
 }
 
 export const validateBuildConfig = (

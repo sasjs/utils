@@ -1,6 +1,7 @@
 import {
   DocConfig,
   AuthConfig,
+  AuthConfigSas9,
   BuildConfig,
   DeployConfig,
   ServiceConfig,
@@ -25,6 +26,7 @@ import {
   validateServerName,
   validateRepositoryName,
   validateAuthConfig,
+  validateAuthConfigSas9,
   validateTestConfig
 } from './targetValidators'
 
@@ -39,6 +41,7 @@ export interface TargetJson {
   appLoc: string
   docConfig?: DocConfig
   authConfig?: AuthConfig
+  authConfigSas9?: AuthConfigSas9
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
   serviceConfig?: ServiceConfig
@@ -85,6 +88,11 @@ export class Target implements TargetJson {
     return this._authConfig
   }
   private _authConfig: AuthConfig | undefined
+
+  get authConfigSas9(): AuthConfigSas9 | undefined {
+    return this._authConfigSas9
+  }
+  private _authConfigSas9: AuthConfigSas9 | undefined
 
   get buildConfig(): BuildConfig | undefined {
     return this._buildConfig
@@ -172,6 +180,10 @@ export class Target implements TargetJson {
         this._authConfig = validateAuthConfig(json.authConfig)
       }
 
+      if (json.authConfigSas9) {
+        this._authConfigSas9 = validateAuthConfigSas9(json.authConfigSas9)
+      }
+
       if (json.buildConfig) {
         this._buildConfig = validateBuildConfig(json.buildConfig, this._name)
       }
@@ -222,13 +234,11 @@ export class Target implements TargetJson {
 
     if (this.authConfig) {
       json.authConfig = this.authConfig
-    } else if (withDefaults)
-      json.authConfig = {
-        access_token: '',
-        refresh_token: '',
-        client: '',
-        secret: ''
-      }
+    }
+
+    if (this.authConfigSas9) {
+      json.authConfigSas9 = this.authConfigSas9
+    }
 
     if (this.buildConfig) {
       json.buildConfig = this.buildConfig

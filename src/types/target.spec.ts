@@ -310,6 +310,22 @@ describe('Target', () => {
     expect(target.authConfig).toEqual(authConfig)
   })
 
+  it('should create an instance with the auth config for sas9 when available', () => {
+    const authConfigSas9 = {
+      userName: 'TestUser',
+      password: 'hello-world'
+    }
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      authConfigSas9
+    })
+
+    expect(target.authConfigSas9).toEqual(authConfigSas9)
+  })
+
   it('should convert to JSON with minimal attributes', () => {
     const target = new Target({
       name: 'test',
@@ -324,12 +340,8 @@ describe('Target', () => {
     expect(json.serverUrl).toEqual(target.serverUrl)
     expect(json.serverType).toEqual(target.serverType)
     expect(json.appLoc).toEqual(target.appLoc)
-    expect(json.authConfig).toEqual({
-      access_token: '',
-      refresh_token: '',
-      client: '',
-      secret: ''
-    })
+    expect(json.authConfig).toBeUndefined()
+    expect(json.authConfigSas9).toBeUndefined()
     expect(json.buildConfig).toEqual({
       initProgram: '',
       termProgram: '',
@@ -390,6 +402,40 @@ describe('Target', () => {
     expect(json.serviceConfig).toEqual(undefined)
     expect(json.streamConfig).toEqual(undefined)
     expect(json.deployConfig).toEqual(undefined)
+  })
+
+  it('should return a JSON which contains authConfig whose value should be equal to authConfig that was passed in creation of target', () => {
+    const authConfig = {
+      access_token: 'T35T',
+      refresh_token: 'R3FR35H',
+      client: 'CL13NT',
+      secret: '53CR3T'
+    }
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      authConfig
+    })
+    const json = target.toJson()
+    expect(target.authConfig).toEqual(authConfig)
+  })
+
+  it('should return a JSON which contains authConfigSas9 whose value should be equal to authConfigSas9 that was passed in creation of target', () => {
+    const authConfigSas9 = {
+      userName: 'TestUser',
+      password: 'Hello-World'
+    }
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      authConfigSas9
+    })
+    const json = target.toJson()
+    expect(target.authConfigSas9).toEqual(authConfigSas9)
   })
 
   it('should include context name in JSON when server type is SASVIYA', () => {
