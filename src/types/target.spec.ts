@@ -340,12 +340,8 @@ describe('Target', () => {
     expect(json.serverUrl).toEqual(target.serverUrl)
     expect(json.serverType).toEqual(target.serverType)
     expect(json.appLoc).toEqual(target.appLoc)
-    expect(json.authConfig).toEqual({
-      access_token: '',
-      refresh_token: '',
-      client: '',
-      secret: ''
-    })
+    expect(json.authConfig).toBeUndefined()
+    expect(json.authConfigSas9).toBeUndefined()
     expect(json.buildConfig).toEqual({
       initProgram: '',
       termProgram: '',
