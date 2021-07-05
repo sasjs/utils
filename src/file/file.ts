@@ -162,11 +162,9 @@ export function getRelativePath(from: string, to: string): string {
   )
 
   const relativePath =
-    (!path.sep.match(/\\/)
-      ? relativePathParts.length
-        ? `..${path.sep}`.repeat(relativePathParts.length)
-        : `.${path.sep}`
-      : '') +
+    (relativePathParts.length
+      ? `..${path.sep}`.repeat(relativePathParts.length)
+      : `.${path.sep}`) +
     to
       .replace(commonPath, '')
       .replace(leadingPathSepRegExp, '')
