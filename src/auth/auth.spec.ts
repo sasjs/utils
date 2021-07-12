@@ -1,4 +1,8 @@
-import { isAccessTokenExpiring, isRefreshTokenExpiring } from './auth'
+import {
+  hasTokenExpired,
+  isAccessTokenExpiring,
+  isRefreshTokenExpiring
+} from './auth'
 
 describe('isAccessTokenExpiring', () => {
   it('should return true if the token is expiring in an hour', () => {
@@ -61,6 +65,22 @@ describe('isRefreshTokenExpiring', () => {
   it('should return false if the token is not expiring within the given time', () => {
     const token = generateToken(120)
     expect(isRefreshTokenExpiring(token, 60)).toBeFalsy()
+  })
+})
+
+describe('hasTokenExpired', () => {
+  it('should return true if a token has expired', () => {
+    const token = generateToken(0)
+    expect(hasTokenExpired(token)).toBeTruthy()
+  })
+
+  it('should return true if a token is not provided', () => {
+    expect(hasTokenExpired(undefined)).toBeTruthy()
+  })
+
+  it('should return false if a token has not expired', () => {
+    const token = generateToken(36000)
+    expect(hasTokenExpired(token)).toBeFalsy()
   })
 })
 
