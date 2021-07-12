@@ -38,6 +38,18 @@ export function isRefreshTokenExpiring(
   return isTokenExpiring(token, timeToLiveSeconds)
 }
 
+/**
+ * Checks if the given token has expired.
+ * @param {string} token- token string that will be evaluated
+ * @returns {boolean} a value indicating whether the token has expired
+ */
+export function hasTokenExpired(token?: string): boolean {
+  if (!token) {
+    return true
+  }
+  return isTokenExpiring(token, 0)
+}
+
 function isTokenExpiring(token: string, timeToLiveSeconds: number) {
   const payload = jwtDecode<{ exp: number }>(token)
   const timeToLive = payload.exp - new Date().valueOf() / 1000
