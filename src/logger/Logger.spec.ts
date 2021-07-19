@@ -114,6 +114,25 @@ describe('Logger', () => {
     expect(consola.log).toHaveBeenCalledTimes(1)
   })
 
+  it('should log correct error message when empty string has been provided as argument', () => {
+    const logger = new Logger(LogLevel.Error)
+    spyOn(consola, 'error')
+
+    const message = `'test_results' not found in server response, to debug click https://server.com/SASJobExecution/?_program=/Public/sasjs/jobs/tests/macros/friday.test&_debug=2477&_contextName=SAS%20Job%20Execution%20compute%20context`
+
+    logger.error(message, '')
+
+    expect(consola.error).toHaveBeenLastCalledWith(message)
+  })
+
+  it('should ignore not valid args', () => {
+    const logger = new Logger(LogLevel.Error)
+
+    expect(logger['filterArgs']([false, '', undefined, null, 'test'])).toEqual([
+      'test'
+    ])
+  })
+
   describe('logger.table', () => {
     it('should log a table with default border style without head', () => {
       const logger = new Logger(LogLevel.Debug)
