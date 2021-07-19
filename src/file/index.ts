@@ -9,6 +9,7 @@ export {
   listFilesAndSubFoldersInFolder,
   createFile,
   createFolder,
+  createWriteStream,
   deleteFile,
   deleteFolder,
   getRelativePath,
