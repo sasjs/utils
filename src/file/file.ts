@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import { asyncForEach } from '../utils'
+import * as file from '.'
 
 export async function fileExists(filePath: string): Promise<boolean> {
   return fs.promises
@@ -56,7 +57,6 @@ export async function listFilesAndSubFoldersInFolder(
 
         if (subFolders.length) {
           let subFoldersFilesAndFolders: string[] = []
-          const rootFolder = folderName.split(path.sep).pop() as string
 
           await asyncForEach(
             list.filter((f) => f.isDirectory()),
@@ -204,4 +204,14 @@ export async function base64EncodeFile(filePath: string) {
 
 export function getRealPath(file: string) {
   return fs.realpathSync(file)
+}
+
+export async function createWriteStream(filePath: string) {
+  const isFilePresent = await file.fileExists(filePath)
+  if (isFilePresent) {
+    return fs.createWriteStream(filePath, { flags: 'a' })
+  }
+
+  await file.createFile(filePath, '')
+  return fs.createWriteStream(filePath, { flags: 'a' })
 }
