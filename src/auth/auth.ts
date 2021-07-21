@@ -1,4 +1,5 @@
 import jwtDecode from 'jwt-decode'
+import { DecodedToken } from '../types'
 
 /**
  * Checks if the Access Token is expired or is expiring in 1 hour.  A default Access Token
@@ -55,4 +56,15 @@ function isTokenExpiring(token: string, timeToLiveSeconds: number) {
   const timeToLive = payload.exp - new Date().valueOf() / 1000
 
   return timeToLive <= timeToLiveSeconds
+}
+
+export function decodeToken(token: string): DecodedToken {
+  let payload: DecodedToken
+  try {
+    payload = jwtDecode(token)
+  } catch (err) {
+    throw new Error('Invalid token supplied.')
+  }
+
+  return payload
 }
