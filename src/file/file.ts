@@ -109,11 +109,11 @@ export async function createFile(
 }
 
 export async function deleteFile(filePath: string) {
-  return fs.promises.unlink(filePath)
+  return fs.remove(filePath)
 }
 
 export async function deleteFolder(folderPath: string) {
-  return fs.promises.rmdir(folderPath, { recursive: true })
+  return fs.remove(folderPath)
 }
 
 export function unifyFilePath(

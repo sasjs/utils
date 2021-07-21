@@ -25,19 +25,19 @@ export class Logger {
 
   debug = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Debug)) {
-      consola.debug(message, ...args)
+      consola.debug(message, ...this.filterArgs(args))
     }
   }
 
   info = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Info)) {
-      consola.info(message, ...args)
+      consola.info(message, ...this.filterArgs(args))
     }
   }
 
   success = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Info)) {
-      consola.success(message, ...args)
+      consola.success(message, ...this.filterArgs(args))
     }
   }
 
@@ -49,12 +49,12 @@ export class Logger {
 
   error = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Error)) {
-      consola.error(message, ...args)
+      consola.error(message, ...this.filterArgs(args))
     }
   }
 
   log = (message: string, ...args: any): void => {
-    consola.log(message, ...args)
+    consola.log(message, ...this.filterArgs(args))
   }
 
   table = (
@@ -105,5 +105,9 @@ export class Logger {
         ? sanitizeSpecialChars(table.toString())
         : table.toString()) + '\n'
     )
+  }
+
+  private filterArgs(args: any[]) {
+    return args.filter((arg: any) => (arg ? arg : false))
   }
 }
