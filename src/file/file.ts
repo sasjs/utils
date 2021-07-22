@@ -1,4 +1,5 @@
 import fs from 'fs-extra'
+import rimraf from 'rimraf'
 import path from 'path'
 import { asyncForEach } from '../utils'
 import * as file from '.'
@@ -14,6 +15,13 @@ export async function folderExists(folderPath: string): Promise<boolean> {
   return fs.promises
     .access(folderPath, fs.constants.F_OK)
     .then(() => true)
+    .catch(() => false)
+}
+
+export async function isFolder(inputPath: string): Promise<boolean> {
+  return fs.promises
+    .lstat(inputPath)
+    .then((stat) => stat.isDirectory())
     .catch(() => false)
 }
 
@@ -113,7 +121,14 @@ export async function deleteFile(filePath: string) {
 }
 
 export async function deleteFolder(folderPath: string) {
-  return fs.remove(folderPath)
+  return new Promise<void>((resolve, reject) => {
+    rimraf(folderPath, {}, (error) => {
+      if (error) {
+        return reject(error)
+      }
+      return resolve()
+    })
+  })
 }
 
 export function unifyFilePath(

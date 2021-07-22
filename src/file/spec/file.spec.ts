@@ -1,9 +1,11 @@
 import fs, { WriteStream } from 'fs-extra'
 import path from 'path'
 import {
+  isFolder,
   createFile,
   readFile,
   fileExists,
+  folderExists,
   deleteFile,
   deleteFolder,
   unifyFilePath,
@@ -21,6 +23,7 @@ import {
   createWriteStream
 } from '../file'
 import * as fileModule from '../file'
+import { generateTimestamp } from '../../time'
 import { svgBase64EncodedUnix, svgBase64EncodedWin } from './expectedOutputs'
 
 const content = 'test content'
@@ -444,5 +447,57 @@ describe('createWriteStream', () => {
     expect(fs.createWriteStream).toHaveBeenCalledWith(filePath, {
       flags: 'a'
     })
+  })
+})
+
+describe('isFolder', () => {
+  it('should return true if the supplied path is a folder', async () => {
+    const result = await isFolder(process.cwd())
+
+    expect(result).toBeTruthy()
+  })
+
+  it('should return false if the folder does not exist', async () => {
+    const result = await isFolder(path.join(process.cwd(), 'does-not-exist'))
+
+    expect(result).toBeFalsy()
+  })
+
+  it('should return false if the supplied path is a file', async () => {
+    const result = await isFolder(path.join(process.cwd(), 'file.spec.ts'))
+
+    expect(result).toBeFalsy()
+  })
+})
+
+describe('deleteFile', () => {
+  it('should delete the given file', async () => {
+    const fileName = `test-delete-${generateTimestamp()}.txt`
+    const filePath = path.join(__dirname, fileName)
+    await createFile(filePath, '')
+
+    let isFilePresent = await fileExists(filePath)
+
+    await deleteFile(filePath)
+    isFilePresent = await fileExists(filePath)
+
+    expect(isFilePresent).toBeFalsy()
+  })
+})
+
+describe('deleteFolder', () => {
+  it('should delete the given folder even when non-empty', async () => {
+    const folderName = `test-delete-${generateTimestamp()}`
+    const folderPath = path.join(__dirname, folderName)
+    await createFolder(folderPath)
+    await createFolder(path.join(folderPath, 'subfolder'))
+    await createFile(path.join(folderPath, 'subfolder', 'test.txt'), 'test')
+
+    let isFolderPresent = await folderExists(folderPath)
+
+    await deleteFolder(folderPath)
+    isFolderPresent = await folderExists(folderPath)
+
+    expect(isFolderPresent).toBeFalsy()
   })
 })
