@@ -4,18 +4,18 @@
 
 //Add more options here
 const executorPathMap: ExecutorPathMap = {
-    SASVIYA: '/SASJobExecution',
-    SAS9: '/SASStoredProcess/do'
+  SASVIYA: '/SASJobExecution',
+  SAS9: '/SASStoredProcess/do'
 }
 
 export const getExecutorPath = (serverType: string) => {
-    if (!serverType) return ''
+  if (!serverType) return ''
 
-    serverType = serverType.toUpperCase()
+  serverType = serverType.toUpperCase()
 
-    return executorPathMap[serverType] || ''
+  return executorPathMap[serverType] || ''
 }
 
 interface ExecutorPathMap {
-    [key: string]: string
+  [key: string]: string
 }
