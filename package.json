@@ -11,10 +11,11 @@
   },
   "typings": "./index.d.ts",
   "scripts": {
+    "preinstall": "node checkNodeVersion",
     "build": "rimraf build && tsc",
     "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm tsconfig.json",
     "postpublish": "git clean -fd",
-    "package:lib": "npm run build && cp ./package.json build && cp README.md build && cd build && npm version \"5.0.0\" && npm pack",
+    "package:lib": "npm run build && cp ./package.json ./checkNodeVersion.js build && cp README.md build && cd build && npm version \"5.0.0\" && npm pack",
     "test": "jest --coverage",
     "lint:fix": "npx prettier --write '{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}'",
     "lint": "npx prettier --check '{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}'",
@@ -51,8 +52,5 @@
     "prompts": "^2.4.1",
     "rimraf": "^3.0.2",
     "valid-url": "^1.0.9"
-  },
-  "engines": {
-    "node": ">=15"
   }
 }
