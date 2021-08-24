@@ -12,6 +12,7 @@
   "typings": "./index.d.ts",
   "scripts": {
     "preinstall": "node checkNodeVersion",
+    "prebuild": "node checkNodeVersion",
     "build": "rimraf build && tsc",
     "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm tsconfig.json",
     "postpublish": "git clean -fd",
