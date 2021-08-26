@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/cli-table": "^0.3.0",
     "@types/jest": "^26.0.15",
-    "@types/rimraf": "^3.0.1",
+    "@types/rimraf": "^3.0.2",
     "@types/valid-url": "^1.0.3",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
