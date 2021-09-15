@@ -77,12 +77,10 @@ describe('writeToCsv', () => {
 
     it(`should throw 'Error while checking if csv file exists.'`, async () => {
       jest.spyOn(fileModule, 'fileExists').mockRejectedValueOnce('')
-      try {
-        await writeToCsv(csvFilePath, data, Object.values(csvColumns))
-        expect(false).toBe(true)
-      } catch (e) {
-        expect(e).toEqual('Error while checking if csv file exists.\n')
-      }
+
+      await expect(
+        writeToCsv(csvFilePath, data, Object.values(csvColumns))
+      ).rejects.toEqual('Error while checking if csv file exists.\n')
     })
 
     it(`should throw 'Error while creating CSV file.' if file does not exists already`, async () => {
@@ -91,23 +89,17 @@ describe('writeToCsv', () => {
         .mockImplementationOnce(() => Promise.resolve(false))
       jest.spyOn(fileModule, 'createFile').mockRejectedValueOnce('')
 
-      try {
-        await writeToCsv(csvFilePath, data, Object.values(csvColumns))
-        expect(false).toBe(true)
-      } catch (e) {
-        expect(e).toEqual('Error while creating CSV file.\n')
-      }
+      await expect(
+        writeToCsv(csvFilePath, data, Object.values(csvColumns))
+      ).rejects.toEqual('Error while creating CSV file.\n')
     })
 
     it(`should throw 'Error while reading CSV file.'`, async () => {
       jest.spyOn(fileModule, 'readFile').mockRejectedValueOnce('')
 
-      try {
-        await writeToCsv(csvFilePath, data, Object.values(csvColumns))
-        expect(false).toBe(true)
-      } catch (e) {
-        expect(e).toEqual('Error while reading CSV file.\n')
-      }
+      await expect(
+        writeToCsv(csvFilePath, data, Object.values(csvColumns))
+      ).rejects.toEqual('Error while reading CSV file.\n')
     })
 
     it(`should throw 'Error while creating CSV file.' when creating file finally`, async () => {
@@ -129,12 +121,9 @@ describe('writeToCsv', () => {
         })
         .mockRejectedValueOnce('')
 
-      try {
-        await writeToCsv(csvFilePath, data, Object.values(csvColumns))
-        expect(false).toBe(true)
-      } catch (e) {
-        expect(e).toEqual('Error while creating CSV file.\n')
-      }
+      await expect(
+        writeToCsv(csvFilePath, data, Object.values(csvColumns))
+      ).rejects.toEqual('Error while creating CSV file.\n')
     })
   })
 })
