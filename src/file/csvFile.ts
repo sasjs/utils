@@ -77,12 +77,19 @@ const validateInput = async (
   const csvData = await readCsv(csvFilePath).catch((_) => [] as string[][])
   const columnsInFile = csvData?.[0]
 
-  if (columnsInFile?.length > columnsProvided.length) {
-    // provided columns can/cannot have 'id'
-    if (!(prependId && columnsInFile?.length === columnsProvided.length + 1))
+  if (columnsInFile?.length !== columnsProvided.length) {
+    if (columnsProvided.length > columnsInFile?.length) {
       throw new Error(
-        'number of provided columns is less than number of existing columns'
+        'number of provided columns are greater than number of existing columns'
       )
+    }
+    if (columnsProvided.length < columnsInFile?.length) {
+      // provided columns can/cannot have 'id'
+      if (!(prependId && columnsProvided.length + 1 === columnsInFile?.length))
+        throw new Error(
+          'number of provided columns are less than number of existing columns'
+        )
+    }
   }
 
   return csvData
