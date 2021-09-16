@@ -69,14 +69,8 @@ const validateInput = async (
     if (!(prependId && newRecord.length + 1 === columnsProvided.length)) {
       throw new Error('a record can not have less fields than provided columns')
     }
-  } else {
-    const idIndexInColumns = columnsProvided.findIndex(
-      (col) => col === prependId
-    )
-    // if provided columns have id and newRecord's length is already equal to provided columns than by appending newId in newRecord it would have more fields than providedColumns
-    if (idIndexInColumns > -1) {
-      throw new Error('a record can not have more fields than provided columns')
-    }
+  } else if (prependId && columnsProvided.includes(prependId)) {
+    throw new Error('a record can not have more fields than provided columns')
   }
 
   const csvData = await readCsv(csvFilePath).catch((_) => [] as string[][])
@@ -87,24 +81,36 @@ const validateInput = async (
       throw new Error(
         'number of provided columns are greater than number of existing columns'
       )
-    } else if (columnsProvided.length < columnsInFile.length) {
+    }
+
+    if (columnsProvided.length < columnsInFile.length) {
       // provided columns can/cannot have 'id'
       if (!(prependId && columnsProvided.length + 1 === columnsInFile.length))
         throw new Error(
           'number of provided columns are less than number of existing columns'
         )
+
+      const idIndexInColumns = columnsInFile.findIndex(
+        (col) => col === prependId
+      )
+
+      const columnsWithId = [...columnsProvided]
+
+      if (idIndexInColumns > -1) {
+        columnsWithId.splice(idIndexInColumns, 0, prependId)
+        if (JSON.stringify(columnsProvided) !== JSON.stringify(columnsWithId)) {
+          throw new Error('provided columns does not match existing columns')
+        }
+      } else {
+        throw new Error('provided columns does not match existing columns')
+      }
     } else {
       if (JSON.stringify(columnsProvided) !== JSON.stringify(columnsInFile)) {
         throw new Error('provided columns does not match existing columns')
       }
 
-      if (prependId) {
-        const idIndexInColumns = columnsProvided.findIndex(
-          (col) => col === prependId
-        )
-        if (idIndexInColumns < 0) {
-          throw new Error('can not add new id to existing data')
-        }
+      if (prependId && !columnsProvided.includes(prependId)) {
+        throw new Error('can not add new id to existing data')
       }
     }
   }

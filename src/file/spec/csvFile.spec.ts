@@ -175,7 +175,29 @@ describe('updateToCsv', () => {
         )
       })
 
-      it('if provided columns does not match existing', async () => {
+      it('if number of provided columns is one less than number of existing columns but provided id is not included in existing columns', async () => {
+        await expect(
+          updateCsv(
+            csvFilePath,
+            ['firstColumn-2', 'secondColumn-2', 'thirdColumn'],
+            ['col-1', 'col-2', 'col-3'],
+            'id'
+          )
+        ).rejects.toThrow('provided columns does not match existing columns')
+      })
+
+      it('if number of provided columns is one less than number of existing columns but columns are different', async () => {
+        await expect(
+          updateCsv(
+            csvFilePath,
+            ['firstColumn-2', 'secondColumn-2', 'thirdColumn'],
+            ['col-3', 'col-1', 'col-2'],
+            'newId'
+          )
+        ).rejects.toThrow('provided columns does not match existing columns')
+      })
+
+      it('if number of provided columns is equal to number of existing columns but columns does not match', async () => {
         await expect(
           updateCsv(
             csvFilePath,
