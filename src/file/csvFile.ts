@@ -1,36 +1,8 @@
 import { readFile, createFile } from './file'
-import { prefixMessage } from '../error'
 import stringify from 'csv-stringify/lib/sync'
 
-export async function UpdateCsv(
-  csvFilePath: string,
-  record: Array<any>,
-  columns: Array<string>,
-  prependId?: string
-) {
-  if (record.length > columns.length) {
-    throw 'a record can not have more fields than provided columns'
-  }
-
-  const csvData = await readCsv(csvFilePath).catch((err) => [] as Array<any>)
-
-  if (csvData.length > 0 && csvData[0].length > columns.length)
-    throw 'number of provided columns is less than number of existing columns'
-
-  const id = csvData.length === 0 ? 1 : csvData.length
-
-  if (prependId) {
-    const idIndex = findIdColumn(columns, prependId)
-    csvData.push(addId(id, idIndex, record))
-  } else csvData.push(record)
-
-  await createCsv(csvFilePath, csvData, columns)
-}
-
-export async function readCsv(csvFilePath: string) {
-  const csvContent = await readFile(csvFilePath).catch((err) => {
-    throw prefixMessage(err, 'Error while reading CSV file.\n')
-  })
+export const readCsv = async (csvFilePath: string): Promise<string[][]> => {
+  const csvContent = await readFile(csvFilePath)
 
   return csvContent
     .split('\n')
@@ -38,39 +10,80 @@ export async function readCsv(csvFilePath: string) {
     .map((data) => data.split(','))
 }
 
-export async function createCsv(
+export const createCsv = async (
   csvFilePath: string,
-  csvData: Array<Array<any>>,
-  columns: Array<string>
-) {
+  csvData: any[][],
+  columns: string[]
+) => {
   const output = stringify(csvData, {
     header: csvData.length === 1,
     columns: columns
   })
-  await createFile(csvFilePath, output).catch((err) => {
-    throw prefixMessage(err, 'Error while creating CSV file.\n')
-  })
+
+  await createFile(csvFilePath, output)
 }
 
-function findIdColumn(columns: Array<string>, idCol: string) {
-  const index = columns.findIndex((col) => col === idCol)
-  if (index < 0) throw 'Id column could not be found in given columns'
-  return index
-}
+export const updateCsv = async (
+  csvFilePath: string,
+  newRecord: any[],
+  columns: string[],
+  prependId?: string
+) => {
+  const csvData = await validateInput(
+    csvFilePath,
+    newRecord,
+    columns,
+    prependId
+  )
 
-function addId(id: number, idIndex: number, record: Array<any>) {
-  if (idIndex > record.length) {
-    let i = record.length
-    let isIdAppended = false
-    while (!isIdAppended) {
-      if (i === idIndex) {
-        record.push(id)
-        isIdAppended = true
-      } else record.push('')
-      i++
+  if (prependId) {
+    const newId = csvData.length === 0 ? 1 : csvData.length
+
+    const idIndexInColumns = columns.findIndex((col) => col === prependId)
+
+    if (idIndexInColumns > -1) {
+      newRecord.splice(idIndexInColumns, 0, newId)
+    } else {
+      columns.splice(0, 0, prependId)
+      newRecord.splice(0, 0, newId)
     }
-  } else {
-    record.splice(idIndex, 0, id)
   }
-  return record
+
+  csvData.push(newRecord)
+
+  await createCsv(csvFilePath, csvData, columns)
+}
+
+const validateInput = async (
+  csvFilePath: string,
+  newRecord: any[],
+  columnsProvided: string[],
+  prependId?: string
+): Promise<string[][]> => {
+  if (newRecord.length !== columnsProvided.length) {
+    if (newRecord.length > columnsProvided.length) {
+      throw new Error('a record can not have more fields than provided columns')
+    }
+
+    if (newRecord.length < columnsProvided.length) {
+      // provided columns can/cannot have 'id'
+      if (!(prependId && newRecord.length + 1 === columnsProvided.length))
+        throw new Error(
+          'a record can not have less fields than provided columns'
+        )
+    }
+  }
+
+  const csvData = await readCsv(csvFilePath).catch((_) => [] as string[][])
+  const columnsInFile = csvData?.[0]
+
+  if (columnsInFile?.length > columnsProvided.length) {
+    // provided columns can/cannot have 'id'
+    if (!(prependId && columnsInFile?.length === columnsProvided.length + 1))
+      throw new Error(
+        'number of provided columns is less than number of existing columns'
+      )
+  }
+
+  return csvData
 }
