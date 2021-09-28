@@ -7,7 +7,8 @@ import {
   ServiceConfig,
   JobConfig,
   StreamConfig,
-  TestConfig
+  TestConfig,
+  BaseSasConfig
 } from './config'
 import { ServerType } from './serverType'
 import {
@@ -27,7 +28,8 @@ import {
   validateRepositoryName,
   validateAuthConfig,
   validateAuthConfigSas9,
-  validateTestConfig
+  validateTestConfig,
+  validateBaseSasConfig
 } from './targetValidators'
 
 export interface TargetJson {
@@ -51,6 +53,7 @@ export interface TargetJson {
   programFolders: string[]
   isDefault?: boolean
   testConfig?: TestConfig
+  baseSasConfig?: BaseSasConfig
 }
 
 export class Target implements TargetJson {
@@ -149,6 +152,11 @@ export class Target implements TargetJson {
   }
   private _testConfig: TestConfig | undefined
 
+  get baseSasConfig(): BaseSasConfig | undefined {
+    return this._baseSasConfig
+  }
+  private _baseSasConfig: BaseSasConfig | undefined
+
   constructor(json: any) {
     try {
       if (!json) {
@@ -206,6 +214,10 @@ export class Target implements TargetJson {
 
       if (json.testConfig) {
         this._testConfig = validateTestConfig(json.testConfig)
+      }
+
+      if (json.baseSasConfig) {
+        this._baseSasConfig = validateBaseSasConfig(json.baseSasConfig)
       }
 
       if (json.macroFolders && json.macroFolders.length) {
@@ -307,6 +319,10 @@ export class Target implements TargetJson {
     } else {
       json.serverName = this.serverName
       json.repositoryName = this.repositoryName
+    }
+
+    if (this.serverType === ServerType.Sasjs) {
+      json.baseSasConfig = this.baseSasConfig
     }
 
     return json

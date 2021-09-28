@@ -6,7 +6,8 @@ import {
   JobConfig,
   StreamConfig,
   AuthConfig,
-  TestConfig
+  TestConfig,
+  BaseSasConfig
 } from './config'
 import { ServerType } from './serverType'
 import { TargetJson } from './target'
@@ -27,4 +28,5 @@ export interface Configuration {
   targets?: TargetJson[]
   defaultTarget?: string
   testConfig?: TestConfig
+  baseSasConfig?: BaseSasConfig
 }
