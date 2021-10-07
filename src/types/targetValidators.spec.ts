@@ -161,13 +161,13 @@ describe('validateHttpsAgentOptions', () => {
   it('should set httpsAgentOptions to empty when it is null', () => {
     expect(
       validateHttpsAgentOptions(null as unknown as HttpsAgentOptions)
-    ).toEqual({})
+    ).toEqual({ allowInsecureRequests: false })
   })
 
   it('should set httpsAgentOptions to empty when it is undefined', () => {
     expect(
       validateHttpsAgentOptions(undefined as unknown as HttpsAgentOptions)
-    ).toEqual({})
+    ).toEqual({ allowInsecureRequests: false })
   })
 
   it('should remove invalid property types of httpsAgentOptions', () => {
@@ -177,7 +177,7 @@ describe('validateHttpsAgentOptions', () => {
         keyPath: 123,
         certPath: {}
       } as unknown as HttpsAgentOptions)
-    ).toEqual({})
+    ).toEqual({ allowInsecureRequests: false })
   })
 
   it('should throw an error when httpsAgentOptions is not an object', () => {
@@ -194,12 +194,15 @@ describe('validateHttpsAgentOptions', () => {
   })
 
   it('should return httpsAgentOptions when HttpsAgentOptions', () => {
-    const allowInsecureRequestsOptions = { rejectUnauthorized: false }
+    const allowInsecureRequestsOptions = { allowInsecureRequests: true }
     expect(validateHttpsAgentOptions(allowInsecureRequestsOptions)).toEqual(
       allowInsecureRequestsOptions
     )
 
-    const caPathOptions = { caPath: 'path/to/ca/file' }
+    const caPathOptions = {
+      allowInsecureRequests: false,
+      caPath: 'path/to/ca/file'
+    }
     expect(validateHttpsAgentOptions(caPathOptions)).toEqual(caPathOptions)
   })
 })

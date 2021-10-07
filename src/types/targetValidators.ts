@@ -74,12 +74,23 @@ export const validateHttpsAgentOptions = (
   httpsAgentOptions: HttpsAgentOptions
 ): HttpsAgentOptions => {
   if (!httpsAgentOptions) {
-    httpsAgentOptions = {}
+    httpsAgentOptions = { allowInsecureRequests: false }
   }
 
   if (typeof httpsAgentOptions !== 'object') {
     throw new Error(
       'Invalid value: `httpsAgentOptions` should either be an empty or an object of `HttpsAgentOptions`'
+    )
+  }
+
+  if (
+    httpsAgentOptions.allowInsecureRequests === null ||
+    httpsAgentOptions.allowInsecureRequests === undefined
+  ) {
+    httpsAgentOptions.allowInsecureRequests = false
+  } else if (typeof httpsAgentOptions.allowInsecureRequests !== 'boolean') {
+    throw new Error(
+      'Invalid value: `httpsAgentOptions.allowInsecureRequests` should either be an empty or a boolean'
     )
   }
 
