@@ -1,3 +1,4 @@
+import * as https from 'https'
 import {
   DocConfig,
   BuildConfig,
@@ -13,7 +14,7 @@ import { TargetJson } from './target'
 
 export interface Configuration {
   $schema?: string
-  allowInsecureRequests?: boolean
+  httpsAgentOptions?: https.AgentOptions
   docConfig?: DocConfig
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig

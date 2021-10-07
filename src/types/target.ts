@@ -1,3 +1,4 @@
+import * as https from 'https'
 import {
   DocConfig,
   AuthConfig,
@@ -15,7 +16,7 @@ import {
   validateServerUrl,
   validateServerType,
   validateDocConfig,
-  validateAllowInsecureRequests,
+  validateHttpsAgentOptions,
   validateAppLoc,
   validateBuildConfig,
   validateDeployConfig,
@@ -34,7 +35,7 @@ export interface TargetJson {
   name: string
   serverUrl: string
   serverType: ServerType
-  allowInsecureRequests: boolean
+  httpsAgentOptions?: https.AgentOptions
   contextName?: string
   serverName?: string
   repositoryName?: string
@@ -69,10 +70,10 @@ export class Target implements TargetJson {
   }
   private _serverType = ServerType.SasViya
 
-  get allowInsecureRequests(): boolean {
-    return this._allowInsecureRequests
+  get httpsAgentOptions(): https.AgentOptions {
+    return this._httpsAgentOptions
   }
-  private _allowInsecureRequests
+  private _httpsAgentOptions
 
   get appLoc(): string {
     return this._appLoc
@@ -158,8 +159,8 @@ export class Target implements TargetJson {
       this._name = validateTargetName(json.name)
       this._serverUrl = validateServerUrl(json.serverUrl)
       this._serverType = validateServerType(json.serverType)
-      this._allowInsecureRequests = validateAllowInsecureRequests(
-        json.allowInsecureRequests
+      this._httpsAgentOptions = validateHttpsAgentOptions(
+        json.httpsAgentOptions
       )
       this._appLoc = validateAppLoc(json.appLoc)
       this._contextName = validateContextName(
@@ -225,7 +226,7 @@ export class Target implements TargetJson {
       name: this.name,
       serverUrl: this.serverUrl,
       serverType: this.serverType,
-      allowInsecureRequests: this.allowInsecureRequests,
+      httpsAgentOptions: this.httpsAgentOptions,
       appLoc: this.appLoc,
       macroFolders: this.macroFolders,
       programFolders: this.programFolders,

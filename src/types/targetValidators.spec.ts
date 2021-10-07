@@ -1,3 +1,4 @@
+import * as https from 'https'
 import {
   DocConfig,
   AuthConfig,
@@ -13,7 +14,7 @@ import { ServerType } from './serverType'
 import {
   validateTargetName,
   validateServerType,
-  validateAllowInsecureRequests,
+  validateHttpsAgentOptions,
   validateAppLoc,
   validateServerUrl,
   validateBuildConfig,
@@ -156,38 +157,37 @@ describe('validateServerUrl', () => {
   })
 })
 
-describe('validateAllowInsecureRequests', () => {
-  it('should set allowInsecureRequests to false when it is null', () => {
-    expect(validateAllowInsecureRequests(null as unknown as boolean)).toEqual(
-      false
-    )
-  })
-
-  it('should set allowInsecureRequests to false when it is undefined', () => {
+describe('validateHttpsAgentOptions', () => {
+  it('should set httpsAgentOptions to empty when it is null', () => {
     expect(
-      validateAllowInsecureRequests(undefined as unknown as boolean)
-    ).toEqual(false)
+      validateHttpsAgentOptions(null as unknown as https.AgentOptions)
+    ).toEqual({})
   })
 
-  it('should throw an error when allowInsecureRequests is not a boolean', () => {
+  it('should set httpsAgentOptions to empty when it is undefined', () => {
+    expect(
+      validateHttpsAgentOptions(undefined as unknown as https.AgentOptions)
+    ).toEqual({})
+  })
+
+  it('should throw an error when httpsAgentOptions is not an object', () => {
     expect(() =>
-      validateAllowInsecureRequests('some-string' as unknown as boolean)
+      validateHttpsAgentOptions('some-string' as unknown as https.AgentOptions)
     ).toThrowError(
-      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `https.AgentOptions`'
     )
     expect(() =>
-      validateAllowInsecureRequests({} as unknown as boolean)
+      validateHttpsAgentOptions(true as unknown as https.AgentOptions)
     ).toThrowError(
-      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `https.AgentOptions`'
     )
   })
 
-  it('should return allowInsecureRequests when false', () => {
-    expect(validateAllowInsecureRequests(false)).toEqual(false)
-  })
-
-  it('should return allowInsecureRequests when true', () => {
-    expect(validateAllowInsecureRequests(true)).toEqual(true)
+  it('should return httpsAgentOptions when https.AgentOptions', () => {
+    const allowInsecureRequestsOptions = { rejectUnauthorized: false }
+    expect(validateHttpsAgentOptions(allowInsecureRequestsOptions)).toEqual(
+      allowInsecureRequestsOptions
+    )
   })
 })
 

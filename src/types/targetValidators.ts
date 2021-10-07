@@ -1,3 +1,4 @@
+import * as https from 'https'
 import validUrl from 'valid-url'
 import { ServerType } from '.'
 import {
@@ -70,18 +71,18 @@ export const validateServerUrl = (serverUrl: string): string => {
   return serverUrl
 }
 
-export const validateAllowInsecureRequests = (
-  allowInsecureRequests: boolean
-): boolean => {
-  if (allowInsecureRequests === null || allowInsecureRequests === undefined) {
-    allowInsecureRequests = false
-  } else if (typeof allowInsecureRequests !== 'boolean') {
+export const validateHttpsAgentOptions = (
+  httpsAgentOptions: https.AgentOptions
+): https.AgentOptions => {
+  if (!httpsAgentOptions) {
+    httpsAgentOptions = {}
+  } else if (typeof httpsAgentOptions !== 'object') {
     throw new Error(
-      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `https.AgentOptions`'
     )
   }
 
-  return allowInsecureRequests
+  return httpsAgentOptions
 }
 
 export const validateAppLoc = (appLoc: string): string => {
