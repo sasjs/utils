@@ -1,6 +1,5 @@
-import * as https from 'https'
 import validUrl from 'valid-url'
-import { ServerType } from '.'
+import { ServerType, HttpsAgentOptions } from '.'
 import {
   DocConfig,
   AuthConfig,
@@ -72,14 +71,28 @@ export const validateServerUrl = (serverUrl: string): string => {
 }
 
 export const validateHttpsAgentOptions = (
-  httpsAgentOptions: https.AgentOptions
-): https.AgentOptions => {
+  httpsAgentOptions: HttpsAgentOptions
+): HttpsAgentOptions => {
   if (!httpsAgentOptions) {
     httpsAgentOptions = {}
-  } else if (typeof httpsAgentOptions !== 'object') {
+  }
+
+  if (typeof httpsAgentOptions !== 'object') {
     throw new Error(
-      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `https.AgentOptions`'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `HttpsAgentOptions`'
     )
+  }
+
+  if (typeof httpsAgentOptions.caPath !== 'string') {
+    httpsAgentOptions.caPath = undefined
+  }
+
+  if (typeof httpsAgentOptions.keyPath !== 'string') {
+    httpsAgentOptions.keyPath = undefined
+  }
+
+  if (typeof httpsAgentOptions.certPath !== 'string') {
+    httpsAgentOptions.certPath = undefined
   }
 
   return httpsAgentOptions

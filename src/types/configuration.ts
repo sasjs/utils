@@ -1,4 +1,3 @@
-import * as https from 'https'
 import {
   DocConfig,
   BuildConfig,
@@ -11,10 +10,11 @@ import {
 } from './config'
 import { ServerType } from './serverType'
 import { TargetJson } from './target'
+import { HttpsAgentOptions } from './httpsAgentOptions'
 
 export interface Configuration {
   $schema?: string
-  httpsAgentOptions?: https.AgentOptions
+  httpsAgentOptions?: HttpsAgentOptions
   docConfig?: DocConfig
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig

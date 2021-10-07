@@ -1,4 +1,3 @@
-import * as https from 'https'
 import {
   DocConfig,
   AuthConfig,
@@ -11,6 +10,7 @@ import {
   TestConfig
 } from './config'
 import { ServerType } from './serverType'
+import { HttpsAgentOptions } from './httpsAgentOptions'
 import {
   validateTargetName,
   validateServerUrl,
@@ -35,7 +35,7 @@ export interface TargetJson {
   name: string
   serverUrl: string
   serverType: ServerType
-  httpsAgentOptions?: https.AgentOptions
+  httpsAgentOptions?: HttpsAgentOptions
   contextName?: string
   serverName?: string
   repositoryName?: string
@@ -70,7 +70,7 @@ export class Target implements TargetJson {
   }
   private _serverType = ServerType.SasViya
 
-  get httpsAgentOptions(): https.AgentOptions {
+  get httpsAgentOptions(): HttpsAgentOptions {
     return this._httpsAgentOptions
   }
   private _httpsAgentOptions

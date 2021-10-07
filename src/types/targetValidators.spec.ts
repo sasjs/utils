@@ -1,4 +1,3 @@
-import * as https from 'https'
 import {
   DocConfig,
   AuthConfig,
@@ -11,6 +10,7 @@ import {
   TestConfig
 } from './config'
 import { ServerType } from './serverType'
+import { HttpsAgentOptions } from './httpsAgentOptions'
 import {
   validateTargetName,
   validateServerType,
@@ -160,34 +160,47 @@ describe('validateServerUrl', () => {
 describe('validateHttpsAgentOptions', () => {
   it('should set httpsAgentOptions to empty when it is null', () => {
     expect(
-      validateHttpsAgentOptions(null as unknown as https.AgentOptions)
+      validateHttpsAgentOptions(null as unknown as HttpsAgentOptions)
     ).toEqual({})
   })
 
   it('should set httpsAgentOptions to empty when it is undefined', () => {
     expect(
-      validateHttpsAgentOptions(undefined as unknown as https.AgentOptions)
+      validateHttpsAgentOptions(undefined as unknown as HttpsAgentOptions)
+    ).toEqual({})
+  })
+
+  it('should remove invalid property types of httpsAgentOptions', () => {
+    expect(
+      validateHttpsAgentOptions({
+        caPath: true,
+        keyPath: 123,
+        certPath: {}
+      } as unknown as HttpsAgentOptions)
     ).toEqual({})
   })
 
   it('should throw an error when httpsAgentOptions is not an object', () => {
     expect(() =>
-      validateHttpsAgentOptions('some-string' as unknown as https.AgentOptions)
+      validateHttpsAgentOptions('some-string' as unknown as HttpsAgentOptions)
     ).toThrowError(
-      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `https.AgentOptions`'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `HttpsAgentOptions`'
     )
     expect(() =>
-      validateHttpsAgentOptions(true as unknown as https.AgentOptions)
+      validateHttpsAgentOptions(true as unknown as HttpsAgentOptions)
     ).toThrowError(
-      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `https.AgentOptions`'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `HttpsAgentOptions`'
     )
   })
 
-  it('should return httpsAgentOptions when https.AgentOptions', () => {
+  it('should return httpsAgentOptions when HttpsAgentOptions', () => {
     const allowInsecureRequestsOptions = { rejectUnauthorized: false }
     expect(validateHttpsAgentOptions(allowInsecureRequestsOptions)).toEqual(
       allowInsecureRequestsOptions
     )
+
+    const caPathOptions = { caPath: 'path/to/ca/file' }
+    expect(validateHttpsAgentOptions(caPathOptions)).toEqual(caPathOptions)
   })
 })
 
