@@ -158,16 +158,16 @@ describe('validateServerUrl', () => {
 })
 
 describe('validateHttpsAgentOptions', () => {
-  it('should set httpsAgentOptions to empty when it is null', () => {
+  it('should set httpsAgentOptions to undefined when it is null', () => {
     expect(
       validateHttpsAgentOptions(null as unknown as HttpsAgentOptions)
-    ).toEqual({ allowInsecureRequests: false })
+    ).toBeUndefined()
   })
 
-  it('should set httpsAgentOptions to empty when it is undefined', () => {
+  it('should set httpsAgentOptions to undefined when it is undefined', () => {
     expect(
       validateHttpsAgentOptions(undefined as unknown as HttpsAgentOptions)
-    ).toEqual({ allowInsecureRequests: false })
+    ).toBeUndefined()
   })
 
   it('should remove invalid property types of httpsAgentOptions', () => {
@@ -193,7 +193,7 @@ describe('validateHttpsAgentOptions', () => {
     )
   })
 
-  it('should return httpsAgentOptions when HttpsAgentOptions', () => {
+  it('should return httpsAgentOptions when valid', () => {
     const allowInsecureRequestsOptions = { allowInsecureRequests: true }
     expect(validateHttpsAgentOptions(allowInsecureRequestsOptions)).toEqual(
       allowInsecureRequestsOptions

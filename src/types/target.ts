@@ -70,7 +70,7 @@ export class Target implements TargetJson {
   }
   private _serverType = ServerType.SasViya
 
-  get httpsAgentOptions(): HttpsAgentOptions {
+  get httpsAgentOptions(): HttpsAgentOptions | undefined {
     return this._httpsAgentOptions
   }
   private _httpsAgentOptions

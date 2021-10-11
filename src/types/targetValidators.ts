@@ -72,10 +72,8 @@ export const validateServerUrl = (serverUrl: string): string => {
 
 export const validateHttpsAgentOptions = (
   httpsAgentOptions: HttpsAgentOptions
-): HttpsAgentOptions => {
-  if (!httpsAgentOptions) {
-    httpsAgentOptions = { allowInsecureRequests: false }
-  }
+): HttpsAgentOptions | undefined => {
+  if (!httpsAgentOptions) return
 
   if (typeof httpsAgentOptions !== 'object') {
     throw new Error(
