@@ -9,8 +9,7 @@ import {
   JobConfig,
   ServiceConfig,
   StreamConfig,
-  TestConfig,
-  BaseSasConfig
+  TestConfig
 } from './config'
 
 const DEFAULT_CONTEXT_NAME = 'SAS Job Execution compute context'
@@ -276,12 +275,6 @@ export const validateDeployConfig = (
   }
 
   return deployConfig
-}
-
-export const validateBaseSasConfig = (baseSasConfig: BaseSasConfig) => {
-  // TODO: implement validation
-
-  return baseSasConfig
 }
 
 export const validateStreamConfig = (

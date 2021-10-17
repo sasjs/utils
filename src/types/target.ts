@@ -7,8 +7,7 @@ import {
   ServiceConfig,
   JobConfig,
   StreamConfig,
-  TestConfig,
-  BaseSasConfig
+  TestConfig
 } from './config'
 import { ServerType } from './serverType'
 import {
@@ -28,8 +27,7 @@ import {
   validateRepositoryName,
   validateAuthConfig,
   validateAuthConfigSas9,
-  validateTestConfig,
-  validateBaseSasConfig
+  validateTestConfig
 } from './targetValidators'
 
 export interface TargetJson {
@@ -53,7 +51,6 @@ export interface TargetJson {
   programFolders: string[]
   isDefault?: boolean
   testConfig?: TestConfig
-  baseSasConfig?: BaseSasConfig
 }
 
 export class Target implements TargetJson {
@@ -152,11 +149,6 @@ export class Target implements TargetJson {
   }
   private _testConfig: TestConfig | undefined
 
-  get baseSasConfig(): BaseSasConfig | undefined {
-    return this._baseSasConfig
-  }
-  private _baseSasConfig: BaseSasConfig | undefined
-
   constructor(json: any) {
     try {
       if (!json) {
@@ -214,10 +206,6 @@ export class Target implements TargetJson {
 
       if (json.testConfig) {
         this._testConfig = validateTestConfig(json.testConfig)
-      }
-
-      if (json.baseSasConfig) {
-        this._baseSasConfig = validateBaseSasConfig(json.baseSasConfig)
       }
 
       if (json.macroFolders && json.macroFolders.length) {
@@ -316,13 +304,9 @@ export class Target implements TargetJson {
 
     if (this.serverType === ServerType.SasViya) {
       json.contextName = this.contextName
-    } else {
+    } else if (this.serverType === ServerType.Sas9) {
       json.serverName = this.serverName
       json.repositoryName = this.repositoryName
-    }
-
-    if (this.serverType === ServerType.Sasjs) {
-      json.baseSasConfig = this.baseSasConfig
     }
 
     return json

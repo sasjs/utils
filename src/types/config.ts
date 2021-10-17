@@ -62,7 +62,3 @@ export interface TestConfig {
   testSetUp: string
   testTearDown: string
 }
-
-export interface BaseSasConfig {
-  pathSasBase: string
-}
