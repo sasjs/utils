@@ -19,7 +19,7 @@ describe('getString', () => {
     jest.clearAllMocks()
   })
 
-  it('should call prompts to get string values', async (done) => {
+  it('should call prompts to get string values', async () => {
     const message = 'Enter your name: '
     const validator = (value: string) => !!value
     jest
@@ -39,10 +39,9 @@ describe('getString', () => {
       },
       { onCancel }
     )
-    done()
   })
 
-  it('should throw an error when a string value is null', async (done) => {
+  it('should throw an error when a string value is null', async () => {
     const message = 'Enter your name: '
     const validator = (value: string) => !!value
     jest
@@ -52,10 +51,9 @@ describe('getString', () => {
     await expect(getString(message, validator)).rejects.toThrowError(
       defaultErrorMessage
     )
-    done()
   })
 
-  it('should throw an error when a string value is undefined', async (done) => {
+  it('should throw an error when a string value is undefined', async () => {
     const message = 'Enter your name: '
     const validator = (value: string) => !!value
     jest
@@ -65,7 +63,6 @@ describe('getString', () => {
     await expect(getString(message, validator)).rejects.toThrowError(
       defaultErrorMessage
     )
-    done()
   })
 })
 
@@ -74,7 +71,7 @@ describe('getNumber', () => {
     jest.clearAllMocks()
   })
 
-  it('should call prompts to get number values', async (done) => {
+  it('should call prompts to get number values', async () => {
     const message = 'Enter a number: '
     const defaultValue = 0
     const validator = (value: number) => !!value
@@ -95,10 +92,9 @@ describe('getNumber', () => {
       },
       { onCancel }
     )
-    done()
   })
 
-  it('should throw an error when a number value is a string', async (done) => {
+  it('should throw an error when a number value is a string', async () => {
     const message = 'Enter a number: '
     const defaultValue = 0
     const validator = (value: number) => !!value
@@ -109,10 +105,9 @@ describe('getNumber', () => {
     await expect(
       getNumber(message, validator, defaultValue)
     ).rejects.toThrowError(defaultErrorMessage)
-    done()
   })
 
-  it('should throw an error when a number value is null', async (done) => {
+  it('should throw an error when a number value is null', async () => {
     const message = 'Enter a number: '
     const defaultValue = 0
     const validator = (value: number) => !!value
@@ -123,10 +118,9 @@ describe('getNumber', () => {
     await expect(
       getNumber(message, validator, defaultValue)
     ).rejects.toThrowError(defaultErrorMessage)
-    done()
   })
 
-  it('should throw an error when a number value is undefined', async (done) => {
+  it('should throw an error when a number value is undefined', async () => {
     const message = 'Enter a number: '
     const defaultValue = 0
     const validator = (value: number) => !!value
@@ -137,7 +131,6 @@ describe('getNumber', () => {
     await expect(
       getNumber(message, validator, defaultValue)
     ).rejects.toThrowError(defaultErrorMessage)
-    done()
   })
 })
 
@@ -146,7 +139,7 @@ describe('getUrl', () => {
     jest.clearAllMocks()
   })
 
-  it('should call prompts to get URL values', async (done) => {
+  it('should call prompts to get URL values', async () => {
     const message = 'Enter a URL: '
     const errorMessage = 'URL is invalid.'
     jest
@@ -166,10 +159,9 @@ describe('getUrl', () => {
       },
       { onCancel }
     )
-    done()
   })
 
-  it('should throw an error when the value is null', async (done) => {
+  it('should throw an error when the value is null', async () => {
     const message = 'Enter a URL: '
     const errorMessage = 'URL is invalid.'
     jest
@@ -179,10 +171,9 @@ describe('getUrl', () => {
     await expect(getUrl(message, errorMessage)).rejects.toThrowError(
       errorMessage
     )
-    done()
   })
 
-  it('should throw an error when the value is undefined', async (done) => {
+  it('should throw an error when the value is undefined', async () => {
     const message = 'Enter a URL: '
     const errorMessage = 'URL is invalid.'
     jest
@@ -192,7 +183,6 @@ describe('getUrl', () => {
     await expect(getUrl(message, errorMessage)).rejects.toThrowError(
       errorMessage
     )
-    done()
   })
 })
 
@@ -201,7 +191,7 @@ describe('getConfirmation', () => {
     jest.clearAllMocks()
   })
 
-  it('should call prompts to get a confirmation', async (done) => {
+  it('should call prompts to get a confirmation', async () => {
     const message = 'Are you sure? '
     jest
       .spyOn(prompts, 'prompt')
@@ -220,10 +210,9 @@ describe('getConfirmation', () => {
       },
       { onCancel }
     )
-    done()
   })
 
-  it('should throw an error when the value is non-boolean', async (done) => {
+  it('should throw an error when the value is non-boolean', async () => {
     const message = 'Are you sure? '
     jest
       .spyOn(prompts, 'prompt')
@@ -232,7 +221,6 @@ describe('getConfirmation', () => {
     await expect(getConfirmation(message, false)).rejects.toThrowError(
       defaultErrorMessage
     )
-    done()
   })
 })
 
@@ -241,7 +229,7 @@ describe('getChoice', () => {
     jest.clearAllMocks()
   })
 
-  it('should call prompts to get a selection', async (done) => {
+  it('should call prompts to get a selection', async () => {
     const message = 'Choose: '
     const errorMessage = 'Invalid choice.'
     const choices = [
@@ -266,10 +254,9 @@ describe('getChoice', () => {
       },
       { onCancel }
     )
-    done()
   })
 
-  it('should throw an error with a non-number choice', async (done) => {
+  it('should throw an error with a non-number choice', async () => {
     const message = 'Choose: '
     const errorMessage = 'Invalid choice.'
     const choices = [
@@ -283,7 +270,6 @@ describe('getChoice', () => {
     await expect(
       getChoice(message, errorMessage, choices)
     ).rejects.toThrowError(errorMessage)
-    done()
   })
 })
 
