@@ -11,13 +11,15 @@
   },
   "typings": "./index.d.ts",
   "scripts": {
+    "preinstall": "node checkNodeVersion",
+    "prebuild": "node checkNodeVersion",
     "build": "rimraf build && tsc",
     "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm tsconfig.json",
     "postpublish": "git clean -fd",
-    "package:lib": "npm run build && cp ./package.json build && cp README.md build && cd build && npm version \"5.0.0\" && npm pack",
+    "package:lib": "npm run build && cp ./package.json ./checkNodeVersion.js build && cp README.md build && cd build && npm version \"5.0.0\" && npm pack",
     "test": "jest --coverage",
-    "lint:fix": "npx prettier --write '{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}'",
-    "lint": "npx prettier --check '{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}'",
+    "lint:fix": "npx prettier --write \"{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}\"",
+    "lint": "npx prettier --check \"{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}\"",
     "prepare": "git rev-parse --git-dir && git config core.hooksPath ./.git-hooks || true"
   },
   "repository": {
@@ -32,13 +34,13 @@
   "homepage": "https://github.com/sasjs/utils#readme",
   "devDependencies": {
     "@types/cli-table": "^0.3.0",
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^27.0.1",
     "@types/rimraf": "^3.0.1",
     "@types/valid-url": "^1.0.3",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
     "ts-loader": "^9.2.3",
-    "typescript": "^4.3.2"
+    "typescript": "4.3.5"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.11",
@@ -46,13 +48,11 @@
     "chalk": "^4.1.1",
     "cli-table": "^0.3.6",
     "consola": "^2.15.0",
+    "csv-stringify": "^5.6.5",
     "fs-extra": "^10.0.0",
     "jwt-decode": "^3.1.2",
     "prompts": "^2.4.1",
     "rimraf": "^3.0.2",
     "valid-url": "^1.0.9"
-  },
-  "engines": {
-    "node": ">=15"
   }
 }

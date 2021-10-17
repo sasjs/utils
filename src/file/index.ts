@@ -22,3 +22,5 @@ export {
   base64EncodeFile,
   getRealPath
 } from './file'
+
+export { updateCsv, createCsv, readCsv } from './csvFile'
