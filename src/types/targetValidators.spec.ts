@@ -87,7 +87,7 @@ describe('validateServerType', () => {
     expect(() =>
       validateServerType('garbage' as unknown as ServerType)
     ).toThrowError(
-      `Invalid server type: Supported values for  \`serverType\` are ${ServerType.SasViya} and ${ServerType.Sas9}.`
+      `Invalid server type: Supported values for  \`serverType\` are ${ServerType.SasViya}, ${ServerType.Sas9} and ${ServerType.Sasjs}.`
     )
   })
 

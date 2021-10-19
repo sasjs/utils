@@ -304,7 +304,7 @@ export class Target implements TargetJson {
 
     if (this.serverType === ServerType.SasViya) {
       json.contextName = this.contextName
-    } else {
+    } else if (this.serverType === ServerType.Sas9) {
       json.serverName = this.serverName
       json.repositoryName = this.repositoryName
     }
