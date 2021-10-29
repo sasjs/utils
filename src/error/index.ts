@@ -1,1 +1,2 @@
-export { prefixMessage } from './errorModifier'
+export * from './errorModifier'
+export * from './serverTypeError'

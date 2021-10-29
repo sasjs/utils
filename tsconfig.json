@@ -12,7 +12,8 @@
         "declaration": true,
         "outDir": "./build",
         "strict": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "downlevelIteration": true
     },
     "include": [
         "src"
