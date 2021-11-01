@@ -250,6 +250,69 @@
         }
       }
     },
+    "httpsAgentOptions": {
+      "$id": "#/properties/httpsAgentOptions",
+      "type": "object",
+      "title": "httpsAgentOptions",
+      "description": "Configure https agent by setting all supported attribute such as `key`, `cert`, `ca`, `rejectUnauthorized` and `requestCert`",
+      "examples": [
+        {
+          "allowInsecureRequests": false,
+          "caPath": "path/to/caFile",
+          "keyPath": "path/to/keyFile",
+          "certPath": "path/to/certFile",
+          "requestCert": false,
+          "rejectUnauthorized": true
+        }
+      ],
+      "properties": {
+        "allowInsecureRequests": {
+          "$id": "#/properties/httpsAgentOptions/properties/allowInsecureRequests",
+          "type": "boolean",
+          "title": "allowInsecureRequests",
+          "description": "If you are having certificate errors connecting to SAS, that cannot be properly resolved, try setting this value to true. This option only has an effect if rejectUnauthorized is not present.",
+          "default": false,
+          "examples": [true, false]
+        },
+        "caPath": {
+          "$id": "#/properties/httpsAgentOptions/properties/caPath",
+          "type": "string",
+          "title": "caPath",
+          "description": "Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla. Mozilla's CAs are completely replaced when CAs are explicitly specified using this option.",
+          "examples": ["path/to/caFile"]
+        },
+        "keyFile": {
+          "$id": "#/properties/httpsAgentOptions/properties/keyFile",
+          "type": "string",
+          "title": "keyFile",
+          "description": "Private keys in PEM format. PEM allows the option of private keys being encrypted. Encrypted keys will be decrypted with options.passphrase. Multiple keys using different algorithms can be provided either as an array of unencrypted key strings or buffers, or an array of objects in the form {pem: <string|buffer>[, passphrase: <string>]}. The object form can only occur in an array. object.passphrase is optional. Encrypted keys will be decrypted with object.passphrase if provided, or options.passphrase if it is not.",
+          "examples": ["path/to/keyFile"]
+        },
+        "certFile": {
+          "$id": "#/properties/httpsAgentOptions/properties/certFile",
+          "type": "string",
+          "title": "certFile",
+          "description": "Cert chains in PEM format. One cert chain should be provided per private key. Each cert chain should consist of the PEM formatted certificate for a provided private key, followed by the PEM formatted intermediate certificates (if any), in order, and not including the root CA (the root CA must be pre-known to the peer, see ca). When providing multiple cert chains, they do not have to be in the same order as their private keys in key. If the intermediate certificates are not provided, the peer will not be able to validate the certificate, and the handshake will fail.",
+          "examples": ["path/to/certFile"]
+        },
+        "requestCert": {
+          "$id": "#/properties/httpsAgentOptions/properties/requestCert",
+          "type": "boolean",
+          "title": "requestCert",
+          "description": "If true the server will request a certificate from clients that connect and attempt to verify that certificate. Defaults to false.",
+          "default": false,
+          "examples": [true, false]
+        },
+        "rejectUnauthorized": {
+          "$id": "#/properties/httpsAgentOptions/properties/rejectUnauthorized",
+          "type": "boolean",
+          "title": "rejectUnauthorized",
+          "description": "If true the server will reject any connection which is not authorized with the list of supplied CAs. This option only has an effect if requestCert is true.",
+          "default": true,
+          "examples": [true, false]
+        }
+      }
+    },
     "buildConfig": {
       "$id": "#/properties/buildConfig",
       "type": "object",
@@ -804,13 +867,8 @@
                 "default": "",
                 "examples": ["/Public/app"]
               },
-              "allowInsecureRequests": {
-                "$id": "#/properties/targets/items/anyOf/0/properties/allowInsecureRequests",
-                "type": "boolean",
-                "title": "allowInsecureRequests",
-                "description": "If you are having certificate errors connecting to SAS, that cannot be properly resolved, try setting this value to true.",
-                "default": false,
-                "examples": [true, false]
+              "httpsAgentOptions": {
+                "$ref": "#/properties/httpsAgentOptions"
               },
               "contextName": {
                 "$id": "#/properties/targets/items/anyOf/0/properties/contextName",
