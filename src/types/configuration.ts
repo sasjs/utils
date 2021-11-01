@@ -10,10 +10,11 @@ import {
 } from './config'
 import { ServerType } from './serverType'
 import { TargetJson } from './target'
+import { HttpsAgentOptions } from './httpsAgentOptions'
 
 export interface Configuration {
   $schema?: string
-  allowInsecureRequests?: boolean
+  httpsAgentOptions?: HttpsAgentOptions
   docConfig?: DocConfig
   buildConfig?: BuildConfig
   deployConfig?: DeployConfig
