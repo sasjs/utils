@@ -270,7 +270,7 @@
           "$id": "#/properties/httpsAgentOptions/properties/allowInsecureRequests",
           "type": "boolean",
           "title": "allowInsecureRequests",
-          "description": "If you are having certificate errors connecting to SAS, that cannot be properly resolved, try setting this value to true.",
+          "description": "If you are having certificate errors connecting to SAS, that cannot be properly resolved, try setting this value to true. This option only has an effect if rejectUnauthorized is not present.",
           "default": false,
           "examples": [true, false]
         },
