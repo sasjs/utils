@@ -1,5 +1,5 @@
 import validUrl from 'valid-url'
-import { ServerType } from '.'
+import { ServerType, HttpsAgentOptions } from '.'
 import {
   DocConfig,
   AuthConfig,
@@ -76,18 +76,41 @@ export const validateServerUrl = (serverUrl: string): string => {
   return serverUrl
 }
 
-export const validateAllowInsecureRequests = (
-  allowInsecureRequests: boolean
-): boolean => {
-  if (allowInsecureRequests === null || allowInsecureRequests === undefined) {
-    allowInsecureRequests = false
-  } else if (typeof allowInsecureRequests !== 'boolean') {
+export const validateHttpsAgentOptions = (
+  httpsAgentOptions: HttpsAgentOptions
+): HttpsAgentOptions | undefined => {
+  if (!httpsAgentOptions) return
+
+  if (typeof httpsAgentOptions !== 'object') {
     throw new Error(
-      'Invalid value: `allowInsecureRequests` should either be an empty or a boolean'
+      'Invalid value: `httpsAgentOptions` should either be an empty or an object of `HttpsAgentOptions`'
     )
   }
 
-  return allowInsecureRequests
+  if (
+    httpsAgentOptions.allowInsecureRequests === null ||
+    httpsAgentOptions.allowInsecureRequests === undefined
+  ) {
+    httpsAgentOptions.allowInsecureRequests = false
+  } else if (typeof httpsAgentOptions.allowInsecureRequests !== 'boolean') {
+    throw new Error(
+      'Invalid value: `httpsAgentOptions.allowInsecureRequests` should either be an empty or a boolean'
+    )
+  }
+
+  if (typeof httpsAgentOptions.caPath !== 'string') {
+    httpsAgentOptions.caPath = undefined
+  }
+
+  if (typeof httpsAgentOptions.keyPath !== 'string') {
+    httpsAgentOptions.keyPath = undefined
+  }
+
+  if (typeof httpsAgentOptions.certPath !== 'string') {
+    httpsAgentOptions.certPath = undefined
+  }
+
+  return httpsAgentOptions
 }
 
 export const validateAppLoc = (appLoc: string): string => {
