@@ -14,43 +14,19 @@ export const getInitTerm = async ({
   type,
   buildSourceFolder
 }: getInitTermParams) => {
-  let init, initPath
-  let term, termPath
+  const { content: init, filePath: initPath } = await getInit({
+    target,
+    configuration,
+    buildSourceFolder,
+    type
+  })
 
-  if (type === SASJsFileType.service) {
-    ;({ content: init, filePath: initPath } = await getServiceInit({
-      target,
-      configuration,
-      buildSourceFolder
-    }))
-    ;({ content: term, filePath: termPath } = await getServiceTerm({
-      target,
-      configuration,
-      buildSourceFolder
-    }))
-  } else if (type === SASJsFileType.job) {
-    ;({ content: init, filePath: initPath } = await getJobInit({
-      target,
-      configuration,
-      buildSourceFolder
-    }))
-    ;({ content: term, filePath: termPath } = await getJobTerm({
-      target,
-      configuration,
-      buildSourceFolder
-    }))
-  } else {
-    ;({ content: init, filePath: initPath } = await getTestInit({
-      target,
-      configuration,
-      buildSourceFolder
-    }))
-    ;({ content: term, filePath: termPath } = await getTestTerm({
-      target,
-      configuration,
-      buildSourceFolder
-    }))
-  }
+  const { content: term, filePath: termPath } = await getTerm({
+    target,
+    configuration,
+    buildSourceFolder,
+    type
+  })
 
   const startUpVars = getVars(type, target, configuration)
 
@@ -99,24 +75,35 @@ interface getInitTermParam {
   configuration?: Configuration
   target?: Target
   buildSourceFolder: string
+  type: SASJsFileType
 }
-export const getServiceInit = async ({
+
+export const getInit = async ({
   target,
   configuration,
-  buildSourceFolder
+  buildSourceFolder,
+  type
 }: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let serviceInitContent = '',
+  let initContent = '',
     filePath = ''
+
   const program =
-    target?.serviceConfig?.initProgram ??
-    configuration?.serviceConfig?.initProgram
+    type === SASJsFileType.service
+      ? target?.serviceConfig?.initProgram ??
+        configuration?.serviceConfig?.initProgram
+      : type === SASJsFileType.job
+      ? target?.jobConfig?.initProgram ?? configuration?.jobConfig?.initProgram
+      : type === SASJsFileType.test
+      ? target?.testConfig?.initProgram ??
+        configuration?.testConfig?.initProgram
+      : undefined
   if (program) {
     filePath = getAbsolutePath(program, buildSourceFolder)
-    serviceInitContent = await readFile(filePath)
+    initContent = await readFile(filePath)
   }
 
-  const content = serviceInitContent
-    ? `\n* ServiceInit start;\n${serviceInitContent}\n* ServiceInit end;`
+  const content = initContent
+    ? `\n* ${type}Init start;\n${initContent}\n* ${type}Init end;`
     : ''
 
   return {
@@ -125,117 +112,34 @@ export const getServiceInit = async ({
   }
 }
 
-export const getServiceTerm = async ({
+export const getTerm = async ({
   target,
   configuration,
-  buildSourceFolder
+  buildSourceFolder,
+  type
 }: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let serviceTermContent = '',
+  let termContent = '',
     filePath = ''
+
   const program =
-    target?.serviceConfig?.termProgram ??
-    configuration?.serviceConfig?.termProgram
+    type === SASJsFileType.service
+      ? target?.serviceConfig?.termProgram ??
+        configuration?.serviceConfig?.termProgram
+      : type === SASJsFileType.job
+      ? target?.jobConfig?.termProgram ?? configuration?.jobConfig?.termProgram
+      : type === SASJsFileType.test
+      ? target?.testConfig?.termProgram ??
+        configuration?.testConfig?.termProgram
+      : undefined
   if (program) {
     filePath = getAbsolutePath(program, buildSourceFolder)
-    serviceTermContent = await readFile(filePath)
+    termContent = await readFile(filePath)
   }
 
-  const content = serviceTermContent
-    ? `\n* ServiceTerm start;\n${serviceTermContent}\n* ServiceTerm end;`
+  const content = termContent
+    ? `\n* ${type}Init start;\n${termContent}\n* ${type}Init end;`
     : ''
-  return {
-    content,
-    filePath
-  }
-}
 
-export const getJobInit = async ({
-  target,
-  configuration,
-  buildSourceFolder
-}: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let jobInitContent = '',
-    filePath = ''
-  const program =
-    target?.jobConfig?.initProgram ?? configuration?.jobConfig?.initProgram
-  if (program) {
-    filePath = getAbsolutePath(program, buildSourceFolder)
-    jobInitContent = await readFile(filePath)
-  }
-
-  const content = jobInitContent
-    ? `\n* JobInit start;\n${jobInitContent}\n* JobInit end;`
-    : ''
-  return {
-    content,
-    filePath
-  }
-}
-
-export const getJobTerm = async ({
-  target,
-  configuration,
-  buildSourceFolder
-}: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let jobTermContent = '',
-    filePath = ''
-  const program =
-    target?.jobConfig?.termProgram ?? configuration?.jobConfig?.termProgram
-  if (program) {
-    filePath = getAbsolutePath(program, buildSourceFolder)
-    jobTermContent = await readFile(filePath)
-  }
-
-  const content = jobTermContent
-    ? `\n* JobTerm start;\n${jobTermContent}\n* JobTerm end;`
-    : ''
-  return {
-    content,
-    filePath
-  }
-}
-
-export const getTestInit = async ({
-  target,
-  configuration,
-  buildSourceFolder
-}: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let testInitContent = '',
-    filePath = ''
-  const program =
-    target?.testConfig?.initProgram ?? configuration?.testConfig?.initProgram
-  if (program) {
-    filePath = getAbsolutePath(program, buildSourceFolder)
-    testInitContent = await readFile(filePath)
-  }
-
-  const content = testInitContent
-    ? `\n* TestInit start;\n${testInitContent}\n* TestInit end;`
-    : ''
-  return {
-    content,
-    filePath
-  }
-}
-
-export const getTestTerm = async ({
-  target,
-  configuration,
-  buildSourceFolder
-}: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let testTermContent = '',
-    filePath = ''
-  const program =
-    target?.testConfig?.termProgram ?? configuration?.testConfig?.termProgram
-  if (program) {
-    filePath = getAbsolutePath(program, buildSourceFolder)
-
-    testTermContent = await readFile(filePath)
-  }
-
-  const content = testTermContent
-    ? `\n* TestTerm start;\n${testTermContent}\n* TestTerm end;`
-    : ''
   return {
     content,
     filePath

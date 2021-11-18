@@ -17,7 +17,7 @@ describe('Logger', () => {
   it('should log warnings when the log level is below Warn', () => {
     const logger = new Logger()
     logger.logLevel = LogLevel.Debug
-    spyOn(consola, 'warn')
+    jest.spyOn(consola, 'warn')
 
     logger.warn('This is a warning.')
 
@@ -26,7 +26,7 @@ describe('Logger', () => {
 
   it('should not log warnings when the log level is above Warn', () => {
     const logger = new Logger(LogLevel.Error)
-    spyOn(consola, 'warn')
+    jest.spyOn(consola, 'warn')
 
     logger.warn('This is a warning.')
 
@@ -35,7 +35,7 @@ describe('Logger', () => {
 
   it('should log errors when the log level is Warn', () => {
     const logger = new Logger(LogLevel.Warn)
-    spyOn(consola, 'error')
+    jest.spyOn(consola, 'error')
 
     logger.error('This is an error.')
 
@@ -44,7 +44,7 @@ describe('Logger', () => {
 
   it('should not log errors when the log level is Off', () => {
     const logger = new Logger(LogLevel.Off)
-    spyOn(consola, 'error')
+    jest.spyOn(consola, 'error')
 
     logger.error('This is an error.')
 
@@ -53,7 +53,7 @@ describe('Logger', () => {
 
   it('should log info messages when the log level is Info', () => {
     const logger = new Logger(LogLevel.Info)
-    spyOn(consola, 'info')
+    jest.spyOn(consola, 'info')
 
     logger.info('This is info.')
 
@@ -62,7 +62,7 @@ describe('Logger', () => {
 
   it('should not log info messages when the log level is Error', () => {
     const logger = new Logger(LogLevel.Error)
-    spyOn(consola, 'info')
+    jest.spyOn(consola, 'info')
 
     logger.info('This is info.')
 
@@ -71,7 +71,7 @@ describe('Logger', () => {
 
   it('should log debug messages when the log level is Debug', () => {
     const logger = new Logger(LogLevel.Debug)
-    spyOn(consola, 'debug')
+    jest.spyOn(consola, 'debug')
 
     logger.debug('This is debug.')
 
@@ -80,7 +80,7 @@ describe('Logger', () => {
 
   it('should not log debug messages when the log level is Error', () => {
     const logger = new Logger(LogLevel.Error)
-    spyOn(consola, 'debug')
+    jest.spyOn(consola, 'debug')
 
     logger.debug('This is debug.')
 
@@ -89,7 +89,7 @@ describe('Logger', () => {
 
   it('should log success messages when the log level is Debug', () => {
     const logger = new Logger(LogLevel.Debug)
-    spyOn(consola, 'success')
+    jest.spyOn(consola, 'success')
 
     logger.success('This is success.')
 
@@ -98,7 +98,7 @@ describe('Logger', () => {
 
   it('should not log success messages when the log level is Error', () => {
     const logger = new Logger(LogLevel.Error)
-    spyOn(consola, 'success')
+    jest.spyOn(consola, 'success')
 
     logger.success('This is success.')
 
@@ -107,7 +107,7 @@ describe('Logger', () => {
 
   it('should log a message regardless of log level', () => {
     const logger = new Logger(LogLevel.Off)
-    spyOn(consola, 'log')
+    jest.spyOn(consola, 'log')
 
     logger.log('This is a log.')
 
@@ -116,7 +116,7 @@ describe('Logger', () => {
 
   it('should log correct error message when empty string has been provided as argument', () => {
     const logger = new Logger(LogLevel.Error)
-    spyOn(consola, 'error')
+    jest.spyOn(consola, 'error')
 
     const message = `'test_results' not found in server response, to debug click https://server.com/SASJobExecution/?_program=/Public/sasjs/jobs/tests/macros/friday.test&_debug=2477&_contextName=SAS%20Job%20Execution%20compute%20context`
 
@@ -136,7 +136,7 @@ describe('Logger', () => {
   describe('logger.table', () => {
     it('should log a table with default border style without head', () => {
       const logger = new Logger(LogLevel.Debug)
-      spyOn(consola, 'log')
+      jest.spyOn(consola, 'log')
 
       logger.table(
         [
@@ -160,7 +160,7 @@ describe('Logger', () => {
 
     it('should log a table with default border style', () => {
       const logger = new Logger(LogLevel.Debug)
-      spyOn(consola, 'log')
+      jest.spyOn(consola, 'log')
 
       logger.table(
         [
@@ -186,7 +186,7 @@ describe('Logger', () => {
 
     it('should log a table with default border and special chars', () => {
       const logger = new Logger(LogLevel.Debug)
-      spyOn(consola, 'log')
+      jest.spyOn(consola, 'log')
 
       logger.table(
         [
@@ -216,7 +216,7 @@ describe('Logger', () => {
 
     it('should log a table with custom border style', () => {
       const logger = new Logger(LogLevel.Debug)
-      spyOn(consola, 'log')
+      jest.spyOn(consola, 'log')
 
       logger.table(
         [
