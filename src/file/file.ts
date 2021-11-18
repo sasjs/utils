@@ -230,3 +230,7 @@ export async function createWriteStream(filePath: string) {
   await file.createFile(filePath, '')
   return fs.createWriteStream(filePath, { flags: 'a' })
 }
+
+export const testFileRegExp = /\.test\.(\d+\.)?sas$/i
+
+export const isTestFile = (fileName: string) => testFileRegExp.test(fileName)

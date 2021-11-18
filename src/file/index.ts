@@ -20,7 +20,10 @@ export {
   copy,
   base64EncodeImageFile,
   base64EncodeFile,
-  getRealPath
+  getRealPath,
+  isTestFile,
+  testFileRegExp
 } from './file'
 
 export { updateCsv, createCsv, readCsv } from './csvFile'
+export * from './getAbsolutePath'
