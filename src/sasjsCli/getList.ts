@@ -1,6 +1,6 @@
 /**
  * Gets a list of @li items from the supplied file content with the specified header.
- * @param {string} listHeader - the header of the section to look for - e.g. <h4> Dependencies </h4>.
+ * @param {string} listHeader - the header of the section to look for - e.g. <h4> SAS Macros </h4>.
  * @param {string} fileContent - the text content of the file.
  */
 export const getList = (listHeader: string, fileContent: string) => {
