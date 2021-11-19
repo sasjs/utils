@@ -82,6 +82,19 @@ describe('getDependencyPaths', () => {
     )
   })
 
+  test('it should throw an error when a dependency Path is not found', async () => {
+    const fileContent = await readFile(
+      path.join(__dirname, 'testFiles', 'missing-dependency.sas')
+    )
+
+    const noDir = 'non-existing/dir'
+    await expect(
+      getDependencyPaths(fileContent, [noDir], macroCorePath)
+    ).rejects.toEqual(
+      `Error listing dependency paths: Source path ${noDir} does not exist.`
+    )
+  })
+
   test('it should ignore non-sas dependencies', async () => {
     const fileContent = await readFile(
       path.join(__dirname, 'testFiles', 'non-sas-dependency.sas')

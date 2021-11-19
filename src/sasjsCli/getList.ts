@@ -4,16 +4,9 @@
  * @param {string} fileContent - the text content of the file.
  */
 export const getList = (listHeader: string, fileContent: string) => {
-  let fileHeader
-  try {
-    const hasFileHeader = fileContent.split('/**')[0] !== fileContent
-    if (!hasFileHeader) return []
-    fileHeader = fileContent.split('/**')[1].split('**/')[0]
-  } catch (e) {
-    throw new Error(
-      'File header parse error.\nPlease make sure your file header is in the correct format.'
-    )
-  }
+  const hasFileHeader = fileContent.split('/**')[0] !== fileContent
+  if (!hasFileHeader) return []
+  const fileHeader = fileContent.split('/**')[1].split('**/')[0]
 
   const list = []
 

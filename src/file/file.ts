@@ -123,9 +123,8 @@ export async function deleteFile(filePath: string) {
 export async function deleteFolder(folderPath: string) {
   return new Promise<void>((resolve, reject) => {
     rimraf(folderPath, {}, (error) => {
-      if (error) {
-        return reject(error)
-      }
+      if (error) return reject(error)
+
       return resolve()
     })
   })

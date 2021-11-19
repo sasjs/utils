@@ -15,6 +15,17 @@ describe('getProgramDependencies', () => {
     "put '%put ''Hello, world!'';';",
     'run;'
   ]
+  const expectedLines2 = [
+    'filename TEST temp;',
+    'data _null_;',
+    'file TEST lrecl=32767;',
+    "put '/* SOME COMMENT which is more than 220 characters long, so that this will be chunked into multiple lines. SOME COMMENT which is more than 220 characters long, so that this will be chunked into multiple lines. SOME COMMEN'@;",
+    "put 'T which is more than 220 characters long, so that this will be chunked into multiple lines.*/';",
+    "put '%put ''Hello, world!'';';",
+    "put '/* SOME COMMENT which is more than 220 characters long, so that this will be chunked into multiple lines. SOME COMMENT which is more than 220 characters long, so that this will be chunked into multiple lines. SOME COMMEN'@;",
+    "put 'T which is more than 220 characters long, so that this will be chunked into multiple lines.*/';",
+    'run;'
+  ]
 
   test('it should get all program dependencies', async () => {
     const filePath = path.join(__dirname, 'testFiles', './example.sas')
@@ -28,6 +39,20 @@ describe('getProgramDependencies', () => {
     const actualLines = dependencies.split('\n')
 
     expect(actualLines).toEqual(expectedLines)
+  })
+
+  test('it should get all program dependencies with line to be chunked', async () => {
+    const filePath = path.join(__dirname, 'testFiles', './example2.sas')
+    const fileContent = await readFile(filePath)
+
+    const dependencies = await getProgramDependencies(
+      fileContent,
+      [path.join(__dirname, 'testFiles', 'programs')],
+      filePath
+    )
+    const actualLines = dependencies.split('\n')
+
+    expect(actualLines).toEqual(expectedLines2)
   })
 
   test('it should choose the first dependency when there are duplicates', async () => {
@@ -73,6 +98,28 @@ describe('getProgramDependencies', () => {
     const actualLines = dependencies.split('\n')
 
     expect(actualLines).toEqual(expectedOutput)
+  })
+
+  test('it should throw an error when a program dependency is not found', async () => {
+    const filePath = path.join(
+      __dirname,
+      'testFiles',
+      './missing-program-dep.sas'
+    )
+    const fileContent = await readFile(filePath)
+
+    const programsPath = path.join(__dirname, 'testFiles', 'programs')
+    await expect(
+      getProgramDependencies(fileContent, [programsPath], filePath)
+    ).rejects.toThrow(
+      `Unable to load dependencies for: ${filePath}\n` +
+        'The following files were listed under SAS Programs but could not be found:\n' +
+        "1. 'foobar.sas' with fileRef 'FOO'\n" +
+        "2. 'foobar2.sas' with fileRef 'FOO2'\n" +
+        'Please check that they exist in the folder(s) listed in the `programFolders` array in your sasjsconfig.json file.\n' +
+        'Program Folders:\n' +
+        `- ${programsPath}`
+    )
   })
 
   test('it should throw an error when a fileref is not specified', async () => {

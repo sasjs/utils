@@ -16,6 +16,10 @@ export interface ServiceConfig extends Config {
 export interface JobConfig extends Config {
   jobFolders: string[]
 }
+export interface TestConfig extends Config {
+  testSetUp: string
+  testTearDown: string
+}
 export interface DocConfig {
   displayMacroCore?: boolean
   enableLineage?: boolean
@@ -53,12 +57,4 @@ export interface AuthConfig {
 export interface AuthConfigSas9 {
   userName: string
   password: string
-}
-
-export interface TestConfig {
-  initProgram: string
-  termProgram: string
-  macroVars: MacroVar
-  testSetUp: string
-  testTearDown: string
 }

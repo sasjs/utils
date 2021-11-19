@@ -13,11 +13,11 @@ export const getProgramList = (
 
     if (!fileName) {
       throw new Error(
-        `SAS Program ${fileName} is missing file name. Please specify SAS program dependencies in the format: @li <filename> <fileref>`
+        `SAS Program entry is empty. Please specify SAS program dependencies in the format: @li <filename> <fileref>`
       )
     }
 
-    if (fileName && !fileRef) {
+    if (!fileRef) {
       throw new Error(
         `SAS Program ${fileName} is missing fileref. Please specify SAS program dependencies in the format: @li <filename> <fileref>`
       )
