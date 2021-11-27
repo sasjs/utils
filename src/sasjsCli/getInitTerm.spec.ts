@@ -1,3 +1,4 @@
+import path from 'path'
 import {
   Configuration,
   JobConfig,
@@ -70,7 +71,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig(false).initProgram
+        filePath: jobConfig(false).initProgram.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -82,7 +83,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig(false).initProgram
+        filePath: jobConfig(false).initProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
@@ -98,7 +99,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig().initProgram
+        filePath: jobConfig().initProgram.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, jobConfig: undefined }
@@ -111,7 +112,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig().initProgram
+        filePath: jobConfig().initProgram.replace(/\//g, path.sep)
       })
     })
   })
@@ -129,7 +130,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig(false).initProgram
+        filePath: serviceConfig(false).initProgram.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -141,7 +142,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig(false).initProgram
+        filePath: serviceConfig(false).initProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
@@ -157,7 +158,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig().initProgram
+        filePath: serviceConfig().initProgram.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, serviceConfig: undefined }
@@ -170,7 +171,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig().initProgram
+        filePath: serviceConfig().initProgram.replace(/\//g, path.sep)
       })
     })
   })
@@ -188,7 +189,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig(false).initProgram
+        filePath: testConfig(false).initProgram.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -200,7 +201,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig(false).initProgram
+        filePath: testConfig(false).initProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
@@ -216,7 +217,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig().initProgram
+        filePath: testConfig().initProgram.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, testConfig: undefined }
@@ -229,7 +230,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig().initProgram
+        filePath: testConfig().initProgram.replace(/\//g, path.sep)
       })
     })
   })
@@ -249,7 +250,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig(false).termProgram
+        filePath: jobConfig(false).termProgram.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -261,7 +262,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig(false).termProgram
+        filePath: jobConfig(false).termProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
@@ -277,7 +278,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig().termProgram
+        filePath: jobConfig().termProgram.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, jobConfig: undefined }
@@ -290,7 +291,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: jobConfig().termProgram
+        filePath: jobConfig().termProgram.replace(/\//g, path.sep)
       })
     })
   })
@@ -308,7 +309,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig(false).termProgram
+        filePath: serviceConfig(false).termProgram.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -320,7 +321,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig(false).termProgram
+        filePath: serviceConfig(false).termProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
@@ -336,7 +337,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig().termProgram
+        filePath: serviceConfig().termProgram.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, serviceConfig: undefined }
@@ -349,7 +350,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: serviceConfig().termProgram
+        filePath: serviceConfig().termProgram.replace(/\//g, path.sep)
       })
     })
   })
@@ -367,7 +368,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig(false).termProgram
+        filePath: testConfig(false).termProgram.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -379,7 +380,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig(false).termProgram
+        filePath: testConfig(false).termProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
@@ -395,7 +396,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig().termProgram
+        filePath: testConfig().termProgram.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, testConfig: undefined }
@@ -408,7 +409,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: '',
-        filePath: testConfig().termProgram
+        filePath: testConfig().termProgram.replace(/\//g, path.sep)
       })
     })
   })
