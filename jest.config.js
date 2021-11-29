@@ -1,6 +1,12 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/js-with-ts',
+  resetMocks: true,
+  restoreMocks: true,
+  setupFilesAfterEnv: ['jest-extended/all'],
   testEnvironment: 'node',
+  transform: {
+    '^.+\\.ts?$': 'ts-jest'
+  },
   coverageThreshold: {
     global: {
       branches: 80,
