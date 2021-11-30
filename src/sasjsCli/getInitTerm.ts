@@ -137,7 +137,7 @@ export const getTerm = async ({
   }
 
   const content = termContent
-    ? `\n* ${type}Init start;\n${termContent}\n* ${type}Init end;`
+    ? `\n* ${type}Term start;\n${termContent}\n* ${type}Term end;`
     : ''
 
   return {

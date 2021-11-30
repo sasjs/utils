@@ -55,13 +55,15 @@ const configuration: Configuration = {
   testConfig: testConfig()
 }
 const buildSourceFolder = ''
+const initFileContent = ' INIT FILE CONTENT '
+const termFileContent = ' TERM FILE CONTENT '
 
 describe('getInit', () => {
   describe('job', () => {
     test('should return with Init Program of Target', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(initFileContent))
 
       await expect(
         getInit({
@@ -70,7 +72,7 @@ describe('getInit', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.job),
         filePath: jobConfig(false).initProgram.replace(/\//g, path.sep)
       })
 
@@ -82,14 +84,14 @@ describe('getInit', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.job),
         filePath: jobConfig(false).initProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(initFileContent))
 
       await expect(
         getInit({
@@ -98,7 +100,7 @@ describe('getInit', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.job),
         filePath: jobConfig().initProgram.replace(/\//g, path.sep)
       })
 
@@ -111,7 +113,7 @@ describe('getInit', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.job),
         filePath: jobConfig().initProgram.replace(/\//g, path.sep)
       })
     })
@@ -120,7 +122,7 @@ describe('getInit', () => {
     test('should return with Init Program of Target', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(initFileContent))
 
       await expect(
         getInit({
@@ -129,7 +131,7 @@ describe('getInit', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.service),
         filePath: serviceConfig(false).initProgram.replace(/\//g, path.sep)
       })
 
@@ -141,14 +143,14 @@ describe('getInit', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.service),
         filePath: serviceConfig(false).initProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(initFileContent))
 
       await expect(
         getInit({
@@ -157,7 +159,7 @@ describe('getInit', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.service),
         filePath: serviceConfig().initProgram.replace(/\//g, path.sep)
       })
 
@@ -170,7 +172,7 @@ describe('getInit', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.service),
         filePath: serviceConfig().initProgram.replace(/\//g, path.sep)
       })
     })
@@ -179,7 +181,7 @@ describe('getInit', () => {
     test('should return with Init Program of Target', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(initFileContent))
 
       await expect(
         getInit({
@@ -188,7 +190,7 @@ describe('getInit', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.test),
         filePath: testConfig(false).initProgram.replace(/\//g, path.sep)
       })
 
@@ -200,14 +202,14 @@ describe('getInit', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.test),
         filePath: testConfig(false).initProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(initFileContent))
 
       await expect(
         getInit({
@@ -216,7 +218,7 @@ describe('getInit', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.test),
         filePath: testConfig().initProgram.replace(/\//g, path.sep)
       })
 
@@ -229,7 +231,7 @@ describe('getInit', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedInitContent(SASJsFileType.test),
         filePath: testConfig().initProgram.replace(/\//g, path.sep)
       })
     })
@@ -240,7 +242,7 @@ describe('getTerm', () => {
     test('should return with Term Program of Target', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(termFileContent))
 
       await expect(
         getTerm({
@@ -249,7 +251,7 @@ describe('getTerm', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.job),
         filePath: jobConfig(false).termProgram.replace(/\//g, path.sep)
       })
 
@@ -261,14 +263,14 @@ describe('getTerm', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.job),
         filePath: jobConfig(false).termProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(termFileContent))
 
       await expect(
         getTerm({
@@ -277,7 +279,7 @@ describe('getTerm', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.job),
         filePath: jobConfig().termProgram.replace(/\//g, path.sep)
       })
 
@@ -290,7 +292,7 @@ describe('getTerm', () => {
           type: SASJsFileType.job
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.job),
         filePath: jobConfig().termProgram.replace(/\//g, path.sep)
       })
     })
@@ -299,7 +301,7 @@ describe('getTerm', () => {
     test('should return with Term Program of Target', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(termFileContent))
 
       await expect(
         getTerm({
@@ -308,7 +310,7 @@ describe('getTerm', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.service),
         filePath: serviceConfig(false).termProgram.replace(/\//g, path.sep)
       })
 
@@ -320,14 +322,14 @@ describe('getTerm', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.service),
         filePath: serviceConfig(false).termProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(termFileContent))
 
       await expect(
         getTerm({
@@ -336,7 +338,7 @@ describe('getTerm', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.service),
         filePath: serviceConfig().termProgram.replace(/\//g, path.sep)
       })
 
@@ -349,7 +351,7 @@ describe('getTerm', () => {
           type: SASJsFileType.service
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.service),
         filePath: serviceConfig().termProgram.replace(/\//g, path.sep)
       })
     })
@@ -358,7 +360,7 @@ describe('getTerm', () => {
     test('should return with Term Program of Target', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(termFileContent))
 
       await expect(
         getTerm({
@@ -367,7 +369,7 @@ describe('getTerm', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.test),
         filePath: testConfig(false).termProgram.replace(/\//g, path.sep)
       })
 
@@ -379,14 +381,14 @@ describe('getTerm', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.test),
         filePath: testConfig(false).termProgram.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
       jest
         .spyOn(internalModule, 'readFile')
-        .mockImplementation(() => Promise.resolve(''))
+        .mockImplementation(() => Promise.resolve(termFileContent))
 
       await expect(
         getTerm({
@@ -395,7 +397,7 @@ describe('getTerm', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.test),
         filePath: testConfig().termProgram.replace(/\//g, path.sep)
       })
 
@@ -408,9 +410,14 @@ describe('getTerm', () => {
           type: SASJsFileType.test
         })
       ).resolves.toEqual({
-        content: '',
+        content: expectedTermContent(SASJsFileType.test),
         filePath: testConfig().termProgram.replace(/\//g, path.sep)
       })
     })
   })
 })
+
+const expectedInitContent = (type: SASJsFileType) =>
+  `\n* ${type}Init start;\n${initFileContent}\n* ${type}Init end;`
+const expectedTermContent = (type: SASJsFileType) =>
+  `\n* ${type}Term start;\n${termFileContent}\n* ${type}Term end;`
