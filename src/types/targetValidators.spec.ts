@@ -191,6 +191,14 @@ describe('validateHttpsAgentOptions', () => {
     ).toThrowError(
       'Invalid value: `httpsAgentOptions` should either be an empty or an object of `HttpsAgentOptions`'
     )
+
+    expect(() =>
+      validateHttpsAgentOptions({
+        allowInsecureRequests: 'yes'
+      } as unknown as HttpsAgentOptions)
+    ).toThrowError(
+      'Invalid value: `httpsAgentOptions.allowInsecureRequests` should either be an empty or a boolean'
+    )
   })
 
   it('should return httpsAgentOptions when valid', () => {
