@@ -36,7 +36,7 @@
     "@sasjs/core": "^2.48.6",
     "@types/cli-table": "^0.3.0",
     "@types/find": "0.2.1",
-    "@types/jest": "27.0.2",
+    "@types/jest": "27.0.3",
     "@types/lodash.groupby": "4.6.6",
     "@types/lodash.uniqby": "4.7.6",
     "@types/rimraf": "^3.0.1",
