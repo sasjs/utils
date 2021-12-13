@@ -60,7 +60,7 @@
     "jwt-decode": "^3.1.2",
     "lodash.groupby": "4.6.0",
     "lodash.uniqby": "4.7.0",
-    "prompts": "^2.4.1",
+    "prompts": "^2.4.2",
     "rimraf": "^3.0.2",
     "valid-url": "^1.0.9"
   }
