@@ -1,0 +1,3 @@
+npm run package:lib
+cd ../server/api
+npm install ../../utils/build/sasjs-utils-5.0.0.tgz

@@ -844,7 +844,7 @@
                 "$id": "#/properties/targets/items/anyOf/0/properties/serverType",
                 "type": "string",
                 "title": "The Target serverType",
-                "description": "The serverType can be either SAS9 or SASVIYA.",
+                "description": "The serverType can be either SAS9, SASVIYA or SASJS.",
                 "default": "",
                 "examples": ["SASVIYA"]
               },
