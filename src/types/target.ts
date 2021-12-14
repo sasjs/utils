@@ -35,11 +35,13 @@ export interface TargetJson {
   name: string
   serverUrl: string
   serverType: ServerType
+  appLoc: string
+  macroFolders: string[]
+  programFolders: string[]
   httpsAgentOptions?: HttpsAgentOptions
   contextName?: string
   serverName?: string
   repositoryName?: string
-  appLoc: string
   docConfig?: DocConfig
   authConfig?: AuthConfig
   authConfigSas9?: AuthConfigSas9
@@ -48,8 +50,6 @@ export interface TargetJson {
   serviceConfig?: ServiceConfig
   jobConfig?: JobConfig
   streamConfig?: StreamConfig
-  macroFolders: string[]
-  programFolders: string[]
   isDefault?: boolean
   testConfig?: TestConfig
 }
@@ -70,15 +70,25 @@ export class Target implements TargetJson {
   }
   private _serverType = ServerType.SasViya
 
-  get httpsAgentOptions(): HttpsAgentOptions | undefined {
-    return this._httpsAgentOptions
-  }
-  private _httpsAgentOptions
-
   get appLoc(): string {
     return this._appLoc
   }
   private _appLoc
+
+  get macroFolders(): string[] {
+    return this._macroFolders
+  }
+  private _macroFolders: string[] = []
+
+  get programFolders(): string[] {
+    return this._programFolders
+  }
+  private _programFolders: string[] = []
+
+  get httpsAgentOptions(): HttpsAgentOptions | undefined {
+    return this._httpsAgentOptions
+  }
+  private _httpsAgentOptions
 
   get docConfig(): DocConfig | undefined {
     return this._docConfig
@@ -119,16 +129,6 @@ export class Target implements TargetJson {
     return this._streamConfig
   }
   private _streamConfig: StreamConfig | undefined
-
-  get macroFolders(): string[] {
-    return this._macroFolders
-  }
-  private _macroFolders: string[] = []
-
-  get programFolders(): string[] {
-    return this._programFolders
-  }
-  private _programFolders: string[] = []
 
   get contextName(): string {
     return this._contextName

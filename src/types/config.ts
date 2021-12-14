@@ -1,9 +1,9 @@
 import { MacroVar } from './'
 
 export interface Config {
-  macroVars: MacroVar
-  initProgram: string
-  termProgram: string
+  macroVars?: MacroVar
+  initProgram?: string
+  termProgram?: string
 }
 export interface BuildConfig extends Config {
   buildOutputFileName: string
@@ -11,14 +11,14 @@ export interface BuildConfig extends Config {
   buildResultsFolder?: string
 }
 export interface ServiceConfig extends Config {
-  serviceFolders: string[]
+  serviceFolders?: string[]
 }
 export interface JobConfig extends Config {
-  jobFolders: string[]
+  jobFolders?: string[]
 }
 export interface TestConfig extends Config {
-  testSetUp: string
-  testTearDown: string
+  testSetUp?: string
+  testTearDown?: string
 }
 export interface DocConfig {
   displayMacroCore?: boolean

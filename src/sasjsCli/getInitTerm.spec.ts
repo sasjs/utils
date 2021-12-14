@@ -16,9 +16,7 @@ const jobConfig = (root: boolean = true): JobConfig => ({
     : '/target/jobinitProgram/path',
   termProgram: root
     ? '/configuration/jobtermProgram/path'
-    : '/target/jobtermProgram/path',
-  jobFolders: [],
-  macroVars: {}
+    : '/target/jobtermProgram/path'
 })
 
 const serviceConfig = (root: boolean = true): ServiceConfig => ({
@@ -27,9 +25,7 @@ const serviceConfig = (root: boolean = true): ServiceConfig => ({
     : '/target/serviceinitProgram/path',
   termProgram: root
     ? '/configuration/servicetermProgram/path'
-    : '/target/servicetermProgram/path',
-  serviceFolders: [],
-  macroVars: {}
+    : '/target/servicetermProgram/path'
 })
 
 const testConfig = (root: boolean = true): TestConfig => ({
@@ -73,7 +69,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.job),
-        filePath: jobConfig(false).initProgram.replace(/\//g, path.sep)
+        filePath: jobConfig(false).initProgram!.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -85,7 +81,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.job),
-        filePath: jobConfig(false).initProgram.replace(/\//g, path.sep)
+        filePath: jobConfig(false).initProgram!.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
@@ -101,7 +97,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.job),
-        filePath: jobConfig().initProgram.replace(/\//g, path.sep)
+        filePath: jobConfig().initProgram!.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, jobConfig: undefined }
@@ -114,7 +110,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.job),
-        filePath: jobConfig().initProgram.replace(/\//g, path.sep)
+        filePath: jobConfig().initProgram!.replace(/\//g, path.sep)
       })
     })
   })
@@ -132,7 +128,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.service),
-        filePath: serviceConfig(false).initProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig(false).initProgram!.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -144,7 +140,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.service),
-        filePath: serviceConfig(false).initProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig(false).initProgram!.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
@@ -160,7 +156,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.service),
-        filePath: serviceConfig().initProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig().initProgram!.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, serviceConfig: undefined }
@@ -173,7 +169,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.service),
-        filePath: serviceConfig().initProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig().initProgram!.replace(/\//g, path.sep)
       })
     })
   })
@@ -191,7 +187,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.test),
-        filePath: testConfig(false).initProgram.replace(/\//g, path.sep)
+        filePath: testConfig(false).initProgram!.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -203,7 +199,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.test),
-        filePath: testConfig(false).initProgram.replace(/\//g, path.sep)
+        filePath: testConfig(false).initProgram!.replace(/\//g, path.sep)
       })
     })
     test('should return with Init Program of Configuration', async () => {
@@ -219,7 +215,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.test),
-        filePath: testConfig().initProgram.replace(/\//g, path.sep)
+        filePath: testConfig().initProgram!.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, testConfig: undefined }
@@ -232,7 +228,7 @@ describe('getInit', () => {
         })
       ).resolves.toEqual({
         content: expectedInitContent(SASJsFileType.test),
-        filePath: testConfig().initProgram.replace(/\//g, path.sep)
+        filePath: testConfig().initProgram!.replace(/\//g, path.sep)
       })
     })
   })
@@ -252,7 +248,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.job),
-        filePath: jobConfig(false).termProgram.replace(/\//g, path.sep)
+        filePath: jobConfig(false).termProgram!.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -264,7 +260,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.job),
-        filePath: jobConfig(false).termProgram.replace(/\//g, path.sep)
+        filePath: jobConfig(false).termProgram!.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
@@ -280,7 +276,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.job),
-        filePath: jobConfig().termProgram.replace(/\//g, path.sep)
+        filePath: jobConfig().termProgram!.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, jobConfig: undefined }
@@ -293,7 +289,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.job),
-        filePath: jobConfig().termProgram.replace(/\//g, path.sep)
+        filePath: jobConfig().termProgram!.replace(/\//g, path.sep)
       })
     })
   })
@@ -311,7 +307,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.service),
-        filePath: serviceConfig(false).termProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig(false).termProgram!.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -323,7 +319,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.service),
-        filePath: serviceConfig(false).termProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig(false).termProgram!.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
@@ -339,7 +335,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.service),
-        filePath: serviceConfig().termProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig().termProgram!.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, serviceConfig: undefined }
@@ -352,7 +348,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.service),
-        filePath: serviceConfig().termProgram.replace(/\//g, path.sep)
+        filePath: serviceConfig().termProgram!.replace(/\//g, path.sep)
       })
     })
   })
@@ -370,7 +366,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.test),
-        filePath: testConfig(false).termProgram.replace(/\//g, path.sep)
+        filePath: testConfig(false).termProgram!.replace(/\//g, path.sep)
       })
 
       await expect(
@@ -382,7 +378,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.test),
-        filePath: testConfig(false).termProgram.replace(/\//g, path.sep)
+        filePath: testConfig(false).termProgram!.replace(/\//g, path.sep)
       })
     })
     test('should return with Term Program of Configuration', async () => {
@@ -398,7 +394,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.test),
-        filePath: testConfig().termProgram.replace(/\//g, path.sep)
+        filePath: testConfig().termProgram!.replace(/\//g, path.sep)
       })
 
       const newtarget = { ...target, testConfig: undefined }
@@ -411,7 +407,7 @@ describe('getTerm', () => {
         })
       ).resolves.toEqual({
         content: expectedTermContent(SASJsFileType.test),
-        filePath: testConfig().termProgram.replace(/\//g, path.sep)
+        filePath: testConfig().termProgram!.replace(/\//g, path.sep)
       })
     })
   })

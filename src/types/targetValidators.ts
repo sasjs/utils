@@ -193,57 +193,37 @@ export const validateBuildConfig = (
   if (!buildConfig) {
     throw new Error('Invalid build config: JSON cannot be null or undefined.')
   }
-  if (!buildConfig.buildResultsFolder) {
+
+  if (!buildConfig.buildResultsFolder)
     buildConfig.buildResultsFolder = 'sasjsresults'
-  }
 
-  if (!buildConfig.buildOutputFolder) {
+  if (!buildConfig.buildOutputFolder)
     buildConfig.buildOutputFolder = 'sasjsbuild'
-  }
 
-  if (!buildConfig.buildOutputFileName) {
+  if (!buildConfig.buildOutputFileName)
     buildConfig.buildOutputFileName = `${defaultName}.sas`
-  }
 
-  if (!buildConfig.initProgram) {
-    buildConfig.initProgram = ''
-  }
-
-  if (!buildConfig.termProgram) {
-    buildConfig.termProgram = ''
-  }
-
-  if (!buildConfig.macroVars) {
-    buildConfig.macroVars = {}
-  }
+  if (!buildConfig.initProgram) buildConfig.initProgram = ''
+  if (!buildConfig.termProgram) buildConfig.termProgram = ''
+  if (!buildConfig.macroVars) buildConfig.macroVars = {}
 
   return buildConfig
 }
 
 export const validateServiceConfig = (
-  serviceConfig: ServiceConfig
+  srvConf: ServiceConfig
 ): ServiceConfig => {
-  if (!serviceConfig) {
+  if (!srvConf) {
     throw new Error('Invalid service config: JSON cannot be null or undefined.')
   }
 
-  if (!serviceConfig.initProgram) {
-    serviceConfig.initProgram = ''
-  }
+  if (!validMacroVar(srvConf.macroVars)) srvConf.macroVars = undefined
+  if (!validStr(srvConf.initProgram)) srvConf.initProgram = undefined
+  if (!validStr(srvConf.termProgram)) srvConf.termProgram = undefined
 
-  if (!serviceConfig.termProgram) {
-    serviceConfig.termProgram = ''
-  }
+  if (!validStrArr(srvConf.serviceFolders)) srvConf.serviceFolders = undefined
 
-  if (!serviceConfig.serviceFolders) {
-    serviceConfig.serviceFolders = []
-  }
-
-  if (!serviceConfig.macroVars) {
-    serviceConfig.macroVars = {}
-  }
-
-  return serviceConfig
+  return srvConf
 }
 
 export const validateTestConfig = (testConfig: TestConfig): TestConfig => {
@@ -251,11 +231,12 @@ export const validateTestConfig = (testConfig: TestConfig): TestConfig => {
     throw new Error('Invalid test config: JSON cannot be null or undefined.')
   }
 
-  if (!testConfig.initProgram) testConfig.initProgram = ''
-  if (!testConfig.termProgram) testConfig.termProgram = ''
-  if (!testConfig.macroVars) testConfig.macroVars = {}
-  if (!testConfig.testSetUp) testConfig.testSetUp = ''
-  if (!testConfig.testTearDown) testConfig.testTearDown = ''
+  if (!validMacroVar(testConfig.macroVars)) testConfig.macroVars = undefined
+  if (!validStr(testConfig.initProgram)) testConfig.initProgram = undefined
+  if (!validStr(testConfig.termProgram)) testConfig.termProgram = undefined
+
+  if (!validStr(testConfig.testSetUp)) testConfig.testSetUp = undefined
+  if (!validStr(testConfig.testTearDown)) testConfig.testTearDown = undefined
 
   return testConfig
 }
@@ -265,21 +246,11 @@ export const validateJobConfig = (jobConfig: JobConfig): JobConfig => {
     throw new Error('Invalid job config: JSON cannot be null or undefined.')
   }
 
-  if (!jobConfig.initProgram) {
-    jobConfig.initProgram = ''
-  }
+  if (!validMacroVar(jobConfig.macroVars)) jobConfig.macroVars = undefined
+  if (!validStr(jobConfig.initProgram)) jobConfig.initProgram = undefined
+  if (!validStr(jobConfig.termProgram)) jobConfig.termProgram = undefined
 
-  if (!jobConfig.termProgram) {
-    jobConfig.termProgram = ''
-  }
-
-  if (!jobConfig.jobFolders) {
-    jobConfig.jobFolders = []
-  }
-
-  if (!jobConfig.macroVars) {
-    jobConfig.macroVars = {}
-  }
+  if (!validStrArr(jobConfig.jobFolders)) jobConfig.jobFolders = undefined
 
   return jobConfig
 }
@@ -293,9 +264,7 @@ export const validateDeployConfig = (
 
   deployConfig.deployServicePack = !!deployConfig.deployServicePack
 
-  if (!deployConfig.deployScripts) {
-    deployConfig.deployScripts = []
-  }
+  if (!deployConfig.deployScripts) deployConfig.deployScripts = []
 
   return deployConfig
 }
@@ -368,3 +337,13 @@ export const validateRepositoryName = (
 
   return repositoryName
 }
+
+const validStr = (input?: any): boolean => typeof input === 'string'
+
+const validStrArr = (input?: any[]): boolean =>
+  Array.isArray(input) && input.every((item) => validStr(item))
+
+const validMacroVar = (obj?: any): boolean =>
+  obj &&
+  !Array.isArray(obj) &&
+  Object.keys(obj).every((prop) => validStr(obj[prop]))

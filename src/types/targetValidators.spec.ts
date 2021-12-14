@@ -260,7 +260,7 @@ describe('validateBuildConfig', () => {
     })
   })
 
-  it('should set the term program to the empty string if null', () => {
+  it('should unset the term program if null', () => {
     expect(
       validateBuildConfig(
         {
@@ -390,32 +390,27 @@ describe('validateServiceConfig', () => {
     ).toThrowError('Invalid service config: JSON cannot be null or undefined.')
   })
 
-  it('should set the init program to the empty string if null', () => {
+  it('should unset the init program  if null', () => {
     expect(
       validateServiceConfig({
         serviceFolders: [],
         initProgram: null
       } as unknown as ServiceConfig)
     ).toEqual({
-      serviceFolders: [],
-      initProgram: '',
-      termProgram: '',
-      macroVars: {}
+      serviceFolders: []
     })
   })
 
-  it('should set the term program to the empty string if null', () => {
+  it('should unset the term program if null', () => {
     expect(
       validateServiceConfig({
         serviceFolders: [],
         initProgram: 'test',
-        termProgram: ''
+        termProgram: null
       } as unknown as ServiceConfig)
     ).toEqual({
       serviceFolders: [],
-      initProgram: 'test',
-      termProgram: '',
-      macroVars: {}
+      initProgram: 'test'
     })
   })
 
@@ -435,17 +430,15 @@ describe('validateServiceConfig', () => {
     })
   })
 
-  it('should initialise the macro vars if not present', () => {
+  it('should unset the macro vars if not present', () => {
     expect(
       validateServiceConfig({
         initProgram: 'init',
         termProgram: 'term'
       } as unknown as ServiceConfig)
     ).toEqual({
-      serviceFolders: [],
       initProgram: 'init',
-      termProgram: 'term',
-      macroVars: {}
+      termProgram: 'term'
     })
   })
 })
@@ -463,32 +456,27 @@ describe('validateJobConfig', () => {
     ).toThrowError('Invalid job config: JSON cannot be null or undefined.')
   })
 
-  it('should set the init program to the empty string if null', () => {
+  it('should unset the init program if null', () => {
     expect(
       validateJobConfig({
         jobFolders: [],
         initProgram: null
       } as unknown as JobConfig)
     ).toEqual({
-      jobFolders: [],
-      initProgram: '',
-      termProgram: '',
-      macroVars: {}
+      jobFolders: []
     })
   })
 
-  it('should set the term program to the empty string if null', () => {
+  it('should unset the term program if null', () => {
     expect(
       validateJobConfig({
         jobFolders: [],
         initProgram: 'test',
-        termProgram: ''
+        termProgram: null
       } as unknown as JobConfig)
     ).toEqual({
       jobFolders: [],
-      initProgram: 'test',
-      termProgram: '',
-      macroVars: {}
+      initProgram: 'test'
     })
   })
 
@@ -508,17 +496,15 @@ describe('validateJobConfig', () => {
     })
   })
 
-  it('should initialise the macro vars if not present', () => {
+  it('should unset the macro vars if not present', () => {
     expect(
       validateJobConfig({
         initProgram: 'init',
         termProgram: 'term'
       } as unknown as JobConfig)
     ).toEqual({
-      jobFolders: [],
       initProgram: 'init',
-      termProgram: 'term',
-      macroVars: {}
+      termProgram: 'term'
     })
   })
 })
@@ -928,19 +914,13 @@ describe('validateTestConfig', () => {
   })
 
   let testInput = {}
-  let testOutput = {
-    initProgram: '',
-    termProgram: '',
-    macroVars: {},
-    testSetUp: '',
-    testTearDown: ''
-  }
+  let testOutput = {}
   const testAssertion = () =>
     expect(validateTestConfig(testInput as unknown as TestConfig)).toEqual(
       testOutput
     )
 
-  it('should set init program to the empty string if null', () => {
+  it('should unset init program if null', () => {
     testInput = {
       ...testInput,
       initProgram: null
@@ -949,30 +929,30 @@ describe('validateTestConfig', () => {
     testAssertion()
   })
 
-  it('should set term program to the empty string if null', () => {
+  it('should unset term program if null', () => {
     testInput = { ...testInput, initProgram: 'init', termProgram: null }
-    testOutput = { ...testOutput, initProgram: 'init', termProgram: '' }
+    testOutput = { ...testOutput, initProgram: 'init' }
 
     testAssertion()
   })
 
-  it('should initialise macro vars if not present', () => {
+  it('should unset macro vars if not present', () => {
     testInput = { ...testInput, termProgram: 'term', macroVars: null }
-    testOutput = { ...testOutput, termProgram: 'term', macroVars: {} }
+    testOutput = { ...testOutput, termProgram: 'term' }
 
     testAssertion()
   })
 
-  it('should set test set up to the empty string if null', () => {
+  it('should unset test set up if null', () => {
     testInput = { ...testInput, macroVars: {}, testSetUp: null }
-    testOutput = { ...testOutput, testSetUp: '' }
+    testOutput = { ...testOutput, macroVars: {} }
 
     testAssertion()
   })
 
-  it('should set test tear down to the empty string if null', () => {
+  it('should unset test tear down if null', () => {
     testInput = { ...testInput, testSetUp: 'testSetup', testTearDown: null }
-    testOutput = { ...testOutput, testSetUp: 'testSetup', testTearDown: '' }
+    testOutput = { ...testOutput, testSetUp: 'testSetup' }
 
     testAssertion()
   })
