@@ -14,3 +14,5 @@ export const uuidv4 = () =>
 
     return v.toString(16)
   })
+
+export const uniqArray = (data: any[]) => Array.from(new Set(data))

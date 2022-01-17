@@ -50,6 +50,7 @@ export interface TargetJson {
   streamConfig?: StreamConfig
   macroFolders: string[]
   programFolders: string[]
+  binaryFolders: string[]
   isDefault?: boolean
   testConfig?: TestConfig
 }
@@ -129,6 +130,11 @@ export class Target implements TargetJson {
     return this._programFolders
   }
   private _programFolders: string[] = []
+
+  get binaryFolders(): string[] {
+    return this._binaryFolders
+  }
+  private _binaryFolders: string[] = []
 
   get contextName(): string {
     return this._contextName
@@ -216,6 +222,10 @@ export class Target implements TargetJson {
       if (json.programFolders && json.programFolders.length) {
         this._programFolders = json.programFolders
       }
+
+      if (json.binaryFolders && json.binaryFolders.length) {
+        this._binaryFolders = json.binaryFolders
+      }
     } catch (e) {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
     }
@@ -230,6 +240,7 @@ export class Target implements TargetJson {
       appLoc: this.appLoc,
       macroFolders: this.macroFolders,
       programFolders: this.programFolders,
+      binaryFolders: this.binaryFolders,
       docConfig: this.docConfig
     }
 

@@ -33,12 +33,10 @@
   },
   "homepage": "https://github.com/sasjs/utils#readme",
   "devDependencies": {
-    "@sasjs/core": "^2.48.6",
+    "@sasjs/core": "^3.10.0",
     "@types/cli-table": "^0.3.0",
     "@types/find": "0.2.1",
     "@types/jest": "27.0.2",
-    "@types/lodash.groupby": "4.6.6",
-    "@types/lodash.uniqby": "4.7.6",
     "@types/rimraf": "^3.0.1",
     "@types/valid-url": "^1.0.3",
     "babel-jest": "27.2.4",
@@ -58,8 +56,6 @@
     "find": "0.3.0",
     "fs-extra": "^10.0.0",
     "jwt-decode": "^3.1.2",
-    "lodash.groupby": "4.6.0",
-    "lodash.uniqby": "4.7.0",
     "prompts": "^2.4.1",
     "rimraf": "^3.0.2",
     "valid-url": "^1.0.9"

@@ -1,7 +1,12 @@
 import { readFile } from '../file'
 import { Configuration, SASJsFileType, Target } from '../types'
 import { asyncForEach } from '../utils'
-import { getDependencyPaths, getInitTerm, getProgramDependencies } from './'
+import {
+  getDependencyPaths,
+  getInitTerm,
+  getDependencies,
+  DependencyType
+} from './'
 
 interface loadDependenciesParams {
   filePath?: string
@@ -12,6 +17,7 @@ interface loadDependenciesParams {
   programFolders: string[]
   macroFolders: string[]
   buildSourceFolder: string
+  binaryFolders: string[]
   macroCorePath: string
 }
 
@@ -24,7 +30,8 @@ export const loadDependenciesFile = async ({
   programFolders,
   macroFolders,
   buildSourceFolder,
-  macroCorePath
+  macroCorePath,
+  binaryFolders
 }: loadDependenciesParams) => {
   const { init, initPath, term, termPath, startUpVars } = await getInitTerm({
     configuration,
@@ -40,49 +47,64 @@ export const loadDependenciesFile = async ({
     macroFolders,
     macroCorePath
   )
+
   const initDependencyPaths = await getDependencyPaths(
     init,
     macroFolders,
     macroCorePath
   )
+
   const termDependencyPaths = await getDependencyPaths(
     term,
     macroFolders,
     macroCorePath
   )
+
   const allDependencyPaths = [
     ...initDependencyPaths,
     ...fileDependencyPaths,
     ...termDependencyPaths
   ]
 
-  const initProgramDependencies = await getProgramDependencies(
+  const initProgramDependencies = await getDependencies(
+    initPath,
     init,
     programFolders,
-    initPath
+    DependencyType.Include
   )
-  const termProgramDependencies = await getProgramDependencies(
+
+  const termProgramDependencies = await getDependencies(
+    termPath,
     term,
     programFolders,
-    termPath
+    DependencyType.Include
   )
 
-  const programDependencies = await getProgramDependencies(
+  const programDependencies = await getDependencies(
+    filePath,
     fileContent,
     programFolders,
-    filePath
+    DependencyType.Include
   )
 
-  const dependenciesContent = await getDependencies(allDependencyPaths)
+  const binariesDeps = await getDependencies(
+    filePath,
+    fileContent,
+    binaryFolders,
+    DependencyType.Binary
+  )
 
-  fileContent = `* Dependencies start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* Dependencies end;\n* Programs start;\n${programDependencies}\n*Programs end;${init}${fileContent}${term}`
+  const dependenciesContent = await getAllDependencies(allDependencyPaths)
 
-  fileContent = `* ${type} Variables start;\n${startUpVars}\n*${type} Variables end;\n${fileContent}`
+  fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
+  ${init}${fileContent}${term}`
+
+  fileContent = `* ${type} Variables start;\n${startUpVars}\n* ${type} Variables end;\n${fileContent}`
 
   return fileContent
 }
 
-const getDependencies = async (filePaths: string[]): Promise<string> => {
+const getAllDependencies = async (filePaths: string[]): Promise<string> => {
   let dependenciesContent: string[] = []
   await asyncForEach([...new Set(filePaths)], async (filePath) => {
     const depFileContent = await readFile(filePath)
