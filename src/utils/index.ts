@@ -1,4 +1,4 @@
-export { asyncForEach, uuidv4 } from './utils'
+export * from './utils'
 
 export { urlOrigin } from './url'
 

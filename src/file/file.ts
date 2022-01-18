@@ -25,8 +25,11 @@ export async function isFolder(inputPath: string): Promise<boolean> {
     .catch(() => false)
 }
 
-export async function readFile(fileName: string): Promise<string> {
-  return fs.promises.readFile(fileName, 'utf-8')
+export async function readFile(
+  fileName: string,
+  encoding: BufferEncoding = 'utf8'
+): Promise<string> {
+  return fs.promises.readFile(fileName, encoding)
 }
 
 export async function readFileBinary(fileName: string): Promise<Buffer> {

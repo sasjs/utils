@@ -125,7 +125,7 @@ const compiledVars = (type: 'Job' | 'Service') => `* ${type} Variables start;
 %let macrovar2=macro ${type.toLowerCase()} value target 2;
 %let macrovar3=macro ${type.toLowerCase()} value target 3;
 
-*${type} Variables end;`
+* ${type} Variables end;`
 
 const root = path.join(__dirname, '..', '..')
 const macroCorePath = path.join(root, 'node_modules', '@sasjs', 'core')
@@ -169,7 +169,8 @@ describe('loadDependenciesFile', () => {
       programFolders: [],
       type: SASJsFileType.service,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -203,7 +204,8 @@ describe('loadDependenciesFile', () => {
       programFolders: [],
       type: SASJsFileType.job,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -240,7 +242,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.service,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -277,7 +280,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.job,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -314,7 +318,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.service,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -351,7 +356,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.job,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -388,7 +394,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.job,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -431,7 +438,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.job,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -473,7 +481,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.service,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -516,7 +525,8 @@ describe('loadDependenciesFile', () => {
       ],
       type: SASJsFileType.service,
       buildSourceFolder,
-      macroCorePath
+      macroCorePath,
+      binaryFolders: []
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))

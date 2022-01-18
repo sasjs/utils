@@ -24,6 +24,7 @@ export interface Configuration {
   streamConfig?: StreamConfig
   macroFolders?: string[]
   programFolders?: string[]
+  binaryFolders?: string[]
   serverType?: ServerType
   targets?: TargetJson[]
   defaultTarget?: string

@@ -9,6 +9,7 @@
     {
       "macroFolders": ["macros"],
       "programFolders": ["programs"],
+      "binaryFolders": ["binaries"],
       "defaultTarget": "viya",
       "targets": [
         {
@@ -52,7 +53,8 @@
             "testTearDown": "sasjs/tests/testteardown.sas"
           },
           "macroFolders": ["targets/viya/macros"],
-          "programFolders": []
+          "programFolders": [],
+          "binaryFolders": ["binaries"]
         },
         {
           "name": "sas9",
@@ -93,7 +95,8 @@
             "testTearDown": "sasjs/tests/testteardown.sas"
           },
           "macroFolders": ["targets/sas9/macros"],
-          "programFolders": []
+          "programFolders": [],
+          "binaryFolders": ["binaries"]
         }
       ]
     }
@@ -662,6 +665,14 @@
       "description": "These local folders are searched for SAS Programs when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
       "default": [],
       "examples": [["programs", "../../more_programs"]]
+    },
+    "binaryFolders": {
+      "$id": "#/properties/binaryFolders",
+      "type": "array",
+      "title": "The binaryFolders array",
+      "description": "These local folders are searched for Binary Files when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+      "default": [],
+      "examples": [["binaries", "../../more_binaries"]]
     },
     "targets": {
       "$id": "#/properties/targets",

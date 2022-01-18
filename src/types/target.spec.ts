@@ -270,6 +270,20 @@ describe('Target', () => {
     expect(target.programFolders).toEqual(['foo'])
   })
 
+  it('should create an instance with binary folders when the JSON is valid', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      binaryFolders: ['foo']
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.binaryFolders).toEqual(['foo'])
+  })
+
   it('should create an instance with the minimum set of attributes', () => {
     const target = new Target({
       name: 'test',
