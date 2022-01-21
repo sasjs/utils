@@ -3,6 +3,7 @@ import { getList, validateFileRef } from './'
 import { asyncForEach, chunk } from '../utils'
 import find from 'find'
 import { readFile } from '../file'
+import { capitalizeFirstChar } from '../formatter'
 
 // REFACTOR: move logic supporting SAS Macros dependencies to this file
 
@@ -113,7 +114,7 @@ export const getDependencies = async (
 
     if (notFoundDeps.length) {
       let depFolder = depInfo.config.replace(/([A-Z]+)/g, ' $1')
-      depFolder = depFolder.charAt(0).toUpperCase() + depFolder.slice(1)
+      depFolder = capitalizeFirstChar(depFolder)
 
       throw new Error(
         `Unable to load dependencies for: ${fileName || ''}\n` +
