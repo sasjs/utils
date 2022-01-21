@@ -36,7 +36,7 @@ export const loadDependenciesFile = async ({
   const { init, initPath, term, termPath, startUpVars } = await getInitTerm({
     configuration,
     target,
-    type,
+    fileType: type,
     buildSourceFolder
   })
 
