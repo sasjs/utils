@@ -1,34 +1,52 @@
 import { readFile, getAbsolutePath } from '../file'
-import { Configuration, SASJsFileType, Target } from '../types'
+import {
+  Configuration,
+  ServiceConfig,
+  JobConfig,
+  TestConfig,
+  SASJsFileType,
+  Target
+} from '../types'
 import { chunk } from '../utils'
+import { capitalizeFirstChar } from '../formatter'
 
+export enum ProgramType {
+  Init = 'init',
+  Term = 'term'
+}
 interface getInitTermParams {
   configuration?: Configuration
   target?: Target
-  type: SASJsFileType
+  fileType: SASJsFileType
   buildSourceFolder: string
 }
 export const getInitTerm = async ({
   configuration,
   target,
-  type,
+  fileType,
   buildSourceFolder
 }: getInitTermParams) => {
-  const { content: init, filePath: initPath } = await getInit({
-    target,
-    configuration,
-    buildSourceFolder,
-    type
-  })
+  const { content: init, filePath: initPath } = await getProgram(
+    {
+      target,
+      configuration,
+      buildSourceFolder,
+      fileType
+    },
+    ProgramType.Init
+  )
 
-  const { content: term, filePath: termPath } = await getTerm({
-    target,
-    configuration,
-    buildSourceFolder,
-    type
-  })
+  const { content: term, filePath: termPath } = await getProgram(
+    {
+      target,
+      configuration,
+      buildSourceFolder,
+      fileType
+    },
+    ProgramType.Term
+  )
 
-  const startUpVars = getVars(type, target, configuration)
+  const startUpVars = getVars(fileType, target, configuration)
 
   return {
     init,
@@ -71,39 +89,58 @@ const convertVarsToSasFormat = (vars: { [key: string]: string }): string => {
   return varsContent
 }
 
-interface getInitTermParam {
-  configuration?: Configuration
-  target?: Target
-  buildSourceFolder: string
-  type: SASJsFileType
-}
-
-export const getInit = async ({
-  target,
-  configuration,
-  buildSourceFolder,
-  type
-}: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let initContent = '',
+export const getProgram = async (
+  { target, configuration, buildSourceFolder, fileType }: getInitTermParams,
+  programType: ProgramType
+): Promise<{ content: string; filePath: string }> => {
+  let programContent = '',
     filePath = ''
 
-  const program =
-    type === SASJsFileType.service
-      ? target?.serviceConfig?.initProgram ??
-        configuration?.serviceConfig?.initProgram
-      : type === SASJsFileType.job
-      ? target?.jobConfig?.initProgram ?? configuration?.jobConfig?.initProgram
-      : type === SASJsFileType.test
-      ? target?.testConfig?.initProgram ??
-        configuration?.testConfig?.initProgram
-      : undefined
-  if (program) {
-    filePath = getAbsolutePath(program, buildSourceFolder)
-    initContent = await readFile(filePath)
+  let program: string | undefined = undefined
+  let targetConfig: ServiceConfig | JobConfig | TestConfig | undefined =
+    undefined
+  let rootConfig: ServiceConfig | JobConfig | TestConfig | undefined = undefined
+
+  switch (fileType) {
+    case SASJsFileType.service:
+      targetConfig = target?.serviceConfig
+      rootConfig = configuration?.serviceConfig
+
+      break
+    case SASJsFileType.job:
+      targetConfig = target?.jobConfig
+      rootConfig = configuration?.jobConfig
+
+      break
+    case SASJsFileType.test:
+      targetConfig = target?.testConfig
+      rootConfig = configuration?.testConfig
+
+      break
   }
 
-  const content = initContent
-    ? `\n* ${type}Init start;\n${initContent}\n* ${type}Init end;`
+  program =
+    (targetConfig &&
+      (targetConfig as unknown as { [key: string]: string })[
+        `${programType}Program`
+      ]) ||
+    (rootConfig &&
+      (rootConfig as unknown as { [key: string]: string })[
+        `${programType}Program`
+      ])
+
+  if (program) {
+    filePath = getAbsolutePath(program, buildSourceFolder)
+
+    programContent = await readFile(filePath)
+  }
+
+  const content = programContent
+    ? `\n* ${fileType}${capitalizeFirstChar(
+        programType
+      )} start;\n${programContent}\n* ${fileType}${capitalizeFirstChar(
+        programType
+      )} end;`
     : ''
 
   return {
@@ -112,36 +149,22 @@ export const getInit = async ({
   }
 }
 
-export const getTerm = async ({
-  target,
-  configuration,
-  buildSourceFolder,
-  type
-}: getInitTermParam): Promise<{ content: string; filePath: string }> => {
-  let termContent = '',
-    filePath = ''
-
-  const program =
-    type === SASJsFileType.service
-      ? target?.serviceConfig?.termProgram ??
-        configuration?.serviceConfig?.termProgram
-      : type === SASJsFileType.job
-      ? target?.jobConfig?.termProgram ?? configuration?.jobConfig?.termProgram
-      : type === SASJsFileType.test
-      ? target?.testConfig?.termProgram ??
-        configuration?.testConfig?.termProgram
-      : undefined
-  if (program) {
-    filePath = getAbsolutePath(program, buildSourceFolder)
-    termContent = await readFile(filePath)
-  }
-
-  const content = termContent
-    ? `\n* ${type}Term start;\n${termContent}\n* ${type}Term end;`
-    : ''
-
-  return {
-    content,
-    filePath
-  }
+export const mockGetProgram = (
+  module: {
+    getProgram: (param: getInitTermParams, programType: ProgramType) => {}
+  },
+  fakeInit: string,
+  fakeTerm: string
+) => {
+  jest.spyOn(module, 'getProgram').mockImplementation((params, programType) =>
+    programType === ProgramType.Init
+      ? Promise.resolve({
+          content: `\n* ${params.fileType}Init start;\n${fakeInit}\n* ${params.fileType}Init end;`,
+          filePath: ''
+        })
+      : Promise.resolve({
+          content: `\n* ${params.fileType}Term start;\n${fakeTerm}\n* ${params.fileType}Term end;`,
+          filePath: ''
+        })
+  )
 }

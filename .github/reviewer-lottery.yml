@@ -4,9 +4,7 @@ groups:
     usernames: # github usernames of the reviewers
       - krishna-acondy
       - YuryShkoda
-      - saadjutt01
       - medjedovicm
-      - allanbowe
       - sabhas
   - name: SASjs QA
     reviewers: 1
