@@ -36,7 +36,7 @@
     "@sasjs/core": "3.10.0",
     "@types/cli-table": "0.3.0",
     "@types/find": "0.2.1",
-    "@types/jest": "27.0.2",
+    "@types/jest": "27.4.0",
     "@types/rimraf": "3.0.1",
     "@types/valid-url": "1.0.3",
     "babel-jest": "27.2.4",
