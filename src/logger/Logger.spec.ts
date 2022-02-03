@@ -210,7 +210,9 @@ describe('Logger', () => {
       try {
         expect(consola.log).toHaveBeenCalledWith(expectedOutput)
       } catch (error) {
-        expect(error.matcherResult.pass).toEqual(false)
+        const err = error as unknown as any
+
+        expect(err.matcherResult.pass).toEqual(false)
       }
     })
 
