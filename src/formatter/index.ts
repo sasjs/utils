@@ -1,3 +1,3 @@
 export { padWithNumber } from './number'
 
-export { sanitizeSpecialChars } from './string'
+export { sanitizeSpecialChars, capitalizeFirstChar } from './string'
