@@ -4,5 +4,5 @@ export interface HttpsAgentOptions extends https.AgentOptions {
   caPath?: string
   keyPath?: string
   certPath?: string
-  allowInsecureRequests: boolean
+  allowInsecureRequests?: boolean
 }
