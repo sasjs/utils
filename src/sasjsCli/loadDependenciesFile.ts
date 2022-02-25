@@ -1,4 +1,4 @@
-import { readFile } from '../file'
+import { readFile, fileExists, createFile } from '../file'
 import { Configuration, SASJsFileType, Target } from '../types'
 import { asyncForEach } from '../utils'
 import {
@@ -7,8 +7,10 @@ import {
   getDependencies,
   DependencyType
 } from './'
+import path from 'path'
+import { CompileTree } from '../compileTree'
 
-interface loadDependenciesParams {
+interface LoadDependenciesParams {
   filePath?: string
   fileContent: string
   configuration?: Configuration
@@ -19,7 +21,15 @@ interface loadDependenciesParams {
   buildSourceFolder: string
   binaryFolders: string[]
   macroCorePath: string
+  buildDestinationFolder: string
+  compileTree: CompileTree
 }
+
+// interface CompileTree {
+//   [key: string]: { content: string; dependencies: string[]; location: string }
+// }
+
+// let compileTree: CompileTree = {}
 
 export const loadDependenciesFile = async ({
   filePath,
@@ -31,8 +41,10 @@ export const loadDependenciesFile = async ({
   macroFolders,
   buildSourceFolder,
   macroCorePath,
-  binaryFolders
-}: loadDependenciesParams) => {
+  binaryFolders,
+  buildDestinationFolder,
+  compileTree
+}: LoadDependenciesParams) => {
   const { init, initPath, term, termPath, startUpVars } = await getInitTerm({
     configuration,
     target,
@@ -94,7 +106,10 @@ export const loadDependenciesFile = async ({
     DependencyType.Binary
   )
 
-  const dependenciesContent = await getAllDependencies(allDependencyPaths)
+  const dependenciesContent = await getAllDependencies(
+    allDependencyPaths,
+    compileTree
+  )
 
   fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
   ${init}${fileContent}${term}`
@@ -104,10 +119,39 @@ export const loadDependenciesFile = async ({
   return fileContent
 }
 
-const getAllDependencies = async (filePaths: string[]): Promise<string> => {
+const getAllDependencies = async (
+  filePaths: string[],
+  compileTree?: CompileTree
+): Promise<string> => {
   let dependenciesContent: string[] = []
   await asyncForEach([...new Set(filePaths)], async (filePath) => {
-    const depFileContent = await readFile(filePath)
+    const fileName = filePath.split(path.sep)[
+      filePath.split(path.sep).length - 1
+    ]
+    let depFileContent = ''
+
+    if (compileTree && Object.keys(compileTree).length) {
+      const compiledFile = compileTree.getLeave(filePath)
+
+      if (compiledFile) {
+        console.log(`🤖[using already compiled]🤖`, compiledFile.location)
+
+        depFileContent = compiledFile.content
+      } else {
+        console.log(`🤖[reading filePath]🤖`, filePath)
+
+        depFileContent = await readFile(filePath)
+
+        compileTree.addLeave({
+          content: depFileContent,
+          dependencies: [],
+          location: filePath
+        })
+      }
+    } else {
+      depFileContent = await readFile(filePath)
+    }
+
     dependenciesContent.push(depFileContent)
   })
 
