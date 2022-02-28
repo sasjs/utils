@@ -57,19 +57,22 @@ export const loadDependenciesFile = async ({
   const fileDependencyPaths = await getDependencyPaths(
     `${fileContent}\n${init}\n${term}`,
     macroFolders,
-    macroCorePath
+    macroCorePath,
+    compileTree
   )
 
   const initDependencyPaths = await getDependencyPaths(
     init,
     macroFolders,
-    macroCorePath
+    macroCorePath,
+    compileTree
   )
 
   const termDependencyPaths = await getDependencyPaths(
     term,
     macroFolders,
-    macroCorePath
+    macroCorePath,
+    compileTree
   )
 
   const allDependencyPaths = [
@@ -125,21 +128,14 @@ const getAllDependencies = async (
 ): Promise<string> => {
   let dependenciesContent: string[] = []
   await asyncForEach([...new Set(filePaths)], async (filePath) => {
-    const fileName = filePath.split(path.sep)[
-      filePath.split(path.sep).length - 1
-    ]
     let depFileContent = ''
 
     if (compileTree && Object.keys(compileTree).length) {
-      const compiledFile = compileTree.getLeave(filePath)
+      const compiledFile = compileTree.getLeaf(filePath)
 
       if (compiledFile) {
-        console.log(`🤖[using already compiled]🤖`, compiledFile.location)
-
         depFileContent = compiledFile.content
       } else {
-        console.log(`🤖[reading filePath]🤖`, filePath)
-
         depFileContent = await readFile(filePath)
 
         compileTree.addLeave({

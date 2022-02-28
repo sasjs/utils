@@ -24,7 +24,7 @@ export class CompileTree {
     return this._tree
   }
 
-  public getLeave(location: string) {
+  public getLeaf(location: string) {
     return this._tree[this.getFileName(location)]
   }
 

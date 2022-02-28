@@ -2,11 +2,13 @@ import find from 'find'
 import { folderExists, readFile } from '../file'
 import { asyncForEach, diff } from '../utils'
 import { prioritiseDependencyOverrides, getList } from './'
+import { CompileTree } from '../compileTree'
 
 export async function getDependencyPaths(
   fileContent: string,
   macroFolders: string[],
-  macroCorePath: string
+  macroCorePath: string,
+  compileTree?: CompileTree
 ) {
   let dependencyPaths: string[] = []
   const foundDependencies: string[] = []
@@ -26,14 +28,33 @@ export async function getDependencyPaths(
         const filePaths = find.fileSync(dep, sourcePath)
 
         if (filePaths.length) {
-          const fileContent = await readFile(filePaths[0])
+          let fileContent = ''
+
+          if (compileTree && Object.keys(compileTree).length) {
+            const compiledFile = compileTree.getLeaf(filePaths[0])
+
+            if (compiledFile) {
+              fileContent = compiledFile.content
+            } else {
+              fileContent = await readFile(filePaths[0])
+
+              compileTree.addLeave({
+                content: fileContent,
+                dependencies: [],
+                location: filePaths[0]
+              })
+            }
+          } else {
+            fileContent = await readFile(filePaths[0])
+          }
 
           foundDependencies.push(dep)
           dependencyPaths.push(
             ...(await getDependencyPaths(
               fileContent,
               macroFolders,
-              macroCorePath
+              macroCorePath,
+              compileTree
             ))
           )
         }
