@@ -1,10 +1,10 @@
 /**
  * Converts a JavaScript date object to a SAS Date or Datetime, given the logic below:
- * 
+ *
  * A JS Date contains the number of _milliseconds_ since 01/01/1970
  * A SAS Date contains the number of _days_ since 01/01/1960
- * A SAS Datetime contains the number of _seconds_ since 01/01/1960 
- * 
+ * A SAS Datetime contains the number of _seconds_ since 01/01/1960
+ *
  * @param jsDate JS Date to be converted. The type could be `Date` or `string. If it's a string, the available formats are all those that Date() can parse.
  * @param unit Unit in which to return the SAS Date / datetime, eg `sasdate | sasdatetime`
  * @returns SAS Date value based on `unit` param
