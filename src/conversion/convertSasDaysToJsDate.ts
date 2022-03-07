@@ -1,6 +1,6 @@
-export const convertSasDaysToJsDate = (
+export const convertSasDateToJsDate = (
   sasValue: number | string,
-  unit: 'days' | 'seconds' = 'days'
+  unit: 'sasdate' | 'sasdatetime'
 ) => {
   const msInDay = 24 * 60 * 60 * 1000
   const msNegativeTenYears = -315619200000 //since calculating it is not practical/guarantee to get correct value, this is parsed with: new Date(Date.UTC(1960, 0, 1)).getTime()
