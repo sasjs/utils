@@ -13,23 +13,16 @@ export const convertJsDateToSasDate = (
   jsDate: Date,
   unit: 'sasdate' | 'sasdatetime'
 ): number => {
-  let jsDateObject: Date
   let valueInMilliseconds: number = 0
-
-  if (!(jsDate instanceof Date)) {
-    jsDateObject = new Date(jsDate)
-  } else {
-    jsDateObject = jsDate
-  }
 
   valueInMilliseconds = new Date(
     Date.UTC(
-      jsDateObject.getFullYear(),
-      jsDateObject.getMonth(),
-      jsDateObject.getDate(),
-      jsDateObject.getHours(),
-      jsDateObject.getMinutes(),
-      jsDateObject.getSeconds()
+      jsDate.getFullYear(),
+      jsDate.getMonth(),
+      jsDate.getDate(),
+      jsDate.getHours(),
+      jsDate.getMinutes(),
+      jsDate.getSeconds()
     )
   ).valueOf()
 
@@ -51,9 +44,6 @@ export const convertJsDateToSasDate = (
     case 'sasdatetime': {
       // always in seconds from 1960
       return ms1960 / 1000
-    }
-    default: {
-      throw new Error('Unit is not provided but is mandatory parameter.')
     }
   }
 }
