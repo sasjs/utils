@@ -11,8 +11,6 @@ describe('Convert SAS days to JS date', () => {
       'sasdatetime'
     )
 
-    console.log('convertedDateSeconds', convertedDateSeconds)
-
     expect(convertedDateDays.valueOf()).toEqual(0)
     expect(convertedDateSeconds.valueOf()).toEqual(0) //Conversion function take timezone in count, so in browser this would be 0. But Node is converting it back to UTC so we hardcode that difference only for test
   })
