@@ -19,7 +19,7 @@ export const convertSasDateToJsDate = (
   if (typeof sasValue !== 'number') sasValue = parseFloat(sasValue)
 
   if (unit === 'sasdatetime') {
-    let ms1960 = sasValue * 1000
+    const ms1960 = sasValue * 1000
 
     let jsMs = msNegativeTenYears + ms1960
     let jsDate = new Date(jsMs)
@@ -29,7 +29,7 @@ export const convertSasDateToJsDate = (
 
     jsDate = new Date(jsMs) // We create new Date object after the timezone correction
 
-    let jsDateUtcMs = Date.UTC(
+    const jsDateUtcMs = Date.UTC(
       jsDate.getFullYear(),
       jsDate.getMonth(),
       jsDate.getDate(),

@@ -13,9 +13,7 @@ export const convertJsDateToSasDate = (
   jsDate: Date,
   unit: 'sasdate' | 'sasdatetime'
 ): number => {
-  let valueInMilliseconds: number = 0
-
-  valueInMilliseconds = new Date(
+  const valueInMilliseconds = new Date(
     Date.UTC(
       jsDate.getFullYear(),
       jsDate.getMonth(),
@@ -35,8 +33,7 @@ export const convertJsDateToSasDate = (
     case 'sasdate': {
       // always in days from 1960
       let valueInDays = ms1960 / msInDay
-
-      valueInDays = Math.abs(valueInDays)
+      
       valueInDays = Math.floor(valueInDays)
 
       return valueInDays
