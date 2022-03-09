@@ -1,5 +1,6 @@
 import path from 'path'
 import { createFile } from '../'
+import { getList, DependencyHeader } from '../sasjsCli'
 
 export interface Leave {
   content: string
@@ -29,6 +30,9 @@ export class CompileTree {
   }
 
   public addLeave(leave: Leave) {
+    leave.dependencies = getList(DependencyHeader.Macro, leave.content)
+    leave.content = removeHeader(leave.content)
+
     this._tree[this.getFileName(leave.location)] = leave
   }
 
@@ -40,3 +44,6 @@ export class CompileTree {
     return location.split(path.sep)[location.split(path.sep).length - 1]
   }
 }
+
+export const removeHeader = (content: string) =>
+  content.replace(new RegExp(`^\\/\\*[\\s\\S]*\\*\\/\\n\\n`), '')

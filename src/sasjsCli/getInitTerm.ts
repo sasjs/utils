@@ -9,6 +9,7 @@ import {
 } from '../types'
 import { chunk } from '../utils'
 import { capitalizeFirstChar } from '../formatter'
+import { CompileTree } from '../compileTree'
 
 export enum ProgramType {
   Init = 'init',
@@ -19,12 +20,14 @@ interface getInitTermParams {
   target?: Target
   fileType: SASJsFileType
   buildSourceFolder: string
+  compileTree?: CompileTree
 }
 export const getInitTerm = async ({
   configuration,
   target,
   fileType,
-  buildSourceFolder
+  buildSourceFolder,
+  compileTree
 }: getInitTermParams) => {
   const { content: init, filePath: initPath } = await getProgram(
     {
@@ -33,7 +36,8 @@ export const getInitTerm = async ({
       buildSourceFolder,
       fileType
     },
-    ProgramType.Init
+    ProgramType.Init,
+    compileTree
   )
 
   const { content: term, filePath: termPath } = await getProgram(
@@ -43,7 +47,8 @@ export const getInitTerm = async ({
       buildSourceFolder,
       fileType
     },
-    ProgramType.Term
+    ProgramType.Term,
+    compileTree
   )
 
   const startUpVars = getVars(fileType, target, configuration)
@@ -91,7 +96,8 @@ const convertVarsToSasFormat = (vars: { [key: string]: string }): string => {
 
 export const getProgram = async (
   { target, configuration, buildSourceFolder, fileType }: getInitTermParams,
-  programType: ProgramType
+  programType: ProgramType,
+  compileTree?: CompileTree
 ): Promise<{ content: string; filePath: string }> => {
   let programContent = '',
     filePath = ''
@@ -132,7 +138,23 @@ export const getProgram = async (
   if (program) {
     filePath = getAbsolutePath(program, buildSourceFolder)
 
-    programContent = await readFile(filePath)
+    if (compileTree && Object.keys(compileTree).length) {
+      const compiledFile = compileTree.getLeaf(filePath)
+
+      if (compiledFile) {
+        programContent = compiledFile.content
+      } else {
+        programContent = await readFile(filePath)
+
+        compileTree.addLeave({
+          content: programContent,
+          dependencies: [],
+          location: filePath
+        })
+      }
+    } else {
+      programContent = await readFile(filePath)
+    }
   }
 
   const content = programContent

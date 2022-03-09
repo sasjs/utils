@@ -49,7 +49,8 @@ export const loadDependenciesFile = async ({
     configuration,
     target,
     fileType: type,
-    buildSourceFolder
+    buildSourceFolder,
+    compileTree
   })
 
   fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
@@ -85,28 +86,32 @@ export const loadDependenciesFile = async ({
     initPath,
     init,
     programFolders,
-    DependencyType.Include
+    DependencyType.Include,
+    compileTree
   )
 
   const termProgramDependencies = await getDependencies(
     termPath,
     term,
     programFolders,
-    DependencyType.Include
+    DependencyType.Include,
+    compileTree
   )
 
   const programDependencies = await getDependencies(
     filePath,
     fileContent,
     programFolders,
-    DependencyType.Include
+    DependencyType.Include,
+    compileTree
   )
 
   const binariesDeps = await getDependencies(
     filePath,
     fileContent,
     binaryFolders,
-    DependencyType.Binary
+    DependencyType.Binary,
+    compileTree
   )
 
   const dependenciesContent = await getAllDependencies(

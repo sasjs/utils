@@ -4,6 +4,7 @@ import { asyncForEach, chunk } from '../utils'
 import find from 'find'
 import { readFile } from '../file'
 import { capitalizeFirstChar } from '../formatter'
+import { CompileTree } from '../compileTree'
 
 // REFACTOR: move logic supporting SAS Macros dependencies to this file
 
@@ -11,6 +12,12 @@ export enum DependencyType {
   Macro = 'Macro',
   Include = 'Include',
   Binary = 'Binary'
+}
+
+export enum DependencyHeader {
+  Macro = '<h4> SAS Macros </h4>',
+  Binary = '<h4> Binary Files </h4>',
+  Include = '<h4> SAS Includes </h4>'
 }
 
 interface DepInfo {
@@ -25,10 +32,17 @@ interface DeconstructedDep {
   fileRef: string
 }
 
-const getDepInfo = (depType: DependencyType, fileContent: string): DepInfo => {
+export const getDepInfo = (
+  depType: DependencyType,
+  fileContent: string
+): DepInfo => {
   let header = ''
 
   switch (depType) {
+    case DependencyType.Macro:
+      header = 'SAS Macros'
+
+      break
     case DependencyType.Binary:
       header = 'Binary Files'
 
@@ -61,7 +75,8 @@ export const getDependencies = async (
   fileName: string | undefined,
   fileContent: string,
   folders: string[],
-  depType: DependencyType
+  depType: DependencyType,
+  compileTree?: CompileTree
 ) => {
   folders = uniqArray(folders)
 
@@ -88,10 +103,32 @@ export const getDependencies = async (
         const filePaths = find.fileSync(dep.fileName, folder)
 
         if (filePaths.length) {
-          const encodedFileContent = await readFile(
-            filePaths[0],
-            depType === DependencyType.Binary ? 'base64' : undefined
-          )
+          let encodedFileContent = ''
+
+          if (
+            compileTree &&
+            Object.keys(compileTree).length &&
+            depType !== DependencyType.Binary
+          ) {
+            const compiledFile = compileTree.getLeaf(filePaths[0])
+
+            if (compiledFile) {
+              encodedFileContent = compiledFile.content
+            } else {
+              encodedFileContent = await await readFile(filePaths[0], undefined)
+
+              compileTree.addLeave({
+                content: encodedFileContent,
+                dependencies: [],
+                location: filePaths[0]
+              })
+            }
+          } else {
+            encodedFileContent = await await readFile(
+              filePaths[0],
+              depType === DependencyType.Binary ? 'base64' : undefined
+            )
+          }
 
           const depContent = compileDep(
             depType,
