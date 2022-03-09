@@ -103,7 +103,8 @@ export async function createFolder(
 
 export async function createFile(
   fileName: string,
-  content: string
+  content: string,
+  encoding?: BufferEncoding
 ): Promise<void> {
   fileName = unifyFilePath(fileName)
   if (fileName.split(path.sep).length > 1) {
@@ -116,7 +117,7 @@ export async function createFile(
     }
   }
 
-  return fs.promises.writeFile(fileName, content)
+  return fs.promises.writeFile(fileName, content, encoding)
 }
 
 export async function deleteFile(filePath: string) {
