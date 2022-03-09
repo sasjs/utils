@@ -33,7 +33,7 @@ export const convertJsDateToSasDate = (
     case 'sasdate': {
       // always in days from 1960
       let valueInDays = ms1960 / msInDay
-      
+
       valueInDays = Math.floor(valueInDays)
 
       return valueInDays
