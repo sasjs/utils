@@ -146,7 +146,7 @@ export const getProgram = async (
       } else {
         programContent = await readFile(filePath)
 
-        compileTree.addLeave({
+        compileTree.addLeaf({
           content: programContent,
           dependencies: [],
           location: filePath

@@ -1,15 +1,15 @@
 import path from 'path'
 import { createFile } from '../'
-import { getList, DependencyHeader } from '../sasjsCli'
+import { getList, DependencyHeader, getDeprecatedHeader } from '../sasjsCli'
 
-export interface Leave {
+export interface Leaf {
   content: string
   dependencies: string[]
   location: string
 }
 
 export interface Tree {
-  [key: string]: Leave
+  [key: string]: Leaf
 }
 
 export class CompileTree {
@@ -29,11 +29,16 @@ export class CompileTree {
     return this._tree[this.getFileName(location)]
   }
 
-  public addLeave(leave: Leave) {
-    leave.dependencies = getList(DependencyHeader.Macro, leave.content)
-    leave.content = removeHeader(leave.content)
+  public addLeaf(leaf: Leaf) {
+    leaf.dependencies = getList(
+      getDeprecatedHeader(leaf.content, DependencyHeader.Macro),
+      leaf.content
+    )
+    leaf.content = removeHeader(leaf.content)
 
-    this._tree[this.getFileName(leave.location)] = leave
+    this._tree[this.getFileName(leaf.location)] = leaf
+
+    return leaf
   }
 
   public async saveTree() {

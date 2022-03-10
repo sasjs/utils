@@ -1,25 +1,31 @@
 import find from 'find'
 import { folderExists, readFile } from '../file'
 import { asyncForEach, diff } from '../utils'
-import { prioritiseDependencyOverrides, getList } from './'
-import { CompileTree } from '../compileTree'
+import {
+  prioritiseDependencyOverrides,
+  getList,
+  DependencyHeader,
+  getDeprecatedHeader
+} from './'
+import { CompileTree, Leaf } from '../compileTree'
 
 export async function getDependencyPaths(
   fileContent: string,
   macroFolders: string[],
   macroCorePath: string,
-  compileTree?: CompileTree
+  compileTree?: CompileTree,
+  leaf?: Leaf
 ) {
   let dependencyPaths: string[] = []
   const foundDependencies: string[] = []
   const sourcePaths = [...macroFolders, macroCorePath]
-
-  const dependenciesHeader = fileContent.includes('<h4> SAS Macros </h4>')
-    ? '<h4> SAS Macros </h4>'
-    : '<h4> Dependencies </h4>'
-  const dependencies = getList(dependenciesHeader, fileContent).filter((d) =>
-    d.endsWith('.sas')
+  const dependenciesHeader = getDeprecatedHeader(
+    fileContent,
+    DependencyHeader.Macro
   )
+  const dependencies =
+    leaf?.dependencies ||
+    getList(dependenciesHeader, fileContent).filter((d) => d.endsWith('.sas'))
 
   // Search dependencies recursively starting from macroFolders and ending in macroCorePath
   await asyncForEach(sourcePaths, async (sourcePath) => {
@@ -29,16 +35,18 @@ export async function getDependencyPaths(
 
         if (filePaths.length) {
           let fileContent = ''
+          let leaf: Leaf | undefined = undefined
 
           if (compileTree && Object.keys(compileTree).length) {
             const compiledFile = compileTree.getLeaf(filePaths[0])
 
             if (compiledFile) {
               fileContent = compiledFile.content
+              leaf = compiledFile
             } else {
               fileContent = await readFile(filePaths[0])
 
-              compileTree.addLeave({
+              leaf = compileTree.addLeaf({
                 content: fileContent,
                 dependencies: [],
                 location: filePaths[0]
@@ -54,7 +62,8 @@ export async function getDependencyPaths(
               fileContent,
               macroFolders,
               macroCorePath,
-              compileTree
+              compileTree,
+              leaf
             ))
           )
         }

@@ -1,4 +1,4 @@
-import { readFile, fileExists, createFile } from '../file'
+import { readFile } from '../file'
 import { Configuration, SASJsFileType, Target } from '../types'
 import { asyncForEach } from '../utils'
 import {
@@ -7,7 +7,6 @@ import {
   getDependencies,
   DependencyType
 } from './'
-import path from 'path'
 import { CompileTree } from '../compileTree'
 
 interface LoadDependenciesParams {
@@ -21,15 +20,8 @@ interface LoadDependenciesParams {
   buildSourceFolder: string
   binaryFolders: string[]
   macroCorePath: string
-  buildDestinationFolder: string
   compileTree: CompileTree
 }
-
-// interface CompileTree {
-//   [key: string]: { content: string; dependencies: string[]; location: string }
-// }
-
-// let compileTree: CompileTree = {}
 
 export const loadDependenciesFile = async ({
   filePath,
@@ -42,7 +34,6 @@ export const loadDependenciesFile = async ({
   buildSourceFolder,
   macroCorePath,
   binaryFolders,
-  buildDestinationFolder,
   compileTree
 }: LoadDependenciesParams) => {
   const { init, initPath, term, termPath, startUpVars } = await getInitTerm({
@@ -143,7 +134,7 @@ const getAllDependencies = async (
       } else {
         depFileContent = await readFile(filePath)
 
-        compileTree.addLeave({
+        compileTree.addLeaf({
           content: depFileContent,
           dependencies: [],
           location: filePath
