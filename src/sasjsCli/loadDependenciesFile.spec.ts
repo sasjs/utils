@@ -5,18 +5,20 @@ import {
   SASJsFileType,
   Target,
   readFile,
-  Configuration
+  Configuration,
+  CompileTree
 } from '..'
 import * as internalModule from '../sasjsCli/getInitTerm'
 import { mockGetProgram } from '../sasjsCli/getInitTerm'
 import { loadDependenciesFile } from './loadDependenciesFile'
+import { DependencyHeader } from './'
 
 const fakeInit = `/**
   @file serviceinit.sas
   @brief this file is called with every service
   @details  This file is included in *every* service, *after* the macros and *before* the service code.
 
-  <h4> SAS Macros </h4>
+  ${DependencyHeader.Macro}
   @li mf_abort.sas
 
 **/
@@ -32,7 +34,7 @@ const fakeTerm = `/**
   @brief this file is called at the end of every service
   @details  This file is included at the *end* of every service.
 
-  <h4> SAS Macros </h4>
+  ${DependencyHeader.Macro}
   @li mf_abort.sas
   @li mf_existds.sas
 
@@ -49,10 +51,10 @@ const fakeJobInit = `/**
   The path to this file should be listed in the \`jobInit\` property of the
   sasjsconfig file.
 
-  <h4> SAS Programs </h4>
+  ${DependencyHeader.DeprecatedInclude}
   @li test.sas TEST
 
-  <h4> SAS Macros </h4>
+  ${DependencyHeader.Macro}
   @li examplemacro.sas
 
 **/
@@ -70,10 +72,10 @@ const fakeJobInit2 = `/**
   The path to this file should be listed in the \`jobInit\` property of the
   sasjsconfig file.
 
-  <h4> SAS Includes </h4>
+  ${DependencyHeader.Include}
   @li test.sas TEST
 
-  <h4> SAS Macros </h4>
+  ${DependencyHeader.Macro}
   @li examplemacro.sas
 
 **/
@@ -142,13 +144,17 @@ const configuration: Configuration = {
   jobConfig: jobConfig(),
   serviceConfig: serviceConfig()
 }
+const compileTree = new CompileTree(
+  path.join(process.cwd(), 'test_compileTree.json')
+)
+
 describe('loadDependenciesFile', () => {
   let fileContent: string
   beforeAll(async () => {
     fileContent = await readFile(servicePath)
   })
 
-  test('it should load dependencies for a service with <h4> SAS MAcros </h4>', async () => {
+  test(`it should load dependencies for a service with ${DependencyHeader.Macro}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -160,7 +166,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.service,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -172,7 +179,7 @@ describe('loadDependenciesFile', () => {
     expect(/%macro mf_existds/.test(dependencies)).toEqual(true)
   })
 
-  test('it should load dependencies for a job <h4> SAS MAcros </h4>', async () => {
+  test(`it should load dependencies for a job ${DependencyHeader.Macro}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -184,7 +191,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.job,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -196,7 +204,7 @@ describe('loadDependenciesFile', () => {
     expect(/%macro mf_existds/.test(dependencies)).toEqual(true)
   })
 
-  test('it should load programs for a service with <h4> SAS Programs </h4>', async () => {
+  test(`it should load programs for a service with ${DependencyHeader.DeprecatedInclude}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -211,7 +219,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.service,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -223,7 +232,7 @@ describe('loadDependenciesFile', () => {
     expect(/%macro mf_existds/.test(dependencies)).toEqual(true)
   })
 
-  test('it should load programs for a job <h4> SAS Programs </h4>', async () => {
+  test(`it should load programs for a job ${DependencyHeader.DeprecatedInclude}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -238,7 +247,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.job,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -250,7 +260,7 @@ describe('loadDependenciesFile', () => {
     expect(/%macro mf_existds/.test(dependencies)).toEqual(true)
   })
 
-  test('it should load programs for a service with <h4> SAS Includes </h4>', async () => {
+  test(`it should load programs for a service with ${DependencyHeader.Include}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -265,7 +275,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.service,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -277,7 +288,7 @@ describe('loadDependenciesFile', () => {
     expect(/%macro mf_existds/.test(dependencies)).toEqual(true)
   })
 
-  test('it should load programs for a job <h4> SAS Includes </h4>', async () => {
+  test(`it should load programs for a job ${DependencyHeader.Include}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -292,7 +303,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.job,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -304,7 +316,7 @@ describe('loadDependenciesFile', () => {
     expect(/%macro mf_existds/.test(dependencies)).toEqual(true)
   })
 
-  test("it should load dependencies for a job having jobInit's <h4> SAS Programs </h4>", async () => {
+  test(`it should load dependencies for a job having jobInit's ${DependencyHeader.DeprecatedInclude}`, async () => {
     mockGetProgram(internalModule, fakeJobInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -319,7 +331,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.job,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -337,8 +350,8 @@ describe('loadDependenciesFile', () => {
     )
   })
 
-  test("it should load dependencies for a job having jobTerm's <h4> SAS Programs </h4>", async () => {
-    mockGetProgram(internalModule, fakeInit, fakeJobInit)
+  test(`it should load dependencies for a job having jobTerm's ${DependencyHeader.DeprecatedInclude}`, async () => {
+    mockGetProgram(internalModule, fakeJobInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
       target,
@@ -352,7 +365,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.job,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Job'))
@@ -361,7 +375,7 @@ describe('loadDependenciesFile', () => {
     expect(/\* JobTerm start;/.test(dependencies)).toEqual(true)
     expect(/\* JobTerm end;/.test(dependencies)).toEqual(true)
     expect(/%macro examplemacro/.test(dependencies)).toEqual(true)
-    expect(/%macro doesnothing/.test(dependencies)).toEqual(true)
+    expect(/%macro doesnothing/.test(dependencies)).toEqual(true) //?
     expect(/%macro mf_abort/.test(dependencies)).toEqual(true)
 
     expect(dependencies).toEqual(
@@ -369,7 +383,7 @@ describe('loadDependenciesFile', () => {
     )
   })
 
-  test("it should load dependencies for a service having serviceInit's <h4> SAS Programs </h4>", async () => {
+  test(`it should load dependencies for a service having serviceInit's ${DependencyHeader.DeprecatedInclude}`, async () => {
     mockGetProgram(internalModule, fakeJobInit, fakeTerm)
 
     const dependencies = await loadDependenciesFile({
@@ -384,7 +398,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.service,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
@@ -402,7 +417,7 @@ describe('loadDependenciesFile', () => {
     )
   })
 
-  test("it should load dependencies for a service having serviceTerm's <h4> SAS Programs </h4>", async () => {
+  test(`it should load dependencies for a service having serviceTerm's ${DependencyHeader.DeprecatedInclude}`, async () => {
     mockGetProgram(internalModule, fakeInit, fakeJobInit)
 
     const dependencies = await loadDependenciesFile({
@@ -417,7 +432,8 @@ describe('loadDependenciesFile', () => {
       type: SASJsFileType.service,
       buildSourceFolder,
       macroCorePath,
-      binaryFolders: []
+      binaryFolders: [],
+      compileTree
     })
 
     expect(dependencies).toStartWith(compiledVars('Service'))
