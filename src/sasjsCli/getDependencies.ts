@@ -19,6 +19,7 @@ export enum DependencyHeader {
   Binary = '<h4> Binary Files </h4>',
   Include = '<h4> SAS Includes </h4>',
   DataInput = '<h4> Data Inputs </h4>',
+  DataOutput = '<h4> Data Outputs </h4>',
   DeprecatedMacro = '<h4> Dependencies </h4>',
   DeprecatedInclude = '<h4> SAS Programs </h4>'
 }
@@ -84,15 +85,15 @@ export const getDependencies = async (
 
   deps.forEach(
     (dep: DeconstructedDep) =>
-      uniqDeps.find((d) => dep.fileName === d.fileName) || uniqDeps.push(dep)
+      uniqDeps.find(d => dep.fileName === d.fileName) || uniqDeps.push(dep)
   )
 
   if (uniqDeps.length) {
     const foundDeps: string[] = []
     const foundDepsNames: string[] = []
 
-    await asyncForEach(folders, async (folder) => {
-      await asyncForEach(uniqDeps, async (dep) => {
+    await asyncForEach(folders, async folder => {
+      await asyncForEach(uniqDeps, async dep => {
         const filePaths = find.fileSync(dep.fileName, folder)
 
         if (filePaths.length) {
@@ -136,7 +137,7 @@ export const getDependencies = async (
     })
 
     const notFoundDeps = deps
-      .filter((dep) => !foundDepsNames.includes(dep.fileName))
+      .filter(dep => !foundDepsNames.includes(dep.fileName))
       .map(
         (dep, i) => `${i + 1}. '${dep.fileName}' with fileRef '${dep.fileRef}'`
       )
@@ -152,7 +153,7 @@ export const getDependencies = async (
           `${notFoundDeps}\n` +
           `Please check that they exist in the folder(s) listed in the \`${depInfo.config}\` array in your sasjsconfig.json file.\n` +
           `${depFolder}:\n` +
-          folders.map((folder) => `- ${folder}`).join('\n')
+          folders.map(folder => `- ${folder}`).join('\n')
       )
     }
 
@@ -213,9 +214,9 @@ const compileDep = (
     const sourceLines = fileContent
       .replace(/\r\n/g, '\n')
       .split('\n')
-      .filter((l) => !!l)
+      .filter(l => !!l)
 
-    sourceLines.forEach((line) => {
+    sourceLines.forEach(line => {
       const chunkedLines = chunk(line)
       if (chunkedLines.length === 1) {
         output += `put '${chunkedLines[0].split("'").join("''")}';\n`
@@ -265,9 +266,9 @@ const compileDep = (
     const sourceLines = fileContent
       .replace(/\r\n/g, '\n')
       .split('\n')
-      .filter((l) => !!l)
+      .filter(l => !!l)
 
-    sourceLines.forEach((line) => {
+    sourceLines.forEach(line => {
       const chunkedLines = chunk(line)
       if (chunkedLines.length === 1) {
         output += `put '${chunkedLines[0].split("'").join("''")}';\n`
