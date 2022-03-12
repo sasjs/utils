@@ -11,7 +11,7 @@ import {
 import * as internalModule from '../sasjsCli/getInitTerm'
 import { mockGetProgram } from '../sasjsCli/getInitTerm'
 import { loadDependenciesFile } from './loadDependenciesFile'
-import { DependencyHeader } from './'
+import { DependencyHeader, getAllDependencies } from './'
 
 const fakeInit = `/**
   @file serviceinit.sas
@@ -52,27 +52,6 @@ const fakeJobInit = `/**
   sasjsconfig file.
 
   ${DependencyHeader.DeprecatedInclude}
-  @li test.sas TEST
-
-  ${DependencyHeader.Macro}
-  @li examplemacro.sas
-
-**/
-
-%example(Job Init is executing!)
-
-%let mylib=WORK;`
-
-const fakeJobInit2 = `/**
-  @file
-  @brief This code is inserted into the beginning of each Viya Job.
-  @details Inserted during the \`sasjs compile\` step.  Add any code here that
-  should go at the beginning of every deployed job.
-
-  The path to this file should be listed in the \`jobInit\` property of the
-  sasjsconfig file.
-
-  ${DependencyHeader.Include}
   @li test.sas TEST
 
   ${DependencyHeader.Macro}
@@ -144,7 +123,8 @@ const configuration: Configuration = {
   jobConfig: jobConfig(),
   serviceConfig: serviceConfig()
 }
-const compileTree = new CompileTree(
+
+let compileTree = new CompileTree(
   path.join(process.cwd(), 'test_compileTree.json')
 )
 
@@ -447,6 +427,60 @@ describe('loadDependenciesFile', () => {
 
     expect(dependencies).toEqual(
       expect.stringContaining(fakeProgramLines.join('\n'))
+    )
+  })
+})
+
+describe('getAllDependencies', () => {
+  const coreBasePath = path.join(
+    process.cwd(),
+    'node_modules',
+    '@sasjs',
+    'core',
+    'base'
+  )
+  const dep1FileName = 'mf_abort.sas'
+  const dep1Path = path.join(coreBasePath, dep1FileName)
+  const dep2Path = path.join(coreBasePath, 'mf_existds.sas')
+
+  it('should get all dependencies with compile tree', async () => {
+    const dep1 = `%macro mf_abort(mac=mf_abort.sas, type=deprecated, msg=, iftrue=%str(1=1)
+)/*/STORE SOURCE*/;
+
+%if not(%eval(%unquote(&iftrue))) %then %return;
+
+%put NOTE: ///  mf_abort macro executing //;
+%if %length(&mac)>0 %then %put NOTE- called by &mac;
+%put NOTE - &msg;
+
+%abort;
+
+%mend mf_abort;`
+    const expectedOutput = `${dep1}
+${await readFile(dep2Path)}`
+
+    compileTree = new CompileTree(
+      path.join(process.cwd(), 'test_compileTree.json'),
+      {
+        [dep1FileName]: {
+          content: dep1,
+          dependencies: [],
+          location: dep1FileName
+        }
+      }
+    )
+
+    await expect(
+      getAllDependencies([dep1Path, dep2Path], compileTree)
+    ).resolves.toEqual(expectedOutput)
+  })
+
+  it('should get all dependencies without compile tree', async () => {
+    const expectedOutput = `${await readFile(dep1Path)}
+${await readFile(dep2Path)}`
+
+    await expect(getAllDependencies([dep1Path, dep2Path])).resolves.toEqual(
+      expectedOutput
     )
   })
 })

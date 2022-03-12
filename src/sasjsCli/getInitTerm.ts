@@ -103,8 +103,11 @@ export const getProgram = async (
     filePath = ''
 
   let program: string | undefined = undefined
-  let targetConfig: ServiceConfig | JobConfig | TestConfig | undefined =
-    undefined
+  let targetConfig:
+    | ServiceConfig
+    | JobConfig
+    | TestConfig
+    | undefined = undefined
   let rootConfig: ServiceConfig | JobConfig | TestConfig | undefined = undefined
 
   switch (fileType) {
@@ -127,11 +130,11 @@ export const getProgram = async (
 
   program =
     (targetConfig &&
-      (targetConfig as unknown as { [key: string]: string })[
+      ((targetConfig as unknown) as { [key: string]: string })[
         `${programType}Program`
       ]) ||
     (rootConfig &&
-      (rootConfig as unknown as { [key: string]: string })[
+      ((rootConfig as unknown) as { [key: string]: string })[
         `${programType}Program`
       ])
 

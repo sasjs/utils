@@ -118,12 +118,12 @@ export const loadDependenciesFile = async ({
   return fileContent
 }
 
-const getAllDependencies = async (
+export const getAllDependencies = async (
   filePaths: string[],
   compileTree?: CompileTree
 ): Promise<string> => {
   let dependenciesContent: string[] = []
-  await asyncForEach([...new Set(filePaths)], async (filePath) => {
+  await asyncForEach([...new Set(filePaths)], async filePath => {
     let depFileContent = ''
 
     if (compileTree && Object.keys(compileTree).length) {
