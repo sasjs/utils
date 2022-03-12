@@ -21,7 +21,7 @@ export async function folderExists(folderPath: string): Promise<boolean> {
 export async function isFolder(inputPath: string): Promise<boolean> {
   return fs.promises
     .lstat(inputPath)
-    .then(stat => stat.isDirectory())
+    .then((stat) => stat.isDirectory())
     .catch(() => false)
 }
 
@@ -39,11 +39,11 @@ export async function readFileBinary(fileName: string): Promise<Buffer> {
 export async function listFilesInFolder(folderName: string): Promise<string[]> {
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
-    .then(list => list.filter(f => !f.isDirectory()).map(f => f.name))
+    .then((list) => list.filter((f) => !f.isDirectory()).map((f) => f.name))
 }
 
 export async function listIniFilesInFolder(folderName: string) {
-  return (await listFilesInFolder(folderName)).filter(name =>
+  return (await listFilesInFolder(folderName)).filter((name) =>
     name.endsWith('.ini')
   )
 }
@@ -53,7 +53,7 @@ export async function listSubFoldersInFolder(
 ): Promise<string[]> {
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
-    .then(list => list.filter(f => f.isDirectory()).map(f => f.name))
+    .then((list) => list.filter((f) => f.isDirectory()).map((f) => f.name))
 }
 
 export async function listFilesAndSubFoldersInFolder(
@@ -62,22 +62,22 @@ export async function listFilesAndSubFoldersInFolder(
 ): Promise<string[]> {
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
-    .then(async list => {
+    .then(async (list) => {
       if (recurse) {
-        const subFolders = list.filter(f => f.isDirectory())
+        const subFolders = list.filter((f) => f.isDirectory())
 
         if (subFolders.length) {
           let subFoldersFilesAndFolders: string[] = []
 
           await asyncForEach(
-            list.filter(f => f.isDirectory()),
-            async f => {
+            list.filter((f) => f.isDirectory()),
+            async (f) => {
               const subFolder = f.name
               const subPath = path.join(folderName, subFolder)
 
               subFoldersFilesAndFolders = [
                 ...subFoldersFilesAndFolders,
-                ...(await listFilesAndSubFoldersInFolder(subPath)).map(f =>
+                ...(await listFilesAndSubFoldersInFolder(subPath)).map((f) =>
                   path.join(subFolder, f)
                 )
               ]
@@ -85,13 +85,13 @@ export async function listFilesAndSubFoldersInFolder(
           )
 
           return [
-            ...list.filter(f => !f.isDirectory()).map(f => f.name),
+            ...list.filter((f) => !f.isDirectory()).map((f) => f.name),
             ...subFoldersFilesAndFolders
           ]
         }
       }
 
-      return list.map(f => f.name)
+      return list.map((f) => f.name)
     })
 }
 
@@ -126,7 +126,7 @@ export async function deleteFile(filePath: string) {
 
 export async function deleteFolder(folderPath: string) {
   return new Promise<void>((resolve, reject) => {
-    rimraf(folderPath, {}, error => {
+    rimraf(folderPath, {}, (error) => {
       if (error) return reject(error)
 
       return resolve()
@@ -142,12 +142,12 @@ export function unifyFilePath(
   const separators: { [key: string]: string } = { unix: '/', win: '\\' }
 
   let osSeparator = Object.keys(separators).find(
-    key => separators[key] === separator
+    (key) => separators[key] === separator
   )
 
   if (osSeparator) {
     const notValidSeparator =
-      separators[Object.keys(separators).find(key => key !== osSeparator)!]
+      separators[Object.keys(separators).find((key) => key !== osSeparator)!]
 
     osSeparator = separators[osSeparator]
 
@@ -205,7 +205,7 @@ export async function copy(source: string, destination: string) {
 export const pathSepEscaped = path.sep.replace(/\\/g, '\\\\')
 
 export async function base64EncodeImageFile(filePath: string) {
-  return readFileBinary(filePath).then(data => {
+  return readFileBinary(filePath).then((data) => {
     let extname = path.extname(filePath).substr(1) || 'png'
 
     if (extname === 'svg') {

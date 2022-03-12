@@ -282,7 +282,12 @@ describe('readAndValidateInput', () => {
     jest.spyOn(prompts, 'prompt')
 
     await expect(
-      readAndValidateInput('garbage' as InputType, 'choice', 'Choose', v => !!v)
+      readAndValidateInput(
+        'garbage' as InputType,
+        'choice',
+        'Choose',
+        (v) => !!v
+      )
     ).rejects.toThrowError(
       'Invalid input type. Valid input types are `text`, `number`, `url`, `confirm` and `select`'
     )
@@ -292,7 +297,7 @@ describe('readAndValidateInput', () => {
     jest.spyOn(prompts, 'prompt')
 
     await expect(
-      readAndValidateInput('select', 'choice', 'Choose', v => !!v)
+      readAndValidateInput('select', 'choice', 'Choose', (v) => !!v)
     ).rejects.toThrowError(
       'A set of choices is required to be supplied with the `select` input type.'
     )
@@ -302,7 +307,7 @@ describe('readAndValidateInput', () => {
     jest.spyOn(prompts, 'prompt')
 
     await expect(
-      readAndValidateInput('number', 'choice', 'Choose', v => !!v, 1, [
+      readAndValidateInput('number', 'choice', 'Choose', (v) => !!v, 1, [
         { title: 'Test', value: 1 }
       ])
     ).rejects.toThrowError(
