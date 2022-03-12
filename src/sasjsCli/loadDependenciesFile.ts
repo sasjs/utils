@@ -123,23 +123,12 @@ export const getAllDependencies = async (
   compileTree?: CompileTree
 ): Promise<string> => {
   let dependenciesContent: string[] = []
+
   await asyncForEach([...new Set(filePaths)], async (filePath) => {
     let depFileContent = ''
 
     if (compileTree && Object.keys(compileTree).length) {
-      const compiledFile = compileTree.getLeaf(filePath)
-
-      if (compiledFile) {
-        depFileContent = compiledFile.content
-      } else {
-        depFileContent = await readFile(filePath)
-
-        compileTree.addLeaf({
-          content: depFileContent,
-          dependencies: [],
-          location: filePath
-        })
-      }
+      depFileContent = await compileTree.getDepContent(filePath)
     } else {
       depFileContent = await readFile(filePath)
     }

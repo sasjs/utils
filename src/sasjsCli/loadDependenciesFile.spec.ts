@@ -6,7 +6,8 @@ import {
   Target,
   readFile,
   Configuration,
-  CompileTree
+  CompileTree,
+  removeHeader
 } from '..'
 import * as internalModule from '../sasjsCli/getInitTerm'
 import { mockGetProgram } from '../sasjsCli/getInitTerm'
@@ -457,7 +458,7 @@ describe('getAllDependencies', () => {
 
 %mend mf_abort;`
     const expectedOutput = `${dep1}
-${await readFile(dep2Path)}`
+${removeHeader(await readFile(dep2Path))}`
 
     compileTree = new CompileTree(
       path.join(process.cwd(), 'test_compileTree.json'),

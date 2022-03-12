@@ -38,20 +38,8 @@ export async function getDependencyPaths(
           let leaf: Leaf | undefined = undefined
 
           if (compileTree && Object.keys(compileTree).length) {
-            const compiledFile = compileTree.getLeaf(filePaths[0])
-
-            if (compiledFile) {
-              fileContent = compiledFile.content
-              leaf = compiledFile
-            } else {
-              fileContent = await readFile(filePaths[0])
-
-              leaf = compileTree.addLeaf({
-                content: fileContent,
-                dependencies: [],
-                location: filePaths[0]
-              })
-            }
+            fileContent = await compileTree.getDepContent(filePaths[0])
+            leaf = compileTree.getLeaf(filePaths[0])
           } else {
             fileContent = await readFile(filePaths[0])
           }

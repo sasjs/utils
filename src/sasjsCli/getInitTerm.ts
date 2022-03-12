@@ -139,19 +139,7 @@ export const getProgram = async (
     filePath = getAbsolutePath(program, buildSourceFolder)
 
     if (compileTree && Object.keys(compileTree).length) {
-      const compiledFile = compileTree.getLeaf(filePath)
-
-      if (compiledFile) {
-        programContent = compiledFile.content
-      } else {
-        programContent = await readFile(filePath)
-
-        compileTree.addLeaf({
-          content: programContent,
-          dependencies: [],
-          location: filePath
-        })
-      }
+      programContent = await compileTree.getDepContent(filePath)
     } else {
       programContent = await readFile(filePath)
     }
