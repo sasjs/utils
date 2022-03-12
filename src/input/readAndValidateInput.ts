@@ -102,7 +102,7 @@ export const getChoice = async (
     'select',
     'choice',
     message,
-    (value) => choiceValidator(value, choices.length, errorMessage),
+    value => choiceValidator(value, choices.length, errorMessage),
     0,
     choices
   )

@@ -28,8 +28,8 @@ describe('getDependencyPaths', () => {
       macroCorePath
     )
 
-    dependencyPaths.forEach((dep) => {
-      expect(dependenciesList.some((x) => dep.includes(x))).toBeTruthy()
+    dependencyPaths.forEach(dep => {
+      expect(dependenciesList.some(x => dep.includes(x))).toBeTruthy()
     })
   })
 
@@ -61,9 +61,9 @@ describe('getDependencyPaths', () => {
       macroCorePath
     )
 
-    dependenciesList.forEach((expectedDep) => {
+    dependenciesList.forEach(expectedDep => {
       expect(
-        dependencyPaths.some((dep) => dep.includes(expectedDep))
+        dependencyPaths.some(dep => dep.includes(expectedDep))
       ).toBeTruthy()
     })
   })
@@ -122,8 +122,8 @@ describe('getDependencyPaths', () => {
       macroCorePath
     )
 
-    dependencyPaths.forEach((dep) => {
-      expect(dependenciesList.some((x) => dep.includes(x))).toBeTruthy()
+    dependencyPaths.forEach(dep => {
+      expect(dependenciesList.some(x => dep.includes(x))).toBeTruthy()
     })
   })
 
