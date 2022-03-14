@@ -4,6 +4,7 @@ import { asyncForEach, chunk } from '../utils'
 import find from 'find'
 import { readFile } from '../file'
 import { capitalizeFirstChar } from '../formatter'
+import { CompileTree } from '../compileTree'
 
 // REFACTOR: move logic supporting SAS Macros dependencies to this file
 
@@ -11,6 +12,16 @@ export enum DependencyType {
   Macro = 'Macro',
   Include = 'Include',
   Binary = 'Binary'
+}
+
+export enum DependencyHeader {
+  Macro = '<h4> SAS Macros </h4>',
+  Binary = '<h4> Binary Files </h4>',
+  Include = '<h4> SAS Includes </h4>',
+  DataInput = '<h4> Data Inputs </h4>',
+  DataOutput = '<h4> Data Outputs </h4>',
+  DeprecatedMacro = '<h4> Dependencies </h4>',
+  DeprecatedInclude = '<h4> SAS Programs </h4>'
 }
 
 interface DepInfo {
@@ -25,28 +36,25 @@ interface DeconstructedDep {
   fileRef: string
 }
 
-const getDepInfo = (depType: DependencyType, fileContent: string): DepInfo => {
-  let header = ''
-
-  switch (depType) {
-    case DependencyType.Binary:
-      header = 'Binary Files'
-
-      break
-    case DependencyType.Include:
-      header = fileContent.includes('<h4> SAS Includes </h4>')
-        ? 'SAS Includes'
-        : 'SAS Programs'
-
-      break
-
-    default:
-      break
-  }
+export const getDepInfo = (
+  depType: DependencyType,
+  fileContent: string
+): DepInfo => {
+  const header =
+    depType === DependencyType.Include
+      ? fileContent.includes(DependencyHeader.Include)
+        ? DependencyHeader.Include
+        : DependencyHeader.DeprecatedInclude
+      : DependencyHeader[depType]
 
   const depInfo = {
-    name: header,
-    header: `<h4> ${header} </h4>`,
+    name: getHeaderName(header),
+    header:
+      depType === DependencyType.Include
+        ? fileContent.includes(DependencyHeader.Include)
+          ? DependencyHeader.Include
+          : DependencyHeader.DeprecatedInclude
+        : DependencyHeader[depType],
     config: `${(depType === DependencyType.Include
       ? 'Program'
       : depType
@@ -61,7 +69,8 @@ export const getDependencies = async (
   fileName: string | undefined,
   fileContent: string,
   folders: string[],
-  depType: DependencyType
+  depType: DependencyType,
+  compileTree?: CompileTree
 ) => {
   folders = uniqArray(folders)
 
@@ -88,10 +97,20 @@ export const getDependencies = async (
         const filePaths = find.fileSync(dep.fileName, folder)
 
         if (filePaths.length) {
-          const encodedFileContent = await readFile(
-            filePaths[0],
-            depType === DependencyType.Binary ? 'base64' : undefined
-          )
+          let encodedFileContent = ''
+
+          if (
+            compileTree &&
+            Object.keys(compileTree).length &&
+            depType !== DependencyType.Binary
+          ) {
+            encodedFileContent = await compileTree.getDepContent(filePaths[0])
+          } else {
+            encodedFileContent = await readFile(
+              filePaths[0],
+              depType === DependencyType.Binary ? 'base64' : undefined
+            )
+          }
 
           const depContent = compileDep(
             depType,
@@ -131,6 +150,16 @@ export const getDependencies = async (
 
   return ''
 }
+
+export const getDeprecatedHeader = (
+  fileContent: string,
+  header: DependencyHeader.Macro | DependencyHeader.Include
+) =>
+  fileContent.includes(header)
+    ? header
+    : header === DependencyHeader.Macro
+    ? DependencyHeader.DeprecatedMacro
+    : DependencyHeader.DeprecatedInclude
 
 const deconstructDependency = (
   deps: string[],
@@ -251,3 +280,6 @@ const compileDep = (
 
   return output
 }
+
+const getHeaderName = (header: DependencyHeader) =>
+  header.replace(/^<h4>\s/, '').replace(/\s<\/h4>$/, '')

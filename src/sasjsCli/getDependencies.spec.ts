@@ -289,11 +289,19 @@ describe('getDependencies', () => {
     test('it should return empty string for macro dependency ', async () => {
       const filePath = path.join(__dirname, 'testFiles', './example.sas')
       const fileContent = await readFile(filePath)
-
+      const sasjsCoreViyaPath = path.join(
+        __dirname,
+        '..',
+        '..',
+        'node_modules',
+        '@sasjs',
+        'core',
+        'viya'
+      )
       const dependencies = await getDependencies(
         filePath,
         fileContent,
-        [path.join(__dirname, 'testFiles', 'macros')],
+        [sasjsCoreViyaPath],
         DependencyType.Macro
       )
       const actualLines = dependencies.split('\n')
