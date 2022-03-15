@@ -1,5 +1,4 @@
 import { newLine } from './'
-import { isWindows } from '../utils'
 
 describe('newLine', () => {
   it('should return correct new line regexp entry for windows', () => {
