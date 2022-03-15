@@ -25,6 +25,7 @@ import {
 import * as fileModule from '../file'
 import { generateTimestamp } from '../../time'
 import { svgBase64EncodedUnix, svgBase64EncodedWin } from './expectedOutputs'
+import { isWindows } from '../../utils'
 
 const content = 'test content'
 
@@ -393,7 +394,7 @@ describe('base64EncodeImageFile', () => {
     const filePath = path.join(__dirname, fileNameToEncode)
 
     await expect(base64EncodeImageFile(filePath)).resolves.toEqual(
-      process.platform === 'win32' ? svgBase64EncodedWin : svgBase64EncodedUnix
+      isWindows() ? svgBase64EncodedWin : svgBase64EncodedUnix
     )
   })
 })
