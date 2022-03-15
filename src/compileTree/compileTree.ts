@@ -1,6 +1,7 @@
 import path from 'path'
 import { createFile, readFile } from '../'
 import { getList, DependencyHeader, getDeprecatedHeader } from '../sasjsCli'
+import { newLine } from '../formatter'
 
 export interface Leaf {
   content: string
@@ -71,4 +72,7 @@ export class CompileTree {
 
 // Removes header from SAS file
 export const removeHeader = (content: string) =>
-  content.replace(new RegExp(`^\\/\\*[\\s\\S]*\\*\\/\\n\\n`), '')
+  content.replace(
+    new RegExp(`^\\/\\*[\\s\\S]*\\*\\/${newLine()}${newLine()}`),
+    ''
+  )

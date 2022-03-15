@@ -1,4 +1,4 @@
-import { asyncForEach, uuidv4 } from './utils'
+import { asyncForEach, uuidv4, isWindows } from './utils'
 
 describe('uuidv4', () => {
   it('should generate 10000 uniq UUID', () => {
@@ -25,5 +25,11 @@ describe('asyncForEach', () => {
     await asyncForEach(chars, promise)
 
     expect(result).toEqual(expectedResult)
+  })
+})
+
+describe('isWindows', () => {
+  it('should return if current operation system is windows', () => {
+    expect(isWindows()).toEqual(process.platform === 'win32')
   })
 })
