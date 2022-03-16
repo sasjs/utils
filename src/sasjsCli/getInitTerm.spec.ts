@@ -9,14 +9,15 @@ import {
 } from '../types'
 import * as internalModule from '../file'
 import { getProgram, ProgramType } from './'
+import { CompileTree } from '../'
 
 const jobConfig = (root: boolean = true): JobConfig => ({
   initProgram: root
-    ? '/configuration/jobinitProgram/path'
-    : '/target/jobinitProgram/path',
+    ? '/configuration/jobinitProgram/init_path'
+    : '/target/jobinitProgram/init_path',
   termProgram: root
-    ? '/configuration/jobtermProgram/path'
-    : '/target/jobtermProgram/path',
+    ? '/configuration/jobtermProgram/term_path'
+    : '/target/jobtermProgram/term_path',
   jobFolders: [],
   macroVars: {}
 })
@@ -61,6 +62,14 @@ const termFileContent = ' TERM FILE CONTENT '
 describe('getInitTerm', () => {
   describe('getInit', () => {
     describe('job', () => {
+      let compileTree = new CompileTree('test_compileTree.json', {
+        init_path: {
+          content: initFileContent,
+          dependencies: [],
+          location: 'init_path'
+        }
+      })
+
       test('should return with Init Program of Target', async () => {
         jest
           .spyOn(internalModule, 'readFile')
@@ -73,7 +82,8 @@ describe('getInitTerm', () => {
               buildSourceFolder,
               fileType: SASJsFileType.job
             },
-            ProgramType.Init
+            ProgramType.Init,
+            compileTree
           )
         ).resolves.toEqual({
           content: expectedInitContent(SASJsFileType.job),
@@ -115,16 +125,20 @@ describe('getInitTerm', () => {
           filePath: jobConfig().initProgram.replace(/\//g, path.sep)
         })
 
-        const newtarget = { ...target, jobConfig: undefined }
+        compileTree = new CompileTree('test_compileTree.json', {})
+
+        const newTarget = { ...target, jobConfig: undefined }
+
         await expect(
           getProgram(
             {
-              target: newtarget as Target,
+              target: newTarget as Target,
               configuration,
               buildSourceFolder,
               fileType: SASJsFileType.job
             },
-            ProgramType.Init
+            ProgramType.Init,
+            compileTree
           )
         ).resolves.toEqual({
           content: expectedInitContent(SASJsFileType.job),

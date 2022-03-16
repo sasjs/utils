@@ -7,8 +7,9 @@ import {
   getDependencies,
   DependencyType
 } from './'
+import { CompileTree } from '../compileTree'
 
-interface loadDependenciesParams {
+interface LoadDependenciesParams {
   filePath?: string
   fileContent: string
   configuration?: Configuration
@@ -19,6 +20,7 @@ interface loadDependenciesParams {
   buildSourceFolder: string
   binaryFolders: string[]
   macroCorePath: string
+  compileTree: CompileTree
 }
 
 export const loadDependenciesFile = async ({
@@ -31,13 +33,15 @@ export const loadDependenciesFile = async ({
   macroFolders,
   buildSourceFolder,
   macroCorePath,
-  binaryFolders
-}: loadDependenciesParams) => {
+  binaryFolders,
+  compileTree
+}: LoadDependenciesParams) => {
   const { init, initPath, term, termPath, startUpVars } = await getInitTerm({
     configuration,
     target,
     fileType: type,
-    buildSourceFolder
+    buildSourceFolder,
+    compileTree
   })
 
   fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
@@ -45,19 +49,22 @@ export const loadDependenciesFile = async ({
   const fileDependencyPaths = await getDependencyPaths(
     `${fileContent}\n${init}\n${term}`,
     macroFolders,
-    macroCorePath
+    macroCorePath,
+    compileTree
   )
 
   const initDependencyPaths = await getDependencyPaths(
     init,
     macroFolders,
-    macroCorePath
+    macroCorePath,
+    compileTree
   )
 
   const termDependencyPaths = await getDependencyPaths(
     term,
     macroFolders,
-    macroCorePath
+    macroCorePath,
+    compileTree
   )
 
   const allDependencyPaths = [
@@ -70,31 +77,38 @@ export const loadDependenciesFile = async ({
     initPath,
     init,
     programFolders,
-    DependencyType.Include
+    DependencyType.Include,
+    compileTree
   )
 
   const termProgramDependencies = await getDependencies(
     termPath,
     term,
     programFolders,
-    DependencyType.Include
+    DependencyType.Include,
+    compileTree
   )
 
   const programDependencies = await getDependencies(
     filePath,
     fileContent,
     programFolders,
-    DependencyType.Include
+    DependencyType.Include,
+    compileTree
   )
 
   const binariesDeps = await getDependencies(
     filePath,
     fileContent,
     binaryFolders,
-    DependencyType.Binary
+    DependencyType.Binary,
+    compileTree
   )
 
-  const dependenciesContent = await getAllDependencies(allDependencyPaths)
+  const dependenciesContent = await getAllDependencies(
+    allDependencyPaths,
+    compileTree
+  )
 
   fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
   ${init}${fileContent}${term}`
@@ -104,10 +118,21 @@ export const loadDependenciesFile = async ({
   return fileContent
 }
 
-const getAllDependencies = async (filePaths: string[]): Promise<string> => {
+export const getAllDependencies = async (
+  filePaths: string[],
+  compileTree?: CompileTree
+): Promise<string> => {
   let dependenciesContent: string[] = []
+
   await asyncForEach([...new Set(filePaths)], async (filePath) => {
-    const depFileContent = await readFile(filePath)
+    let depFileContent = ''
+
+    if (compileTree && Object.keys(compileTree).length) {
+      depFileContent = await compileTree.getDepContent(filePath)
+    } else {
+      depFileContent = await readFile(filePath)
+    }
+
     dependenciesContent.push(depFileContent)
   })
 
