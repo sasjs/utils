@@ -65,11 +65,7 @@ describe('getInitTerm', () => {
   describe('getInit', () => {
     describe('job', () => {
       test('should return with Init Program of Target', async () => {
-        const initJobLeaf: Leaf = {
-          content: initFileContent,
-          dependencies: [],
-          location: jobConfig(false).initProgram
-        }
+        const initJobLeaf = getTestLeaf(jobConfig, false)
 
         jest
           .spyOn(internalModule, 'readFile')
