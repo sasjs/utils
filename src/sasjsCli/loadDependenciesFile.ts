@@ -36,13 +36,14 @@ export const loadDependenciesFile = async ({
   binaryFolders,
   compileTree
 }: LoadDependenciesParams) => {
-  const { init, initPath, term, termPath, startUpVars } = await getInitTerm({
-    configuration,
-    target,
-    fileType: type,
-    buildSourceFolder,
-    compileTree
-  })
+  const { init, initPath, term, termPath, startUpVars, initLeaf, termLeaf } =
+    await getInitTerm({
+      configuration,
+      target,
+      fileType: type,
+      buildSourceFolder,
+      compileTree
+    })
 
   fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
 
@@ -57,14 +58,16 @@ export const loadDependenciesFile = async ({
     init,
     macroFolders,
     macroCorePath,
-    compileTree
+    compileTree,
+    initLeaf
   )
 
   const termDependencyPaths = await getDependencyPaths(
     term,
     macroFolders,
     macroCorePath,
-    compileTree
+    compileTree,
+    termLeaf
   )
 
   const allDependencyPaths = [

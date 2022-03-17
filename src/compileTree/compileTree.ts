@@ -72,7 +72,4 @@ export class CompileTree {
 
 // Removes header from SAS file
 export const removeHeader = (content: string) =>
-  content.replace(
-    new RegExp(`^\\/\\*[\\s\\S]*\\*\\/${newLine()}${newLine()}`),
-    ''
-  )
+  content.replace(new RegExp(`\\/(\\*){1,2}([\\s\\S]*?)(\\*){1,2}\\/`), '')
