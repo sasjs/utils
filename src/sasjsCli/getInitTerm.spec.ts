@@ -620,5 +620,7 @@ const getTestLeaf = (
 ): Leaf => ({
   content: isTerm ? initFileContent : termFileContent,
   dependencies: [],
-  location: getConfig(root)[`${isTerm ? 'init' : 'term'}Program`]
+  location: internalModule.unifyFilePath(
+    getConfig(root)[`${isTerm ? 'init' : 'term'}Program`]
+  )
 })
