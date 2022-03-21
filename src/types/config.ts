@@ -46,6 +46,7 @@ export interface StreamConfig {
   streamWebFolder: string
   webSourcePath: string
   streamServiceName: string
+  streamLogo?: string
 }
 export interface AuthConfig {
   access_token: string
