@@ -598,14 +598,16 @@ describe('validateStreamConfig', () => {
         streamWebFolder: '.',
         webSourcePath: '.',
         assetPaths: [],
-        streamServiceName: 'streamWebApp'
+        streamServiceName: 'streamWebApp',
+        streamLogo: 'path/to/logo'
       })
     ).toEqual({
       streamWeb: true,
       streamWebFolder: '.',
       webSourcePath: '.',
       assetPaths: [],
-      streamServiceName: 'streamWebApp'
+      streamServiceName: 'streamWebApp',
+      streamLogo: 'path/to/logo'
     })
   })
 
@@ -617,6 +619,59 @@ describe('validateStreamConfig', () => {
         webSourcePath: '.',
         assetPaths: [],
         streamServiceName: 'test'
+      })
+    ).toEqual({
+      streamWeb: true,
+      streamWebFolder: '.',
+      webSourcePath: '.',
+      assetPaths: [],
+      streamServiceName: 'test'
+    })
+  })
+
+  it('should not set invalid stream logo', () => {
+    expect(
+      validateStreamConfig({
+        streamWeb: true,
+        streamWebFolder: '.',
+        webSourcePath: '.',
+        assetPaths: [],
+        streamServiceName: 'test',
+        streamLogo: true as unknown as string
+      })
+    ).toEqual({
+      streamWeb: true,
+      streamWebFolder: '.',
+      webSourcePath: '.',
+      assetPaths: [],
+      streamServiceName: 'test'
+    })
+
+    expect(
+      validateStreamConfig({
+        streamWeb: true,
+        streamWebFolder: '.',
+        webSourcePath: '.',
+        assetPaths: [],
+        streamServiceName: 'test',
+        streamLogo: 123 as unknown as string
+      })
+    ).toEqual({
+      streamWeb: true,
+      streamWebFolder: '.',
+      webSourcePath: '.',
+      assetPaths: [],
+      streamServiceName: 'test'
+    })
+
+    expect(
+      validateStreamConfig({
+        streamWeb: true,
+        streamWebFolder: '.',
+        webSourcePath: '.',
+        assetPaths: [],
+        streamServiceName: 'test',
+        streamLogo: {} as unknown as string
       })
     ).toEqual({
       streamWeb: true,
