@@ -78,7 +78,7 @@ describe('Target', () => {
     expect(target.contextName).toEqual('Test Context')
   })
 
-  it('should create an instance with build config when the JSON is valid', () => {
+  it('should convert an instance to json containing build config', () => {
     const target = new Target({
       name: 'test',
       serverUrl: '',
@@ -91,17 +91,13 @@ describe('Target', () => {
       }
     })
 
-    expect(target).toBeTruthy()
-    expect(target instanceof Target).toEqual(true)
-    expect(target.name).toEqual('test')
-    expect(target.serverUrl).toEqual('')
-    expect(target.serverType).toEqual(ServerType.Sas9)
-    expect(target.appLoc).toEqual('/test')
-    expect(target.buildConfig).toBeTruthy()
-    expect(target.buildConfig!.buildOutputFileName).toEqual('test')
-    expect(target.buildConfig!.initProgram).toEqual('init')
-    expect(target.buildConfig!.termProgram).toEqual('term')
-    expect(target.buildConfig!.macroVars).toEqual({})
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.buildConfig).toBeTruthy()
+    expect(json.buildConfig!.buildOutputFileName).toEqual('test')
+    expect(json.buildConfig!.initProgram).toEqual('init')
+    expect(json.buildConfig!.termProgram).toEqual('term')
+    expect(json.buildConfig!.macroVars).toEqual({})
   })
 
   it('should create an instance with deploy config when the JSON is valid', () => {
@@ -121,6 +117,22 @@ describe('Target', () => {
     expect(target.deployConfig).toBeTruthy()
     expect(target.deployConfig!.deployServicePack).toEqual(true)
     expect(target.deployConfig!.deployScripts).toEqual(['foo', 'bar'])
+  })
+
+  it('should convert to json containing deploy config with the deployServicePack is equal to false', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      deployConfig: {
+        deployServicePack: false,
+        deployScripts: []
+      }
+    })
+
+    const json = target.toJson()
+    expect(json.deployConfig!.deployServicePack).toEqual(false)
   })
 
   it('should create an instance with service config when the JSON is valid', () => {
@@ -146,7 +158,7 @@ describe('Target', () => {
     expect(target.repositoryName).toEqual('Foundation')
   })
 
-  it('should create an instance with job config when the JSON is valid', () => {
+  it('should convert an instance to json containing job config', () => {
     const target = new Target({
       name: 'test',
       serverUrl: '',
@@ -159,12 +171,13 @@ describe('Target', () => {
       }
     })
 
-    expect(target).toBeTruthy()
-    expect(target instanceof Target).toEqual(true)
-    expect(target.jobConfig).toBeTruthy()
-    expect(target.jobConfig!.jobFolders).toEqual([])
-    expect(target.jobConfig!.initProgram).toEqual('init')
-    expect(target.jobConfig!.termProgram).toEqual('term')
+    const json = target.toJson()
+
+    expect(json).toBeTruthy()
+    expect(json.jobConfig).toBeTruthy()
+    expect(json.jobConfig!.jobFolders).toEqual([])
+    expect(json.jobConfig!.initProgram).toEqual('init')
+    expect(json.jobConfig!.termProgram).toEqual('term')
   })
 
   it('should create an instance with doc config when the JSON is valid', () => {
