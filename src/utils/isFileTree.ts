@@ -12,24 +12,24 @@ export const isFileTree = (arg: any): arg is FileTree =>
   Array.isArray(arg.members) &&
   arg.members.filter(
     (member: ServiceMember | FileMember | FolderMember) =>
-      !isServiceMember(member, '-') &&
-      !isFileMember(member, '-') &&
-      !isFolderMember(member, '-')
+      !isServiceMember(member) &&
+      !isFileMember(member) &&
+      !isFolderMember(member)
   ).length === 0
 
-const isServiceMember = (arg: any, pre: string): arg is ServiceMember =>
+const isServiceMember = (arg: any): arg is ServiceMember =>
   arg &&
   typeof arg.name === 'string' &&
   arg.type === MemberType.service &&
   typeof arg.code === 'string'
 
-const isFileMember = (arg: any, pre: string): arg is ServiceMember =>
+const isFileMember = (arg: any): arg is ServiceMember =>
   arg &&
   typeof arg.name === 'string' &&
   arg.type === MemberType.file &&
   typeof arg.code === 'string'
 
-const isFolderMember = (arg: any, pre: string): arg is FolderMember =>
+const isFolderMember = (arg: any): arg is FolderMember =>
   arg &&
   typeof arg.name === 'string' &&
   arg.type === MemberType.folder &&
@@ -37,9 +37,9 @@ const isFolderMember = (arg: any, pre: string): arg is FolderMember =>
   Array.isArray(arg.members) &&
   arg.members.filter(
     (member: FolderMember | ServiceMember) =>
-      !isServiceMember(member, pre + '-') &&
-      !isFileMember(member, pre + '-') &&
-      !isFolderMember(member, pre + '-')
+      !isServiceMember(member) &&
+      !isFileMember(member) &&
+      !isFolderMember(member)
   ).length === 0
 
 export const getTreeExample = (): FileTree => ({
