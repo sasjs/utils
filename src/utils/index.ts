@@ -1,4 +1,5 @@
 export * from './utils'
+export * from './fileTree'
 
 export { urlOrigin } from './url'
 
