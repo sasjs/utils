@@ -537,14 +537,15 @@
       "$id": "#/properties/streamConfig",
       "type": "object",
       "title": "streamConfig",
-      "description": "SASjs allows the frontend of a local web app to be compiled such that all html, css, javascript, and other assets such as png or mp4 are converted into web services and streamed directly from SAS.\n\nThis approach is convenient as it bypasses the need to deploy to a web server. ",
+      "description": "SASjs allows a local web app to be compiled such that all html, css, javascript, and other assets such as png or mp4 are converted into web services and streamed directly from SAS.\n\nThis approach is convenient as it bypasses the need to deploy to a web server. ",
       "default": {},
       "examples": [
         {
           "assetPaths": [],
           "streamWeb": false,
           "streamWebFolder": "webv",
-          "webSourcePath": "dist"
+          "webSourcePath": "dist",
+          "streamLogo": "logo.png"
         }
       ],
       "required": ["streamWeb"],
@@ -556,6 +557,14 @@
           "description": "An array of local folders.  All assets placed in these folders are converted into web services - example file types could be png, svg, mp3, mp4, excel - anything really.",
           "default": [],
           "examples": [["/myassets"]]
+        },
+        "streamLogo": {
+          "$id": "#/properties/streamConfig/properties/streamLogo",
+          "type": "string",
+          "title": "Icon shown in AppStream (sasjs/server)",
+          "description": "Provide the location of a square image, under the webSourcePath.  Used as the display icon on the appStream page.",
+          "default": "logo.png",
+          "examples": ["logo.png", "favicon.ico"]
         },
         "streamWeb": {
           "$id": "#/properties/streamConfig/properties/streamWeb",

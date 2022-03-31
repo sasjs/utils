@@ -48,9 +48,9 @@ export interface TargetJson {
   serviceConfig?: ServiceConfig
   jobConfig?: JobConfig
   streamConfig?: StreamConfig
-  macroFolders: string[]
-  programFolders: string[]
-  binaryFolders: string[]
+  macroFolders?: string[]
+  programFolders?: string[]
+  binaryFolders?: string[]
   isDefault?: boolean
   testConfig?: TestConfig
 }
@@ -121,20 +121,20 @@ export class Target implements TargetJson {
   }
   private _streamConfig: StreamConfig | undefined
 
-  get macroFolders(): string[] {
+  get macroFolders(): string[] | undefined {
     return this._macroFolders
   }
-  private _macroFolders: string[] = []
+  private _macroFolders: string[] | undefined
 
-  get programFolders(): string[] {
+  get programFolders(): string[] | undefined {
     return this._programFolders
   }
-  private _programFolders: string[] = []
+  private _programFolders: string[] | undefined
 
-  get binaryFolders(): string[] {
+  get binaryFolders(): string[] | undefined {
     return this._binaryFolders
   }
-  private _binaryFolders: string[] = []
+  private _binaryFolders: string[] | undefined
 
   get contextName(): string {
     return this._contextName
@@ -197,6 +197,11 @@ export class Target implements TargetJson {
 
       if (json.deployConfig) {
         this._deployConfig = validateDeployConfig(json.deployConfig)
+      } else {
+        this._deployConfig = validateDeployConfig({
+          deployServicePack: true,
+          deployScripts: []
+        })
       }
 
       if (json.serviceConfig) {
@@ -238,11 +243,14 @@ export class Target implements TargetJson {
       serverType: this.serverType,
       httpsAgentOptions: this.httpsAgentOptions,
       appLoc: this.appLoc,
-      macroFolders: this.macroFolders,
-      programFolders: this.programFolders,
-      binaryFolders: this.binaryFolders,
       docConfig: this.docConfig
     }
+
+    if (this.macroFolders?.length) json.macroFolders = this.macroFolders
+
+    if (this.programFolders?.length) json.programFolders = this.programFolders
+
+    if (this.binaryFolders?.length) json.binaryFolders = this.binaryFolders
 
     if (this.authConfig) {
       json.authConfig = this.authConfig
@@ -295,7 +303,11 @@ export class Target implements TargetJson {
         assetPaths: []
       }
 
-    if (this.deployConfig) {
+    if (
+      this.deployConfig &&
+      (!this.deployConfig.deployServicePack ||
+        this.deployConfig.deployScripts.length)
+    ) {
       json.deployConfig = this.deployConfig
     } else if (withDefaults)
       json.deployConfig = {

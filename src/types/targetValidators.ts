@@ -325,6 +325,10 @@ export const validateStreamConfig = (
     )
   }
 
+  if (streamConfig.streamLogo && typeof streamConfig.streamLogo !== 'string') {
+    streamConfig.streamLogo = undefined
+  }
+
   if (!streamConfig.assetPaths) {
     streamConfig.assetPaths = []
   }

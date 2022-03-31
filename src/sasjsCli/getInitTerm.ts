@@ -1,4 +1,4 @@
-import { readFile, getAbsolutePath } from '../file'
+import { getAbsolutePath } from '../file'
 import {
   Configuration,
   ServiceConfig,
@@ -9,7 +9,7 @@ import {
 } from '../types'
 import { chunk } from '../utils'
 import { capitalizeFirstChar } from '../formatter'
-import { CompileTree } from '../compileTree'
+import { CompileTree, Leaf } from '../compileTree'
 
 export enum ProgramType {
   Init = 'init',
@@ -20,8 +20,9 @@ interface getInitTermParams {
   target?: Target
   fileType: SASJsFileType
   buildSourceFolder: string
-  compileTree?: CompileTree
+  compileTree: CompileTree
 }
+
 export const getInitTerm = async ({
   configuration,
   target,
@@ -29,23 +30,33 @@ export const getInitTerm = async ({
   buildSourceFolder,
   compileTree
 }: getInitTermParams) => {
-  const { content: init, filePath: initPath } = await getProgram(
+  const {
+    content: init,
+    filePath: initPath,
+    compileTreeLeaf: initLeaf
+  } = await getProgram(
     {
       target,
       configuration,
       buildSourceFolder,
-      fileType
+      fileType,
+      compileTree
     },
     ProgramType.Init,
     compileTree
   )
 
-  const { content: term, filePath: termPath } = await getProgram(
+  const {
+    content: term,
+    filePath: termPath,
+    compileTreeLeaf: termLeaf
+  } = await getProgram(
     {
       target,
       configuration,
       buildSourceFolder,
-      fileType
+      fileType,
+      compileTree
     },
     ProgramType.Term,
     compileTree
@@ -58,7 +69,9 @@ export const getInitTerm = async ({
     initPath,
     term,
     termPath,
-    startUpVars
+    startUpVars,
+    initLeaf,
+    termLeaf
   }
 }
 
@@ -97,8 +110,8 @@ const convertVarsToSasFormat = (vars: { [key: string]: string }): string => {
 export const getProgram = async (
   { target, configuration, buildSourceFolder, fileType }: getInitTermParams,
   programType: ProgramType,
-  compileTree?: CompileTree
-): Promise<{ content: string; filePath: string }> => {
+  compileTree: CompileTree
+): Promise<{ content: string; filePath: string; compileTreeLeaf?: Leaf }> => {
   let programContent = '',
     filePath = ''
 
@@ -138,11 +151,7 @@ export const getProgram = async (
   if (program) {
     filePath = getAbsolutePath(program, buildSourceFolder)
 
-    if (compileTree && Object.keys(compileTree).length) {
-      programContent = await compileTree.getDepContent(filePath)
-    } else {
-      programContent = await readFile(filePath)
-    }
+    programContent = await compileTree.getDepContent(filePath)
   }
 
   const content = programContent
@@ -153,15 +162,22 @@ export const getProgram = async (
       )} end;`
     : ''
 
+  const compileTreeLeaf = compileTree.getLeaf(filePath)
+
   return {
     content,
-    filePath
+    filePath,
+    compileTreeLeaf
   }
 }
 
 export const mockGetProgram = (
   module: {
-    getProgram: (param: getInitTermParams, programType: ProgramType) => {}
+    getProgram: (
+      param: getInitTermParams,
+      programType: ProgramType,
+      compileTree: CompileTree
+    ) => {}
   },
   fakeInit: string,
   fakeTerm: string
