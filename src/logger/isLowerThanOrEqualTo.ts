@@ -8,7 +8,7 @@ export const isLowerThanOrEqualTo = (
     return false
   }
 
-  if (currentLevel === LogLevel.Debug) {
+  if (currentLevel === LogLevel.Debug || currentLevel === LogLevel.Trace) {
     return true
   }
 

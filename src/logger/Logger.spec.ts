@@ -78,6 +78,24 @@ describe('Logger', () => {
     expect(consola.debug).toHaveBeenCalledTimes(1)
   })
 
+  it('should log debug messages when the log level is Trace', () => {
+    const logger = new Logger(LogLevel.Trace)
+    jest.spyOn(consola, 'debug')
+
+    logger.debug('This is debug.')
+
+    expect(consola.debug).toHaveBeenCalledTimes(1)
+  })
+
+  it('should log trace messages when the log level is Trace', () => {
+    const logger = new Logger(LogLevel.Trace)
+    jest.spyOn(consola, 'debug')
+
+    logger.trace('This is trace.')
+
+    expect(consola.debug).toHaveBeenCalledTimes(1)
+  })
+
   it('should not log debug messages when the log level is Error', () => {
     const logger = new Logger(LogLevel.Error)
     jest.spyOn(consola, 'debug')
@@ -89,6 +107,15 @@ describe('Logger', () => {
 
   it('should log success messages when the log level is Debug', () => {
     const logger = new Logger(LogLevel.Debug)
+    jest.spyOn(consola, 'success')
+
+    logger.success('This is success.')
+
+    expect(consola.success).toHaveBeenCalledTimes(1)
+  })
+
+  it('should log success messages when the log level is Trace', () => {
+    const logger = new Logger(LogLevel.Trace)
     jest.spyOn(consola, 'success')
 
     logger.success('This is success.')
