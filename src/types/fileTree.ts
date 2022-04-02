@@ -16,11 +16,12 @@ export interface FileMember {
   code: string
 }
 
-export interface FileTree {
+export interface FolderMember {
+  name: string
+  type: MemberType.folder
   members: (FolderMember | ServiceMember | FileMember)[]
 }
 
-export interface FolderMember extends FileTree {
-  name: string
-  type: MemberType.folder
+export interface FileTree {
+  members: (FolderMember | ServiceMember | FileMember)[]
 }
