@@ -85,6 +85,7 @@ describe('Logger', () => {
     logger.debug('This is debug.')
 
     expect(consola.debug).toHaveBeenCalledTimes(1)
+    expect(consola.debug).toHaveBeenCalledWith('This is debug.')
   })
 
   it('should log trace messages when the log level is Trace', () => {
@@ -94,6 +95,7 @@ describe('Logger', () => {
     logger.trace('This is trace.')
 
     expect(consola.debug).toHaveBeenCalledTimes(1)
+    expect(consola.debug).toHaveBeenCalledWith('This is trace.')
   })
 
   it('should not log debug messages when the log level is Error', () => {
@@ -121,6 +123,7 @@ describe('Logger', () => {
     logger.success('This is success.')
 
     expect(consola.success).toHaveBeenCalledTimes(1)
+    expect(consola.success).toHaveBeenCalledWith('This is success.')
   })
 
   it('should not log success messages when the log level is Error', () => {
