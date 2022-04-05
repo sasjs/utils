@@ -23,6 +23,12 @@ export class Logger {
 
   private _logLevel: LogLevel = LogLevel.Error
 
+  trace = (message: string, ...args: any): void => {
+    if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Trace)) {
+      consola.debug(message, ...this.filterArgs(args))
+    }
+  }
+
   debug = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Debug)) {
       consola.debug(message, ...this.filterArgs(args))
