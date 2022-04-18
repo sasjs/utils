@@ -14,3 +14,13 @@ export const choiceValidator = (
   numberOfChoices: number,
   errorMessage: string
 ) => (value > 0 && value <= numberOfChoices) || errorMessage
+
+// This regex will match special missing
+// `a-z` or `_` or `.` or '.a'
+export const isSpecialMissing = (value: any) => {
+  // This regex can't cover the case with `..` two dots, so if we receive it that is false special missing
+  if (typeof value === 'string' && value.includes('..')) return false
+
+  const regex = new RegExp('^(\\.)?[a-z_.]{1}$', 'i')
+  return regex.test(value)
+}

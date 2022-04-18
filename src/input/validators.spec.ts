@@ -1,6 +1,7 @@
 import {
   choiceValidator,
   confirmationValidator,
+  isSpecialMissing,
   urlValidator
 } from './validators'
 
@@ -100,3 +101,24 @@ describe('choiceValidator', () => {
     )
   })
 })
+
+describe('Special Missing check', () => {
+  it('should accept special missings', () => {
+    expect(isSpecialMissing('s')).toBeTrue()
+    expect(isSpecialMissing('.')).toBeTrue()
+    expect(isSpecialMissing('.s')).toBeTrue()
+    expect(isSpecialMissing('_')).toBeTrue()
+    expect(isSpecialMissing('._')).toBeTrue()
+  })
+
+  it('should reject non special missings', () => {
+    expect(isSpecialMissing('ss')).toBeFalse()
+    expect(isSpecialMissing('..')).toBeFalse()
+    expect(isSpecialMissing('__')).toBeFalse()
+    expect(isSpecialMissing('23')).toBeFalse()
+    expect(isSpecialMissing(23)).toBeFalse()
+    expect(isSpecialMissing(null)).toBeFalse()
+    expect(isSpecialMissing(undefined)).toBeFalse()
+  })
+})
+
