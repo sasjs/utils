@@ -8,3 +8,7 @@ export {
   InputValidator,
   Choice
 } from './readAndValidateInput'
+
+export {
+  isSpecialMissing
+} from './validators'
