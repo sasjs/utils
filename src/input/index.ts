@@ -9,6 +9,4 @@ export {
   Choice
 } from './readAndValidateInput'
 
-export {
-  isSpecialMissing
-} from './validators'
+export { isSpecialMissing } from './validators'
