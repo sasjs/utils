@@ -362,6 +362,16 @@ export const validateServerName = (
   return serverName
 }
 
+export const validateSyncFolder = (syncFolder: string): string | undefined => {
+  if (typeof syncFolder !== 'string') {
+    return
+  }
+
+  if (!syncFolder) return
+
+  return syncFolder
+}
+
 export const validateRepositoryName = (
   repositoryName: string,
   serverType: ServerType

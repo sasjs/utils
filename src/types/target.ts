@@ -28,7 +28,8 @@ import {
   validateRepositoryName,
   validateAuthConfig,
   validateAuthConfigSas9,
-  validateTestConfig
+  validateTestConfig,
+  validateSyncFolder
 } from './targetValidators'
 
 export interface TargetJson {
@@ -156,6 +157,11 @@ export class Target implements TargetJson {
   }
   private _testConfig: TestConfig | undefined
 
+  get syncFolder(): string | undefined {
+    return this._syncFolder
+  }
+  private _syncFolder: string | undefined
+
   constructor(json: any) {
     try {
       if (!json) {
@@ -174,6 +180,7 @@ export class Target implements TargetJson {
         this._serverType
       )
       this._serverName = validateServerName(json.serverName, this._serverType)
+      this._syncFolder = validateSyncFolder(json.syncFolder)
       this._repositoryName = validateRepositoryName(
         json.repositoryName,
         this._serverType
