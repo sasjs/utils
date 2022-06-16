@@ -10,6 +10,7 @@ export {
   listFilesAndSubFoldersInFolder,
   createFile,
   createFolder,
+  createReadStream,
   createWriteStream,
   deleteFile,
   deleteFolder,
