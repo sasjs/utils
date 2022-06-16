@@ -66,7 +66,8 @@ describe('Target', () => {
       serverUrl: '',
       serverType: ServerType.Sas9,
       appLoc: '/test',
-      contextName: 'Test Context'
+      contextName: 'Test Context',
+      syncFolder: ''
     })
 
     expect(target).toBeTruthy()
@@ -76,6 +77,7 @@ describe('Target', () => {
     expect(target.serverType).toEqual(ServerType.Sas9)
     expect(target.appLoc).toEqual('/test')
     expect(target.contextName).toEqual('Test Context')
+    expect(target.syncFolder).toBeUndefined()
   })
 
   it('should convert an instance to json containing build config', () => {
