@@ -1,4 +1,4 @@
-import fs, { WriteStream } from 'fs-extra'
+import fs, { ReadStream, WriteStream } from 'fs-extra'
 import path from 'path'
 import {
   isFolder,
@@ -20,7 +20,8 @@ import {
   base64EncodeFile,
   base64EncodeImageFile,
   getRealPath,
-  createWriteStream
+  createWriteStream,
+  createReadStream
 } from '../file'
 import * as fileModule from '../file'
 import { generateTimestamp } from '../../time'
@@ -410,6 +411,31 @@ describe('getRealPath', () => {
     const testPath = path.join(__dirname, '..', `.${path.sep}spec`)
 
     expect(getRealPath(testPath)).toEqual(path.join(__dirname))
+  })
+})
+
+describe('createReadStream', () => {
+  const filePath = path.join(__dirname, 'testfile.txt')
+  beforeEach(async () => {
+    jest.restoreAllMocks()
+    jest.mock('fs-extra')
+    jest.mock('../file')
+    jest
+      .spyOn(fs, 'createReadStream')
+      .mockImplementation(() => ({} as unknown as ReadStream))
+    jest
+      .spyOn(fileModule, 'createFile')
+      .mockImplementation(() => Promise.resolve())
+  })
+
+  it('should return a read stream for a file that exists', async () => {
+    jest
+      .spyOn(fileModule, 'fileExists')
+      .mockImplementation(() => Promise.resolve(true))
+
+    await createReadStream(filePath)
+
+    expect(fs.createReadStream).toHaveBeenCalledWith(filePath)
   })
 })
 

@@ -29,4 +29,5 @@ export interface Configuration {
   targets?: TargetJson[]
   defaultTarget?: string
   testConfig?: TestConfig
+  syncFolder?: string
 }

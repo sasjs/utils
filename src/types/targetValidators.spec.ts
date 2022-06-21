@@ -28,7 +28,8 @@ import {
   validateAuthConfig,
   validateDocConfig,
   validateTestConfig,
-  validateAuthConfigSas9
+  validateAuthConfigSas9,
+  validateSyncFolder
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -1037,5 +1038,31 @@ describe('validateTestConfig', () => {
     testOutput = { ...testOutput, testTearDown: 'testTearDown' }
 
     testAssertion()
+  })
+})
+
+describe('validateSyncFolder', () => {
+  it('should return undefined when not specified', () => {
+    expect(validateSyncFolder(undefined as unknown as string)).toBeUndefined()
+  })
+
+  it('should return undefined when null specified', () => {
+    expect(validateSyncFolder(null as unknown as string)).toBeUndefined()
+  })
+
+  it('should return undefined when number specified', () => {
+    expect(validateSyncFolder(123 as unknown as string)).toBeUndefined()
+  })
+
+  it('should return undefined when object specified', () => {
+    expect(validateSyncFolder({} as unknown as string)).toBeUndefined()
+  })
+
+  it('should return undefined when empty string specified', () => {
+    expect(validateSyncFolder('')).toBeUndefined()
+  })
+
+  it('should return syncFolder when valid', () => {
+    expect(validateSyncFolder('some/path')).toEqual('some/path')
   })
 })
