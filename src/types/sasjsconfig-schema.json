@@ -102,6 +102,14 @@
     }
   ],
   "properties": {
+    "binaryFolders": {
+      "$id": "#/properties/binaryFolders",
+      "type": "array",
+      "title": "The binaryFolders array",
+      "description": "These local folders are searched for Binary Files when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+      "default": [],
+      "examples": [["binaries", "../../more_binaries"]]
+    },
     "buildOutputFolder": {
       "$id": "#/properties/buildOutputFolder",
       "type": "string",
@@ -675,13 +683,12 @@
       "default": [],
       "examples": [["programs", "../../more_programs"]]
     },
-    "binaryFolders": {
-      "$id": "#/properties/binaryFolders",
-      "type": "array",
-      "title": "The binaryFolders array",
-      "description": "These local folders are searched for Binary Files when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-      "default": [],
-      "examples": [["binaries", "../../more_binaries"]]
+    "syncFolder": {
+      "$id": "#/properties/syncFolder",
+      "type": "string",
+      "title": "Sync Folder",
+      "description": "The contents of this folder are simply copied to the sasjsbuild directory AFTER the rest of the project is compiled.  Useful for synchronising random / generic content with SAS logical folders.",
+      "default": "sasjs/static_files"
     },
     "targets": {
       "$id": "#/properties/targets",
@@ -915,6 +922,9 @@
               },
               "streamConfig": {
                 "$ref": "#/properties/streamConfig"
+              },
+              "syncFolder": {
+                "$ref": "#/properties/syncFolder"
               },
               "testConfig": {
                 "$ref": "#/properties/testConfig"
