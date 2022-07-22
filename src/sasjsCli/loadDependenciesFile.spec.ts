@@ -432,7 +432,7 @@ describe('loadDependenciesFile', () => {
   })
 
   it(
-    'should not any comments to file content if the SASJsFileType=' +
+    'should not add any comments to file content if the SASJsFileType=' +
       SASJsFileType.file,
     async () => {
       const testFileContent = 'test file content'
