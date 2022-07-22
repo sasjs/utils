@@ -1,5 +1,6 @@
 export enum SASJsFileType {
   service = 'Service',
   job = 'Job',
-  test = 'Test'
+  test = 'Test',
+  file = 'File'
 }
