@@ -3,6 +3,6 @@ export function chunk(text: string, maxLength = 220) {
     return [text]
   }
   return (text.match(new RegExp('.{1,' + maxLength + '}', 'g')) || []).filter(
-    (m) => !!m
+    m => !!m
   )
 }

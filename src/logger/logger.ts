@@ -104,7 +104,7 @@ export class Logger {
       })
     }
 
-    data.forEach((item) => table.push(item))
+    data.forEach(item => table.push(item))
 
     this.log(
       (disableStyling

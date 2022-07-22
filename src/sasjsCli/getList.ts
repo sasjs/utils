@@ -10,7 +10,7 @@ export const getList = (listHeader: string, fileContent: string) => {
 
   const fileHeader = fileContent.split('/**')[1].split('**/')[0]
   const list = []
-  const lines = fileHeader.split('\n').map((s) => (s ? s.trim() : s))
+  const lines = fileHeader.split('\n').map(s => (s ? s.trim() : s))
   let startIndex = null
   let endIndex = null
 
@@ -37,7 +37,7 @@ export const getList = (listHeader: string, fileContent: string) => {
   }
 
   return list
-    .filter((l) => l.startsWith('@li'))
-    .map((d) => d.replace(/\@li/g, ''))
-    .map((d) => d.trim())
+    .filter(l => l.startsWith('@li'))
+    .map(d => d.replace(/\@li/g, ''))
+    .map(d => d.trim())
 }
