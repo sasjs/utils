@@ -25,12 +25,12 @@ export async function getDependencyPaths(
   )
   const dependencies =
     leaf?.dependencies ||
-    getList(dependenciesHeader, fileContent).filter(d => d.endsWith('.sas'))
+    getList(dependenciesHeader, fileContent).filter((d) => d.endsWith('.sas'))
 
   // Search dependencies recursively starting from macroFolders and ending in macroCorePath
-  await asyncForEach(sourcePaths, async sourcePath => {
+  await asyncForEach(sourcePaths, async (sourcePath) => {
     if (await folderExists(sourcePath)) {
-      await asyncForEach(dependencies, async dep => {
+      await asyncForEach(dependencies, async (dep) => {
         const filePaths = find.fileSync(dep, sourcePath)
 
         if (filePaths.length) {

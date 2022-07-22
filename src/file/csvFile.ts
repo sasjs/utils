@@ -11,8 +11,8 @@ export const readCsv = async (csvFilePath: string): Promise<string[][]> => {
 
   return csvContent
     .split('\n')
-    .filter(row => row.length)
-    .map(data => data.split(','))
+    .filter((row) => row.length)
+    .map((data) => data.split(','))
 }
 
 /**
@@ -57,7 +57,7 @@ export const updateCsv = async (
   if (prependId) {
     const newId = csvData.length === 0 ? 1 : csvData.length
 
-    const idIndexInColumns = columns.findIndex(col => col === prependId)
+    const idIndexInColumns = columns.findIndex((col) => col === prependId)
 
     if (idIndexInColumns > -1) {
       newRecord.splice(idIndexInColumns, 0, newId)
@@ -91,7 +91,7 @@ const validateInput = async (
     throw new Error('a record can not have more fields than provided columns')
   }
 
-  const csvData = await readCsv(csvFilePath).catch(_ => [] as string[][])
+  const csvData = await readCsv(csvFilePath).catch((_) => [] as string[][])
   const columnsInFile = csvData[0]
 
   if (columnsInFile) {
@@ -108,7 +108,9 @@ const validateInput = async (
           'number of provided columns are less than number of existing columns'
         )
 
-      const idIndexInColumns = columnsInFile.findIndex(col => col === prependId)
+      const idIndexInColumns = columnsInFile.findIndex(
+        (col) => col === prependId
+      )
 
       const columnsWithId = [...columnsProvided]
 

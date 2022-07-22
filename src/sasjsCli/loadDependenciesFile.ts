@@ -36,21 +36,14 @@ export const loadDependenciesFile = async ({
   binaryFolders,
   compileTree
 }: LoadDependenciesParams) => {
-  const {
-    init,
-    initPath,
-    term,
-    termPath,
-    startUpVars,
-    initLeaf,
-    termLeaf
-  } = await getInitTerm({
-    configuration,
-    target,
-    fileType: type,
-    buildSourceFolder,
-    compileTree
-  })
+  const { init, initPath, term, termPath, startUpVars, initLeaf, termLeaf } =
+    await getInitTerm({
+      configuration,
+      target,
+      fileType: type,
+      buildSourceFolder,
+      compileTree
+    })
 
   if (type !== SASJsFileType.file) {
     fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
@@ -150,7 +143,7 @@ export const getAllDependencies = async (
 ): Promise<string> => {
   let dependenciesContent: string[] = []
 
-  await asyncForEach([...new Set(filePaths)], async filePath => {
+  await asyncForEach([...new Set(filePaths)], async (filePath) => {
     let depFileContent = ''
 
     if (compileTree && Object.keys(compileTree).length) {
