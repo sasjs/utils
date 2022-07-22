@@ -71,5 +71,6 @@ export class CompileTree {
 }
 
 // Removes header from SAS file
+// Removes multiline comment in the begging of the string regardless of the white spaces or line breaks before it
 export const removeHeader = (content: string) =>
-  content.replace(new RegExp(`\\/(\\*){1,2}([\\s\\S]*?)(\\*){1,2}\\/`), '')
+  content.replace(new RegExp(`^\\s*\\/(\\*){1,2}([\\s\\S]*?)(\\*){1,2}\\/`), '')
