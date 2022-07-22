@@ -45,7 +45,9 @@ export const loadDependenciesFile = async ({
       compileTree
     })
 
-  fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
+  if (type !== SASJsFileType.file) {
+    fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
+  }
 
   const fileDependencyPaths = await getDependencyPaths(
     `${fileContent}\n${init}\n${term}`,
@@ -113,10 +115,24 @@ export const loadDependenciesFile = async ({
     compileTree
   )
 
-  fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
-  ${init}${fileContent}${term}`
+  // There is no need to add any wrapping comments for file content if SASJsFileType===File
+  if (type === SASJsFileType.file) {
+    fileContent = [
+      initProgramDependencies,
+      termProgramDependencies,
+      dependenciesContent,
+      programDependencies,
+      binariesDeps,
+      fileContent
+    ]
+      .filter((content: string) => content.length)
+      .join('\n')
+  } else {
+    fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
+    ${init}${fileContent}${term}`
 
-  fileContent = `* ${type} Variables start;\n${startUpVars}\n* ${type} Variables end;\n${fileContent}`
+    fileContent = `* ${type} Variables start;\n${startUpVars}\n* ${type} Variables end;\n${fileContent}`
+  }
 
   return fileContent
 }

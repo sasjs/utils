@@ -430,6 +430,28 @@ describe('loadDependenciesFile', () => {
       expect.stringContaining(fakeProgramLines.join('\n'))
     )
   })
+
+  it(
+    'should not add any comments to file content if the SASJsFileType=' +
+      SASJsFileType.file,
+    async () => {
+      const testFileContent = 'test file content'
+      const dependencies = await loadDependenciesFile({
+        target,
+        configuration,
+        fileContent: testFileContent,
+        macroFolders: [],
+        programFolders: [],
+        type: SASJsFileType.file,
+        buildSourceFolder,
+        macroCorePath,
+        binaryFolders: [],
+        compileTree
+      })
+
+      expect(dependencies).toEqual(testFileContent)
+    }
+  )
 })
 
 describe('getAllDependencies', () => {
