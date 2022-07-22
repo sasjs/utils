@@ -432,7 +432,8 @@ describe('loadDependenciesFile', () => {
   })
 
   it(
-    'should not wrap file content of the SASJsFileType=' + SASJsFileType.file,
+    'should not any comments to file content if the SASJsFileType=' +
+      SASJsFileType.file,
     async () => {
       const testFileContent = 'test file content'
       const dependencies = await loadDependenciesFile({
