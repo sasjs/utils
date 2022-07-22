@@ -115,7 +115,7 @@ export const loadDependenciesFile = async ({
     compileTree
   )
 
-  // There is no need to add any wrapping for SASJsFileType.file
+  // There is no need to add any wrapping comments for file content if SASJsFileType===File
   if (type === SASJsFileType.file) {
     fileContent = [
       initProgramDependencies,
