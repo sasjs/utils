@@ -18,3 +18,5 @@ export const uuidv4 = () =>
 export const uniqArray = (data: any[]) => Array.from(new Set(data))
 
 export const isWindows = () => process.platform === 'win32'
+
+export const isLinux = () => process.platform === 'linux'
