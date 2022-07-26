@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/sasjs/utils/blob/main/src/types/sasjsconfig-schema.json",
   "type": "object",
   "title": "SASjs Config File",
@@ -875,6 +875,39 @@
                 "default": "",
                 "examples": ["SASVIYA"]
               },
+              "appLoc": {
+                "$id": "#/properties/targets/items/anyOf/0/properties/appLoc",
+                "type": "string",
+                "title": "The Target appLoc",
+                "description": "The appLoc provides the root SAS folder location under which all jobs and services are deployed and executed.  The SAS folder could be metadata in SAS 9, or SAS Drive in Viya. ",
+                "default": "",
+                "examples": ["/Public/app"]
+              },
+              "binaryFolders": {
+                "$id": "#/properties/targets/items/anyOf/0/properties/binaryFolders",
+                "type": "array",
+                "title": "The binaryFolders array",
+                "description": "These local folders are searched for Binary Files when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
+                "default": [],
+                "examples": [["binaries", "../../more_binaries"]]
+              },
+              "buildConfig": {
+                "$ref": "#/properties/buildConfig"
+              },
+              "contextName": {
+                "$id": "#/properties/targets/items/anyOf/0/properties/contextName",
+                "type": "string",
+                "title": "The Target contextName",
+                "description": "The name of the compute context used to execute SAS code.  The context determines the way in which the SAS session is spawned (eg user credentials, autoexec code, system options etc).\nContexts can be created / modified / deleted using the `sasjs context` command.",
+                "default": "SAS Job Execution compute context",
+                "examples": ["SAS Job Execution compute context"]
+              },
+              "deployConfig": {
+                "$ref": "#/properties/deployConfig"
+              },
+              "httpsAgentOptions": {
+                "$ref": "#/properties/httpsAgentOptions"
+              },
               "serverUrl": {
                 "$id": "#/properties/targets/items/anyOf/0/properties/serverUrl",
                 "type": "string",
@@ -885,31 +918,6 @@
                   "https://sas.analytium.co.uk",
                   "https://sas.analytium.co.uk:8080"
                 ]
-              },
-              "appLoc": {
-                "$id": "#/properties/targets/items/anyOf/0/properties/appLoc",
-                "type": "string",
-                "title": "The Target appLoc",
-                "description": "The appLoc provides the root SAS folder location under which all jobs and services are deployed and executed.  The SAS folder could be metadata in SAS 9, or SAS Drive in Viya. ",
-                "default": "",
-                "examples": ["/Public/app"]
-              },
-              "httpsAgentOptions": {
-                "$ref": "#/properties/httpsAgentOptions"
-              },
-              "contextName": {
-                "$id": "#/properties/targets/items/anyOf/0/properties/contextName",
-                "type": "string",
-                "title": "The Target contextName",
-                "description": "The name of the compute context used to execute SAS code.  The context determines the way in which the SAS session is spawned (eg user credentials, autoexec code, system options etc).\nContexts can be created / modified / deleted using the `sasjs context` command.",
-                "default": "SAS Job Execution compute context",
-                "examples": ["SAS Job Execution compute context"]
-              },
-              "buildConfig": {
-                "$ref": "#/properties/buildConfig"
-              },
-              "deployConfig": {
-                "$ref": "#/properties/deployConfig"
               },
               "serviceConfig": {
                 "$ref": "#/properties/serviceConfig"
