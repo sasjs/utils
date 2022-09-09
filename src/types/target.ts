@@ -312,7 +312,7 @@ export class Target implements TargetJson {
 
     if (
       this.deployConfig &&
-      (!this.deployConfig.deployServicePack ||
+      (this.deployConfig.deployServicePack ||
         this.deployConfig.deployScripts.length)
     ) {
       json.deployConfig = this.deployConfig
