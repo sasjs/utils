@@ -250,7 +250,8 @@ export class Target implements TargetJson {
       serverType: this.serverType,
       httpsAgentOptions: this.httpsAgentOptions,
       appLoc: this.appLoc,
-      docConfig: this.docConfig
+      docConfig: this.docConfig,
+      deployConfig: this.deployConfig
     }
 
     if (this.macroFolders?.length) json.macroFolders = this.macroFolders
@@ -308,18 +309,6 @@ export class Target implements TargetJson {
         webSourcePath: '',
         streamServiceName: '',
         assetPaths: []
-      }
-
-    if (
-      this.deployConfig &&
-      (this.deployConfig.deployServicePack ||
-        this.deployConfig.deployScripts.length)
-    ) {
-      json.deployConfig = this.deployConfig
-    } else if (withDefaults)
-      json.deployConfig = {
-        deployScripts: [],
-        deployServicePack: false
       }
 
     if (this.testConfig) {
