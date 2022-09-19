@@ -400,7 +400,7 @@ describe('Target', () => {
     })
     expect(json.deployConfig).toEqual({
       deployScripts: [],
-      deployServicePack: false
+      deployServicePack: true
     })
     expect(json.testConfig).toEqual({
       initProgram: '',
@@ -425,12 +425,15 @@ describe('Target', () => {
     expect(json.serverUrl).toEqual(target.serverUrl)
     expect(json.serverType).toEqual(target.serverType)
     expect(json.appLoc).toEqual(target.appLoc)
+    expect(json.deployConfig).toEqual({
+      deployServicePack: true,
+      deployScripts: []
+    })
     expect(json.authConfig).toEqual(undefined)
     expect(json.buildConfig).toEqual(undefined)
     expect(json.jobConfig).toEqual(undefined)
     expect(json.serviceConfig).toEqual(undefined)
     expect(json.streamConfig).toEqual(undefined)
-    expect(json.deployConfig).toEqual(undefined)
   })
 
   it('should return a JSON which contains authConfig whose value should be equal to authConfig that was passed in creation of target', () => {
