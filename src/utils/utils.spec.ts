@@ -3,7 +3,7 @@ import {
   uuidv4,
   isWindows,
   isLinux,
-  getOSSpecificPath
+  escapeWinSlashes
 } from './utils'
 import * as utilsModule from './utils'
 
@@ -47,12 +47,12 @@ describe('isLinux', () => {
   })
 })
 
-describe('getOSSpecificPath', () => {
+describe('escapeWinSlashes', () => {
   describe('when platform is win32', () => {
     it('should return the path with double backslashes', () => {
       jest.spyOn(utilsModule, 'isWindows').mockImplementationOnce(() => true)
       const path = 'some\\file\\path'
-      expect(getOSSpecificPath(path)).toEqual('some\\\\file\\\\path')
+      expect(escapeWinSlashes(path)).toEqual('some\\\\file\\\\path')
     })
   })
 
@@ -60,7 +60,7 @@ describe('getOSSpecificPath', () => {
     it('should return the path as it is ', () => {
       jest.spyOn(utilsModule, 'isWindows').mockImplementationOnce(() => false)
       const path = 'some/file/path'
-      expect(getOSSpecificPath(path)).toEqual(path)
+      expect(escapeWinSlashes(path)).toEqual(path)
     })
   })
 })

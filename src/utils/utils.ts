@@ -21,5 +21,8 @@ export const isWindows = () => process.platform === 'win32'
 
 export const isLinux = () => process.platform === 'linux'
 
-export const getOSSpecificPath = (path: string) =>
+/**
+ * replace single backslash with double backslash
+ */
+export const escapeWinSlashes = (path: string) =>
   isWindows() ? path.replace(/\\/g, '\\\\') : path
