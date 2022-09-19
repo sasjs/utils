@@ -20,3 +20,6 @@ export const uniqArray = (data: any[]) => Array.from(new Set(data))
 export const isWindows = () => process.platform === 'win32'
 
 export const isLinux = () => process.platform === 'linux'
+
+export const getOSSpecificPath = (path: string) =>
+  isWindows() ? path.replace(/\\/g, '\\\\') : path
