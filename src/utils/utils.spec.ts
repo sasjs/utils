@@ -1,8 +1,15 @@
-import { asyncForEach, uuidv4, isWindows, isLinux } from './utils'
+import {
+  asyncForEach,
+  uuidv4,
+  isWindows,
+  isLinux,
+  escapeWinSlashes
+} from './utils'
+import * as utilsModule from './utils'
 
 describe('uuidv4', () => {
   it('should generate 10000 uniq UUID', () => {
-    const uuids = []
+    const uuids: string[] = []
 
     for (let i = 0; i < 10 * 1000; i++) {
       const uuid = uuidv4()
@@ -37,5 +44,23 @@ describe('isWindows', () => {
 describe('isLinux', () => {
   it('should return if current operation system is linux', () => {
     expect(isLinux()).toEqual(process.platform === 'linux')
+  })
+})
+
+describe('escapeWinSlashes', () => {
+  describe('when platform is win32', () => {
+    it('should return the path with double backslashes', () => {
+      jest.spyOn(utilsModule, 'isWindows').mockImplementationOnce(() => true)
+      const path = 'some\\file\\path'
+      expect(escapeWinSlashes(path)).toEqual('some\\\\file\\\\path')
+    })
+  })
+
+  describe('when platform is not win32', () => {
+    it('should return the path as it is ', () => {
+      jest.spyOn(utilsModule, 'isWindows').mockImplementationOnce(() => false)
+      const path = 'some/file/path'
+      expect(escapeWinSlashes(path)).toEqual(path)
+    })
   })
 })
