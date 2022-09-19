@@ -1,4 +1,11 @@
-export { uuidv4, asyncForEach, uniqArray, isWindows, isLinux } from './utils'
+export {
+  uuidv4,
+  asyncForEach,
+  uniqArray,
+  isWindows,
+  isLinux,
+  escapeWinSlashes
+} from './utils'
 export * from './fileTree'
 
 export { urlOrigin } from './url'
