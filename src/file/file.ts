@@ -243,6 +243,24 @@ export const testFileRegExp = /\.test\.(\d+\.)?sas$/i
 
 export const isTestFile = (fileName: string) => testFileRegExp.test(fileName)
 
+/**
+ * Hashes each file in each directory, and then hashes the hashes to create a hash for each directory also.
+ *
+ * Whilst files are hashed in their entirety, the logic for creating a folder hash is as follows:
+ *
+ * Sort the files and subfolders by name (case sensitive, uppercase then lower)
+ * Take the first 100 hashes, concatenate and hash
+ * Concatenate this hash with another 100 hashes and hash again
+ * Continue until the end of the folder. This is the folder hash
+ * If a folder contains other folders, start from the bottom of the tree - the folder hashes cascade upwards so you know immediately if there is a change in a sub/sub directory
+ * If the folder has no content (empty) then it is ignored. No hash created.
+ *
+ * @param resourcePath
+ * @param pathRelativeTo
+ * @param hashedResources
+ * @returns - an array of HashResult
+ */
+
 export const hashFileFolder = async (
   resourcePath: string,
   pathRelativeTo: string = resourcePath,
