@@ -268,9 +268,13 @@ export const hashFileFolder = async (
 ) => {
   if (!(await isFolder(resourcePath))) {
     const fileContent = fs.readFileSync(resourcePath)
-    const hash = createHash('md5')
-    hash.update(fileContent)
-    const generatedHash = hash.digest('hex').toUpperCase()
+    let generatedHash = ''
+
+    if (fileContent.length) {
+      const hash = createHash('md5')
+      hash.update(fileContent)
+      generatedHash = hash.digest('hex').toUpperCase()
+    }
 
     return [
       ...hashedResources,
