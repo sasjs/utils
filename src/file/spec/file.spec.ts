@@ -147,6 +147,7 @@ describe('listSubFoldersInFolder', () => {
     await createFolder(folderPath)
 
     await expect(listSubFoldersInFolder(__dirname)).resolves.toEqual([
+      'hashFolder',
       folderName
     ])
 
