@@ -1,7 +1,9 @@
+import { createHash } from 'crypto'
 import fs from 'fs-extra'
 import rimraf from 'rimraf'
 import path from 'path'
 import { asyncForEach } from '../utils'
+import { HashResult } from '../types'
 import * as file from '.'
 
 export async function fileExists(filePath: string): Promise<boolean> {
@@ -240,3 +242,65 @@ export const createReadStream = async (filePath: string) =>
 export const testFileRegExp = /\.test\.(\d+\.)?sas$/i
 
 export const isTestFile = (fileName: string) => testFileRegExp.test(fileName)
+
+export const hashFileFolder = async (
+  resourcePath: string,
+  pathRelativeTo: string = resourcePath,
+  hashedResources: HashResult[] = []
+) => {
+  if (!(await isFolder(resourcePath))) {
+    const fileContent = fs.readFileSync(resourcePath)
+    const hash = createHash('md5')
+    hash.update(fileContent)
+    const generatedHash = hash.digest('hex').toUpperCase()
+
+    return [
+      ...hashedResources,
+      {
+        hash: generatedHash,
+        absolutePath: resourcePath,
+        relativePath: getRelativePath(pathRelativeTo, resourcePath),
+        isFolder: false
+      }
+    ]
+  }
+
+  const filesAndFolders = await listFilesAndSubFoldersInFolder(
+    resourcePath,
+    false
+  )
+  filesAndFolders.sort()
+
+  let concatenatedHash = ''
+
+  const chunkSize = 100
+  for (let i = 0; i < filesAndFolders.length; i += chunkSize) {
+    // Take the first 100 hashes, concatenate and hash
+    const resources = filesAndFolders.slice(i, i + chunkSize)
+    for (const resource of resources) {
+      hashedResources = await hashFileFolder(
+        path.join(resourcePath, resource),
+        pathRelativeTo,
+        hashedResources
+      )
+      const lastPushed = hashedResources[hashedResources.length - 1]
+      concatenatedHash += lastPushed.hash
+    }
+
+    if (filesAndFolders.length > 1) {
+      const hash = createHash('md5')
+      hash.update(concatenatedHash)
+      concatenatedHash = hash.digest('hex').toUpperCase()
+    }
+  }
+
+  return [
+    ...hashedResources,
+    {
+      hash: concatenatedHash,
+      absolutePath: resourcePath,
+      relativePath: getRelativePath(pathRelativeTo, resourcePath),
+      isFolder: true
+    }
+  ]
+}

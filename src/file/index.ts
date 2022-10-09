@@ -23,7 +23,8 @@ export {
   base64EncodeFile,
   getRealPath,
   isTestFile,
-  testFileRegExp
+  testFileRegExp,
+  hashFileFolder
 } from './file'
 
 export { updateCsv, createCsv, readCsv } from './csvFile'

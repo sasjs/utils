@@ -21,7 +21,8 @@ import {
   base64EncodeImageFile,
   getRealPath,
   createWriteStream,
-  createReadStream
+  createReadStream,
+  hashFileFolder
 } from '../file'
 import * as fileModule from '../file'
 import { generateTimestamp } from '../../time'
@@ -526,5 +527,14 @@ describe('deleteFolder', () => {
     isFolderPresent = await folderExists(folderPath)
 
     expect(isFolderPresent).toBeFalsy()
+  })
+})
+
+describe('hashFileFolder', () => {
+  it('should return the hash of provided directory', async () => {
+    const hashResult = await hashFileFolder(path.join(__dirname, 'hashFolder'))
+    const expectedHash = '74FFEA8EA05C42341754D6A4B01E90E5'
+    const receivedHash = hashResult[hashResult.length - 1].hash
+    expect(receivedHash).toEqual(expectedHash)
   })
 })
