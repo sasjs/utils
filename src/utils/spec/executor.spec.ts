@@ -1,4 +1,4 @@
-import { getExecutorPath } from './executor'
+import { getExecutorPath } from '../executor'
 
 // Add more pair options to be tested here
 const serverTypePathMap: { serverType: string; executorPath: string }[] = [

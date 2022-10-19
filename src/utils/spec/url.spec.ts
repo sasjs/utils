@@ -1,4 +1,4 @@
-import { urlOrigin } from './url'
+import { urlOrigin } from '../url'
 
 describe('urlOrigin', () => {
   it('should return an empty string if empty string was provided', () => {

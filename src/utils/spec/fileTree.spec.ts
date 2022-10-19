@@ -1,4 +1,4 @@
-import { getTreeExample, isFileTree } from './fileTree'
+import { getTreeExample, isFileTree } from '../fileTree'
 
 describe('isFileTree', () => {
   it('should return true for valid file tree', () => {
