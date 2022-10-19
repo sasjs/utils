@@ -1,9 +1,7 @@
-import { createHash } from 'crypto'
 import fs from 'fs-extra'
 import rimraf from 'rimraf'
 import path from 'path'
 import { asyncForEach } from '../utils'
-import { HashResult } from '../types'
 import * as file from '.'
 
 export async function fileExists(filePath: string): Promise<boolean> {
@@ -242,87 +240,3 @@ export const createReadStream = async (filePath: string) =>
 export const testFileRegExp = /\.test\.(\d+\.)?sas$/i
 
 export const isTestFile = (fileName: string) => testFileRegExp.test(fileName)
-
-/**
- * Hashes each file in each directory, and then hashes the hashes to create a hash for each directory also.
- *
- * Whilst files are hashed in their entirety, the logic for creating a folder hash is as follows:
- *
- * Sort the files and subfolders by name (case sensitive, uppercase then lower)
- * Take the first 100 hashes, concatenate and hash
- * Concatenate this hash with another 100 hashes and hash again
- * Continue until the end of the folder. This is the folder hash
- * If a folder contains other folders, start from the bottom of the tree - the folder hashes cascade upwards so you know immediately if there is a change in a sub/sub directory
- * If the folder has no content (empty) then it is ignored. No hash created.
- *
- * @param resourcePath
- * @param pathRelativeTo
- * @param hashedResources
- * @returns - an array of HashResult
- */
-
-export const hashFileFolder = async (
-  resourcePath: string,
-  pathRelativeTo: string = resourcePath,
-  hashedResources: HashResult[] = []
-) => {
-  if (!(await isFolder(resourcePath))) {
-    const fileContent = fs.readFileSync(resourcePath)
-    let generatedHash = ''
-
-    if (fileContent.length) {
-      const hash = createHash('md5')
-      hash.update(fileContent)
-      generatedHash = hash.digest('hex').toUpperCase()
-    }
-
-    return [
-      ...hashedResources,
-      {
-        hash: generatedHash,
-        absolutePath: resourcePath,
-        relativePath: getRelativePath(pathRelativeTo, resourcePath),
-        isFolder: false
-      }
-    ]
-  }
-
-  const filesAndFolders = await listFilesAndSubFoldersInFolder(
-    resourcePath,
-    false
-  )
-  filesAndFolders.sort()
-
-  let concatenatedHash = ''
-
-  const chunkSize = 100
-  for (let i = 0; i < filesAndFolders.length; i += chunkSize) {
-    // Take the first 100 hashes, concatenate and hash
-    const resources = filesAndFolders.slice(i, i + chunkSize)
-    for (const resource of resources) {
-      hashedResources = await hashFileFolder(
-        path.join(resourcePath, resource),
-        pathRelativeTo,
-        hashedResources
-      )
-      const lastPushed = hashedResources[hashedResources.length - 1]
-      concatenatedHash += lastPushed.hash
-    }
-
-    if (filesAndFolders.length > 1) {
-      const hash = createHash('md5')
-      hash.update(concatenatedHash)
-      concatenatedHash = hash.digest('hex').toUpperCase()
-    }
-  }
-
-  return [
-    ...hashedResources,
-    {
-      hash: concatenatedHash,
-      absolutePath: resourcePath,
-      relativePath: getRelativePath(pathRelativeTo, resourcePath),
-      isFolder: true
-    }
-  ]
-}
