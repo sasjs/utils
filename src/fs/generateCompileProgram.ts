@@ -5,7 +5,6 @@ import {
   getCompiledMacrosCode,
   generateCodeForFileCreation
 } from './internal/helper'
-import { HashedFolder } from '../types'
 
 export const generateCompileProgram = async (folderPath: string) => {
   const compiledMacrosCode = await getCompiledMacrosCode(['mf_mkdir.sas'])
