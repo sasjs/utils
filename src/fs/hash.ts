@@ -29,7 +29,7 @@ export const getHash = async (folderPath: string): Promise<HashedFolder> => {
 /**
  * It returns a hashed folder tree that contains the local directory resources that are not synced with remote
  */
-export async function compareHashes(
+export function compareHashes(
   localHash: HashedFolder,
   remoteHashMap: { [key: string]: string }
 ) {

@@ -1,9 +1,3 @@
-%global fsTarget;
-%let compiled_fsTarget=%sysfunc(pathname(work));
-%let fsTarget=%sysfunc(coalescec(&fsTarget,&compiled_fsTarget));
-options nobomfile;
-
-/* mf_mkdir macro begins */
 /**
   @file
   @brief Creates a directory, including any intermediate directories
@@ -72,10 +66,12 @@ Usage:
   /* exit quietly if directory did exist.*/
 %mend mf_mkdir;
 
-/* mf_mkdir macro ends */
+%global fsTarget;
+%let compiled_fsTarget=%sysfunc(pathname(work));
+%let fsTarget=%sysfunc(coalescec(&fsTarget,&compiled_fsTarget));
+options nobomfile;
 
 %mf_mkdir(&fsTarget)
-
 
 %mf_mkdir(&fsTarget/subFolder)
 
@@ -90,23 +86,22 @@ filename _out64 "&fsTarget/subFolder/file.txt";
 
 /* convert from base64 */
 data _null_;
-  length filein 8 fileout 8;
-  filein = fopen("_in64",'I',4,'B');
-  fileout = fopen("_out64",'O',3,'B');
-  char= '20'x;
-  do while(fread(filein)=0);
-    length raw $4 ;
-    do i=1 to 4;
-      rc=fget(filein,char,1);
-      substr(raw,i,1)=char;
-    end;
-    rc = fput(fileout, input(raw,$base64X4.));
-    rc =fwrite(fileout);
+length filein 8 fileout 8;
+filein = fopen("_in64",'I',4,'B');
+fileout = fopen("_out64",'O',3,'B');
+char= '20'x;
+do while(fread(filein)=0);
+  length raw $4 ;
+  do i=1 to 4;
+    rc=fget(filein,char,1);
+    substr(raw,i,1)=char;
   end;
-  rc = fclose(filein);
-  rc = fclose(fileout);
+  rc = fput(fileout, input(raw,$base64X4.));
+  rc =fwrite(fileout);
+end;
+rc = fclose(filein);
+rc = fclose(fileout);
 run;
 
 filename _in64 clear;
 filename _out64 clear;
-

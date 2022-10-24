@@ -50,7 +50,7 @@ export const generateProgramToSyncHashDiff = async (
   return setTargetAtStart(code, remotePath)
 }
 
-export const findResourcesNotPresentLocally = async (
+export const findResourcesNotPresentLocally = (
   localHash: HashedFolder,
   remoteHashMap: { [key: string]: string }
 ) => {

@@ -21,7 +21,7 @@ export const getNodeModulePath = async (module: string): Promise<string> => {
 
   // Check if module is present in global @sasjs/utils
   const utilsGlobalPath = path.join(
-    execSync(`npm root -g`).toString().replace(/\n/, ''),
+    getGlobalNodeModulesPath(),
     utilsDepsPath,
     module
   )
@@ -31,3 +31,6 @@ export const getNodeModulePath = async (module: string): Promise<string> => {
   // Return default value
   return ''
 }
+
+export const getGlobalNodeModulesPath = () =>
+  execSync(`npm root -g`).toString().replace(/\n/, '')
