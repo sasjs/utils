@@ -5,7 +5,6 @@ import {
   findResourcesNotPresentLocally
 } from '../sync'
 import { getHash } from '../hash'
-import { createFile, readFile } from '../../file'
 
 describe('generateProgramToGetRemoteHash', () => {
   it('should return a sas program to get hashes from remote server', async () => {
