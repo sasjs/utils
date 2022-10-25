@@ -21,9 +21,9 @@ describe('createFSCompileProgram', () => {
 
   it('should return a sas program ', async () => {
     const program = await generateCompileProgram(folderPath)
-    const expectedProgram = await readFile(
-      path.join(__dirname, 'files', 'compiledProgram.sas')
-    )
-    expect(program).toEqual(expectedProgram)
+
+    expect(program).toContain('%macro mf_mkdir')
+    expect(program).toContain('%mf_mkdir(&fsTarget)')
+    expect(program).toContain('%mf_mkdir(&fsTarget/subFolder)')
   })
 })
