@@ -4,8 +4,8 @@ import {
   isWindows,
   isLinux,
   escapeWinSlashes
-} from './utils'
-import * as utilsModule from './utils'
+} from '../utils'
+import * as utilsModule from '../utils'
 
 describe('uuidv4', () => {
   it('should generate 10000 uniq UUID', () => {

@@ -1,4 +1,4 @@
-import { encodeToBase64, decodeFromBase64 } from './base64'
+import { encodeToBase64, decodeFromBase64 } from '../base64'
 
 describe('base64', () => {
   const originalPassword = 'hello-world'

@@ -1,4 +1,4 @@
-import { bytesToSize } from './bytesToSize'
+import { bytesToSize } from '../bytesToSize'
 
 describe('bytesToSize', () => {
   it(`should Convert '1024' bytes to '1.0 KB'`, () => {
