@@ -15,7 +15,7 @@
         {
           "name": "viya",
           "serverType": "SASVIYA",
-          "serverUrl": "http://sas.analytium.co.uk",
+          "serverUrl": "https://sas.sasjs.com",
           "appLoc": "/Public/app",
           "contextName": "SAS Job Execution compute context",
           "deployConfig": {
@@ -59,7 +59,7 @@
         {
           "name": "sas9",
           "serverType": "SAS9",
-          "serverUrl": "http://sas.analytium.co.uk:7980",
+          "serverUrl": "https://sas.sasjs.com:7980",
           "appLoc": "/User Folders/&sysuserid/My Folder",
           "serverName": "Foundation",
           "repositoryName": "SASApp",
@@ -106,8 +106,7 @@
       "$id": "#/properties/binaryFolders",
       "type": "array",
       "title": "The binaryFolders array",
-      "description": "These local folders are searched for Binary Files when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-      "default": [],
+      "description": "These local folders are searched for Binary Files when running sasjs compile.  Folders are relative to the sasjs/sasjsconfig.json file.",
       "examples": [["binaries", "../../more_binaries"]]
     },
     "buildOutputFolder": {
@@ -709,7 +708,7 @@
           {
             "name": "viya",
             "serverType": "SASVIYA",
-            "serverUrl": "https://sas.analytium.co.uk",
+            "serverUrl": "https://sas.sasjs.com",
             "appLoc": "/Public/app",
             "contextName": "SAS Job Execution compute context",
             "buildConfig": {
@@ -754,7 +753,7 @@
           {
             "name": "sas9",
             "serverType": "SAS9",
-            "serverUrl": "http://sas.analytium.co.uk:7980",
+            "serverUrl": "https://sas.sasjs.com:7980",
             "appLoc": "/User Folders/&sysuserid/My Folder",
             "serverName": "Foundation",
             "repositoryName": "SASApp",
@@ -807,7 +806,7 @@
               {
                 "name": "viya",
                 "serverType": "SASVIYA",
-                "serverUrl": "https://sas.analytium.co.uk",
+                "serverUrl": "https://sas.sasjs.com",
                 "appLoc": "/Public/app",
                 "contextName": "SAS Job Execution compute context",
                 "buildConfig": {
@@ -884,12 +883,7 @@
                 "examples": ["/Public/app"]
               },
               "binaryFolders": {
-                "$id": "#/properties/targets/items/anyOf/0/properties/binaryFolders",
-                "type": "array",
-                "title": "The binaryFolders array",
-                "description": "These local folders are searched for Binary Files when running `sasjs compile`.  Folders are relative to the `sasjs/sasjsconfig.json` file.",
-                "default": [],
-                "examples": [["binaries", "../../more_binaries"]]
+                "$ref": "#/properties/binaryFolders"
               },
               "buildConfig": {
                 "$ref": "#/properties/buildConfig"
@@ -915,8 +909,8 @@
                 "description": "The serverUrl is the location to which the app is deployed, and against which any server based operations are performed.  If SAS is served from a particular port, that port should also be included here.",
                 "default": "",
                 "examples": [
-                  "https://sas.analytium.co.uk",
-                  "https://sas.analytium.co.uk:8080"
+                  "https://sas.sasjs.com",
+                  "https://sas.sasjs.com:8080"
                 ]
               },
               "serviceConfig": {
@@ -930,6 +924,22 @@
               },
               "streamConfig": {
                 "$ref": "#/properties/streamConfig"
+              },
+              "syncDirectories": {
+                "$id": "#/properties/targets/items/anyOf/0/properties/syncDirectories",
+                "type": "array",
+                "title": "syncDirectories",
+                "description": "Maps the local filesystem to remote (SAS) physical directories.",
+                "examples": [
+                  {
+                    "local": "C:\\temp\\local\\fs1",
+                    "remote": "/opt/data/fs1"
+                  },
+                  {
+                    "local": "C:\\temp\\elsewhere",
+                    "remote": "/opt/somewhere"
+                  }
+                ]
               },
               "syncFolder": {
                 "$ref": "#/properties/syncFolder"
