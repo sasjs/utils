@@ -931,14 +931,16 @@
                 "title": "syncDirectories",
                 "description": "Maps the local filesystem to remote (SAS) physical directories.",
                 "examples": [
-                  {
-                    "local": "C:\\temp\\local\\fs1",
-                    "remote": "/opt/data/fs1"
-                  },
-                  {
-                    "local": "C:\\temp\\elsewhere",
-                    "remote": "/opt/somewhere"
-                  }
+                  [
+                    {
+                      "local": "C:\\temp\\local\\fs1",
+                      "remote": "/opt/data/fs1"
+                    },
+                    {
+                      "local": "C:\\temp\\elsewhere",
+                      "remote": "/opt/somewhere"
+                    }
+                  ]
                 ]
               },
               "syncFolder": {
