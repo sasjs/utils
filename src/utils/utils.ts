@@ -1,3 +1,5 @@
+import path from 'path'
+
 export async function asyncForEach(
   array: any[],
   callback: (item: any, index: number, originalArray: any[]) => any
@@ -26,3 +28,5 @@ export const isLinux = () => process.platform === 'linux'
  */
 export const escapeWinSlashes = (path: string) =>
   isWindows() ? path.replace(/\\/g, '\\\\') : path
+
+export const getMacrosPath = () => path.join(__dirname, '..', 'macros')

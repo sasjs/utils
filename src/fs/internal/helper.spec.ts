@@ -1,6 +1,5 @@
 import * as ChunkModule from '../../utils/chunk'
-import * as GetNodeModulePath from '../../utils/getNodeModulePath'
-import { chunkFileContent, getCompiledMacrosCode } from './helper'
+import { chunkFileContent } from './helper'
 
 describe('chunkFileContent', () => {
   it('should return single line if fileContent does not exceed maxLength', () => {
@@ -23,17 +22,5 @@ describe('chunkFileContent', () => {
  put 'content';
 `
     expect(result).toEqual(expected)
-  })
-})
-
-describe('getCompiledMacrosCode', () => {
-  it('should throw error when @sasjs/core module is not found', async () => {
-    jest
-      .spyOn(GetNodeModulePath, 'getNodeModulePath')
-      .mockImplementationOnce(() => Promise.resolve(''))
-
-    await expect(getCompiledMacrosCode([] as string[])).rejects.toThrowError(
-      '@sasjs/core could not be found'
-    )
   })
 })

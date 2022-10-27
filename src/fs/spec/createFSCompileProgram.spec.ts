@@ -1,6 +1,7 @@
 import path from 'path'
 import { generateCompileProgram } from '../generateCompileProgram'
 import { createFile, createFolder, deleteFolder, readFile } from '../../file'
+import * as utilsModule from '../../utils/utils'
 
 describe('createFSCompileProgram', () => {
   const timestamp = new Date().valueOf()
@@ -19,6 +20,10 @@ describe('createFSCompileProgram', () => {
     await deleteFolder(folderPath)
   })
 
+  beforeEach(() => {
+    mockGetMacrosPath()
+  })
+
   it('should return a sas program ', async () => {
     const program = await generateCompileProgram(folderPath)
 
@@ -27,3 +32,20 @@ describe('createFSCompileProgram', () => {
     expect(program).toContain(`%mf_mkdir(&fsTarget${path.sep}subFolder)`)
   })
 })
+
+const mockGetMacrosPath = () => {
+  jest
+    .spyOn(utilsModule, 'getMacrosPath')
+    .mockImplementation(() =>
+      path.join(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'node_modules',
+        '@sasjs',
+        'core',
+        'base'
+      )
+    )
+}

@@ -1,6 +1,5 @@
 import path from 'path'
-import { getNodeModulePath } from '../../utils/getNodeModulePath'
-import { chunk } from '../../utils/chunk'
+import { chunk, getMacrosPath } from '../../utils'
 import { readFile, base64EncodeFile } from '../../file'
 
 export const generateCodeForFileCreation = async (
@@ -71,13 +70,10 @@ options nobomfile;
 `
 
 export const getCompiledMacrosCode = async (macros: string[]) => {
-  const sasjsCorePath = await getNodeModulePath('@sasjs/core')
-  if (!sasjsCorePath) throw new Error('@sasjs/core could not be found')
-
   let compiledCode = ''
 
   for (const macro of macros) {
-    const macroPath = path.join(sasjsCorePath, 'base', macro)
+    const macroPath = path.join(getMacrosPath(), macro)
     const macroContent = await readFile(macroPath)
 
     compiledCode += macroContent + '\n'

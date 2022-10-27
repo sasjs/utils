@@ -102,6 +102,79 @@ describe('Target', () => {
     expect(json.buildConfig!.macroVars).toEqual({})
   })
 
+  it('should convert an instance to json containing service config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      serviceConfig: {
+        serviceFolders: ['test'],
+        initProgram: 'init',
+        termProgram: 'term',
+        macroVars: {}
+      }
+    })
+
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.serviceConfig).toBeTruthy()
+    expect(json.serviceConfig!.serviceFolders).toEqual(['test'])
+    expect(json.serviceConfig!.initProgram).toEqual('init')
+    expect(json.serviceConfig!.termProgram).toEqual('term')
+    expect(json.serviceConfig!.macroVars).toEqual({})
+  })
+
+  it('should convert an instance to json containing stream config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      streamConfig: {
+        streamWebFolder: 'test',
+        streamWeb: false,
+        webSourcePath: 'test',
+        streamServiceName: 'test',
+        assetPaths: []
+      }
+    })
+
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.streamConfig).toBeTruthy()
+    expect(json.streamConfig!.streamWebFolder).toEqual('test')
+    expect(json.streamConfig!.streamWeb).toEqual(false)
+    expect(json.streamConfig!.webSourcePath).toEqual('test')
+    expect(json.streamConfig!.streamServiceName).toEqual('test')
+    expect(json.streamConfig!.assetPaths).toEqual([])
+  })
+
+  it('should convert an instance to json containing service config', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      testConfig: {
+        initProgram: 'init',
+        termProgram: 'term',
+        macroVars: {},
+        testSetUp: '',
+        testTearDown: ''
+      }
+    })
+
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.testConfig).toBeTruthy()
+    expect(json.testConfig!.initProgram).toEqual('init')
+    expect(json.testConfig!.termProgram).toEqual('term')
+    expect(json.testConfig!.macroVars).toEqual({})
+    expect(json.testConfig!.testSetUp).toEqual('')
+    expect(json.testConfig!.testTearDown).toEqual('')
+  })
+
   it('should create an instance with deploy config when the JSON is valid', () => {
     const target = new Target({
       name: 'test',
