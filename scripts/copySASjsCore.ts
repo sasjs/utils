@@ -8,9 +8,16 @@ const sasjsCorePath = path.join(root, 'node_modules', '@sasjs', 'core')
 export const macrosPath = path.join(root, 'build', 'macros')
 
 /**
- * We need @sasjs/core macros at runtime for compilation of programs but we can't directly import in javascript file.
- * So, we have to read the macro file. For this we can't use node_modules folder as it will not be available after lib is build/packed.
- * Therefore, we have to copy the macros to a folder in the post build step that we can read at runtime.
+ * We need @sasjs/core macros at runtime for compilation of programs, but we
+ * can't directly import them like a javascript file.
+ * So, we have to read the macro files directly. For this we can't use the
+ * node_modules folder, as it will not always be available after the library is
+ * built / packed (eg in the VS Code extension)
+ * Therefore, we copy the macros to a folder in the post build step, so that we
+ * can read them at runtime.
+ *
+ * These macros are / will be used by the sasjs fs command / fs sync utilites
+ * as well as for general compilation of SAS Jobs, Services, and Tests.
  */
 
 export const copySASjsCore = async () => {
