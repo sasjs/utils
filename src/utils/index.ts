@@ -4,7 +4,8 @@ export {
   uniqArray,
   isWindows,
   isLinux,
-  escapeWinSlashes
+  escapeWinSlashes,
+  getMacrosPath
 } from './utils'
 export * from './fileTree'
 
@@ -17,4 +18,3 @@ export { getExecutorPath } from './executor'
 export { bytesToSize } from './bytesToSize'
 export { diff } from './diff'
 export { chunk } from './chunk'
-export { getNodeModulePath } from './getNodeModulePath'
