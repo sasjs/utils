@@ -9,7 +9,8 @@ import {
   JobConfig,
   ServiceConfig,
   StreamConfig,
-  TestConfig
+  TestConfig,
+  SyncDirectoryMap
 } from './config'
 
 const DEFAULT_CONTEXT_NAME = 'SAS Job Execution compute context'
@@ -381,4 +382,23 @@ export const validateRepositoryName = (
   }
 
   return repositoryName
+}
+
+export const validateSyncDirectories = (
+  syncDirectories: SyncDirectoryMap[]
+): SyncDirectoryMap[] => {
+  if (!syncDirectories) {
+    throw new Error(
+      'Invalid syncDirectories config: JSON cannot be null or undefined.'
+    )
+  }
+
+  syncDirectories.forEach((obj) => {
+    if (!obj.local || !obj.remote)
+      throw new Error(
+        `Invalid syncDirectory config: values of property 'local' and 'remote can not be empty or undefined`
+      )
+  })
+
+  return syncDirectories
 }

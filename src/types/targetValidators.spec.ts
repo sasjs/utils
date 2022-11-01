@@ -7,7 +7,8 @@ import {
   JobConfig,
   ServiceConfig,
   StreamConfig,
-  TestConfig
+  TestConfig,
+  SyncDirectoryMap
 } from './config'
 import { ServerType } from './serverType'
 import { HttpsAgentOptions } from './httpsAgentOptions'
@@ -29,7 +30,8 @@ import {
   validateDocConfig,
   validateTestConfig,
   validateAuthConfigSas9,
-  validateSyncFolder
+  validateSyncFolder,
+  validateSyncDirectories
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -326,6 +328,70 @@ describe('validateBuildConfig', () => {
       termProgram: 'test',
       macroVars: {}
     })
+  })
+})
+
+describe('validateSyncDirectories', () => {
+  it('should throw an error when input JSON is null', () => {
+    expect(() =>
+      validateSyncDirectories(null as unknown as SyncDirectoryMap[])
+    ).toThrowError(
+      'Invalid syncDirectories config: JSON cannot be null or undefined.'
+    )
+  })
+
+  it('should throw an error when input JSON is undefined', () => {
+    expect(() =>
+      validateSyncDirectories(undefined as unknown as SyncDirectoryMap[])
+    ).toThrowError(
+      'Invalid syncDirectories config: JSON cannot be null or undefined.'
+    )
+  })
+
+  it('should throw an error when value of property local is undefined', () => {
+    expect(() =>
+      validateSyncDirectories([
+        { remote: 'remote/path' }
+      ] as unknown as SyncDirectoryMap[])
+    ).toThrowError(
+      `Invalid syncDirectory config: values of property 'local' and 'remote can not be empty or undefined`
+    )
+  })
+
+  it('should throw an error when value of property local is blank string', () => {
+    expect(() =>
+      validateSyncDirectories([
+        { local: '', remote: 'remote/path' }
+      ] as unknown as SyncDirectoryMap[])
+    ).toThrowError(
+      `Invalid syncDirectory config: values of property 'local' and 'remote can not be empty or undefined`
+    )
+  })
+
+  it('should throw an error when value of property remote is undefined', () => {
+    expect(() =>
+      validateSyncDirectories([
+        { local: 'local/path' }
+      ] as unknown as SyncDirectoryMap[])
+    ).toThrowError(
+      `Invalid syncDirectory config: values of property 'local' and 'remote can not be empty or undefined`
+    )
+  })
+
+  it('should throw an error when value of property remote is blank string', () => {
+    expect(() =>
+      validateSyncDirectories([
+        { local: 'local/path', remote: '' }
+      ] as unknown as SyncDirectoryMap[])
+    ).toThrowError(
+      `Invalid syncDirectory config: values of property 'local' and 'remote can not be empty or undefined`
+    )
+  })
+
+  it('should return array of SyncDirectoriesMap', () => {
+    expect(
+      validateSyncDirectories([{ local: 'local/path', remote: 'remote/path' }])
+    ).toEqual([{ local: 'local/path', remote: 'remote/path' }])
   })
 })
 
