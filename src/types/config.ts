@@ -59,3 +59,8 @@ export interface AuthConfigSas9 {
   userName: string
   password: string
 }
+
+export interface SyncDirectoryMap {
+  local: string
+  remote: string
+}

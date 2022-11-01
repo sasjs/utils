@@ -7,7 +7,8 @@ import {
   ServiceConfig,
   JobConfig,
   StreamConfig,
-  TestConfig
+  TestConfig,
+  SyncDirectoryMap
 } from './config'
 import { ServerType } from './serverType'
 import { HttpsAgentOptions } from './httpsAgentOptions'
@@ -29,7 +30,8 @@ import {
   validateAuthConfig,
   validateAuthConfigSas9,
   validateTestConfig,
-  validateSyncFolder
+  validateSyncFolder,
+  validateSyncDirectories
 } from './targetValidators'
 
 export interface TargetJson {
@@ -54,6 +56,7 @@ export interface TargetJson {
   binaryFolders?: string[]
   isDefault?: boolean
   testConfig?: TestConfig
+  syncDirectories?: SyncDirectoryMap[]
 }
 
 export class Target implements TargetJson {
@@ -162,6 +165,11 @@ export class Target implements TargetJson {
   }
   private _syncFolder: string | undefined
 
+  get syncDirectories(): SyncDirectoryMap[] | undefined {
+    return this._syncDirectories
+  }
+  private _syncDirectories: SyncDirectoryMap[] | undefined
+
   constructor(json: any) {
     try {
       if (!json) {
@@ -238,6 +246,10 @@ export class Target implements TargetJson {
       if (json.binaryFolders && json.binaryFolders.length) {
         this._binaryFolders = json.binaryFolders
       }
+
+      if (json.syncDirectories && json.syncDirectories.length) {
+        this._syncDirectories = validateSyncDirectories(json.syncDirectories)
+      }
     } catch (e) {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
     }
@@ -266,6 +278,12 @@ export class Target implements TargetJson {
 
     if (this.authConfigSas9) {
       json.authConfigSas9 = this.authConfigSas9
+    }
+
+    if (this.syncDirectories) {
+      json.syncDirectories = this.syncDirectories
+    } else if (withDefaults) {
+      json.syncDirectories = []
     }
 
     if (this.buildConfig) {
