@@ -583,4 +583,127 @@ describe('Target', () => {
     expect(json.serverName).toEqual(target.serverName)
     expect(json.repositoryName).toEqual(target.repositoryName)
   })
+
+  it('should combine configuration and target configs', () => {
+    const defaultConfig = { initProgram: '', macroVars: {}, termProgram: '' }
+
+    const configurationBuildConfig = {
+      buildOutputFileName: 'test',
+      ...defaultConfig
+    }
+    const targetBuildConfig = {
+      buildOutputFolder: 'test',
+      buildResultsFolder: 'test'
+    }
+
+    const targetServiceConfig = {
+      serviceFolders: []
+    }
+
+    const configurationJobConfig = { ...defaultConfig, jobFolders: [] }
+
+    const configurationTestConfig = {
+      ...defaultConfig,
+      testSetUp: 'confTest',
+      testTearDown: 'confTest'
+    }
+    const targetTestConfig = {
+      testSetUp: 'targetTest'
+    }
+
+    const targetDocConfig = {
+      displayMacroCore: true,
+      enableLineage: false,
+      outDirectory: 'test',
+      dataControllerUrl: 'https://test',
+      doxyContent: {
+        favIcon: 'test',
+        footer: 'test',
+        header: 'test',
+        layout: 'test',
+        logo: 'test',
+        readMe: 'test',
+        stylesheet: 'test',
+        path: 'test'
+      }
+    }
+
+    const configurationDeployConfig = {
+      deployServicePack: true,
+      deployScripts: []
+    }
+
+    const configurationStreamConfig = {
+      assetPaths: [],
+      streamLogo: 'assets/angular-logo.png',
+      streamServiceName: 'Angular',
+      streamWeb: false,
+      streamWebFolder: 'web',
+      webSourcePath: 'dist'
+    }
+    const targetStreamConfig = {
+      streamWeb: true
+    }
+
+    const configurationAuthConfig = {
+      access_token: 'confTest',
+      refresh_token: 'confTest',
+      client: 'confTest',
+      secret: 'confTest'
+    }
+    const targetAuthConfig = {
+      access_token: 'targetTest',
+      refresh_token: 'targetTest',
+      client: 'targetTest',
+      secret: 'targetTest'
+    }
+
+    const target = new Target(
+      {
+        name: 'test',
+        serverUrl: '',
+        serverType: ServerType.Sas9,
+        appLoc: '/test',
+        serverName: 'Test Server',
+        repositoryName: 'Test Repository',
+        streamConfig: targetStreamConfig,
+        buildConfig: targetBuildConfig,
+        serviceConfig: targetServiceConfig,
+        testConfig: targetTestConfig,
+        docConfig: targetDocConfig,
+        authConfig: targetAuthConfig
+      },
+      {
+        streamConfig: configurationStreamConfig,
+        buildConfig: configurationBuildConfig,
+        jobConfig: configurationJobConfig,
+        testConfig: configurationTestConfig,
+        deployConfig: configurationDeployConfig,
+        authConfig: configurationAuthConfig
+      }
+    )
+
+    const json = target.toJson()
+
+    expect(json.streamConfig).toEqual({
+      ...configurationStreamConfig,
+      ...targetStreamConfig
+    })
+    expect(json.buildConfig).toEqual({
+      ...configurationBuildConfig,
+      ...targetBuildConfig
+    })
+    expect(json.serviceConfig).toEqual({
+      ...defaultConfig,
+      ...targetServiceConfig
+    })
+    expect(json.jobConfig).toEqual(configurationJobConfig)
+    expect(json.testConfig).toEqual({
+      ...configurationTestConfig,
+      ...targetTestConfig
+    })
+    expect(json.docConfig).toEqual(targetDocConfig)
+    expect(json.deployConfig).toEqual(configurationDeployConfig)
+    expect(json.authConfig).toEqual(targetAuthConfig)
+  })
 })
