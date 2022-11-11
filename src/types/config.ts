@@ -1,25 +1,41 @@
 import { MacroVar } from './'
 
+export enum ConfigTypes {
+  Build = 'buildConfig',
+  Service = 'serviceConfig',
+  Job = 'jobConfig',
+  Test = 'testConfig',
+  Doc = 'docConfig',
+  Deploy = 'deployConfig',
+  Stream = 'streamConfig',
+  Auth = 'authConfig'
+}
+
 export interface Config {
   macroVars: MacroVar
   initProgram: string
   termProgram: string
 }
+
 export interface BuildConfig extends Config {
   buildOutputFileName: string
   buildOutputFolder?: string
   buildResultsFolder?: string
 }
+
 export interface ServiceConfig extends Config {
   serviceFolders: string[]
 }
+
 export interface JobConfig extends Config {
   jobFolders: string[]
 }
+
 export interface TestConfig extends Config {
   testSetUp: string
   testTearDown: string
 }
+
 export interface DocConfig {
   displayMacroCore?: boolean
   enableLineage?: boolean
@@ -36,10 +52,12 @@ export interface DocConfig {
     path?: string
   }
 }
+
 export interface DeployConfig {
   deployServicePack: boolean
   deployScripts: string[]
 }
+
 export interface StreamConfig {
   assetPaths: string[]
   streamWeb: boolean
@@ -48,6 +66,7 @@ export interface StreamConfig {
   streamServiceName: string
   streamLogo?: string
 }
+
 export interface AuthConfig {
   access_token: string
   refresh_token: string

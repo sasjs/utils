@@ -8,7 +8,8 @@ import {
   JobConfig,
   StreamConfig,
   TestConfig,
-  SyncDirectoryMap
+  SyncDirectoryMap,
+  ConfigTypes
 } from './config'
 import { ServerType } from './serverType'
 import { HttpsAgentOptions } from './httpsAgentOptions'
@@ -33,6 +34,7 @@ import {
   validateSyncFolder,
   validateSyncDirectories
 } from './targetValidators'
+import { Configuration } from '../types/configuration'
 
 export interface TargetJson {
   name: string
@@ -60,6 +62,8 @@ export interface TargetJson {
 }
 
 export class Target implements TargetJson {
+  private _config
+
   get name(): string {
     return this._name
   }
@@ -170,12 +174,13 @@ export class Target implements TargetJson {
   }
   private _syncDirectories: SyncDirectoryMap[] | undefined
 
-  constructor(json: any) {
+  constructor(json: any, config: Configuration = {}) {
     try {
       if (!json) {
         throw new Error('Invalid target: Input JSON is null or undefined.')
       }
 
+      this._config = config
       this._name = validateTargetName(json.name)
       this._serverUrl = validateServerUrl(json.serverUrl)
       this._serverType = validateServerType(json.serverType)
@@ -195,11 +200,15 @@ export class Target implements TargetJson {
       )
 
       if (json.docConfig) {
-        this._docConfig = validateDocConfig(json.docConfig)
+        this._docConfig = validateDocConfig(
+          this.getConfig(ConfigTypes.Doc, json)
+        )
       }
 
       if (json.authConfig) {
-        this._authConfig = validateAuthConfig(json.authConfig)
+        this._authConfig = validateAuthConfig(
+          this.getConfig(ConfigTypes.Auth, json)
+        )
       }
 
       if (json.authConfigSas9) {
@@ -207,11 +216,16 @@ export class Target implements TargetJson {
       }
 
       if (json.buildConfig) {
-        this._buildConfig = validateBuildConfig(json.buildConfig, this._name)
+        this._buildConfig = validateBuildConfig(
+          this.getConfig(ConfigTypes.Build, json),
+          this._name
+        )
       }
 
       if (json.deployConfig) {
-        this._deployConfig = validateDeployConfig(json.deployConfig)
+        this._deployConfig = validateDeployConfig(
+          this.getConfig(ConfigTypes.Deploy, json)
+        )
       } else {
         this._deployConfig = validateDeployConfig({
           deployServicePack: true,
@@ -220,19 +234,27 @@ export class Target implements TargetJson {
       }
 
       if (json.serviceConfig) {
-        this._serviceConfig = validateServiceConfig(json.serviceConfig)
+        this._serviceConfig = validateServiceConfig(
+          this.getConfig(ConfigTypes.Service, json)
+        )
       }
 
       if (json.jobConfig) {
-        this._jobConfig = validateJobConfig(json.jobConfig)
+        this._jobConfig = validateJobConfig(
+          this.getConfig(ConfigTypes.Job, json)
+        )
       }
 
       if (json.streamConfig) {
-        this._streamConfig = validateStreamConfig(json.streamConfig)
+        this._streamConfig = validateStreamConfig(
+          this.getConfig(ConfigTypes.Stream, json)
+        )
       }
 
       if (json.testConfig) {
-        this._testConfig = validateTestConfig(json.testConfig)
+        this._testConfig = validateTestConfig(
+          this.getConfig(ConfigTypes.Test, json)
+        )
       }
 
       if (json.macroFolders && json.macroFolders.length) {
@@ -252,6 +274,15 @@ export class Target implements TargetJson {
       }
     } catch (e) {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
+    }
+  }
+
+  private getConfig = (key: ConfigTypes, json: { [key: string]: any }) => {
+    const config = this._config[key] || {}
+
+    return {
+      ...config,
+      ...json[key]
     }
   }
 
