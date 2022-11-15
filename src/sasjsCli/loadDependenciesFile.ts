@@ -8,6 +8,7 @@ import {
   DependencyType
 } from './'
 import { CompileTree } from '../compileTree'
+import path from 'path'
 
 interface LoadDependenciesParams {
   filePath?: string
@@ -173,12 +174,20 @@ export async function getPreCodeForServicePack(
   macroCorePath: string
 ) {
   let content = ''
+  const mf_getuser = await readFile(
+    path.join(macroCorePath, 'base', 'mf_getuser.sas')
+  )
+  const mp_jsonout = await readFile(
+    path.join(macroCorePath, 'base', 'mp_jsonout.sas')
+  )
 
   switch (serverType) {
     case ServerType.SasViya:
-      content += await readFile(`${macroCorePath}/base/mf_getuser.sas`)
-      content += await readFile(`${macroCorePath}/base/mp_jsonout.sas`)
-      content += await readFile(`${macroCorePath}/viya/mv_webout.sas`)
+      content += mf_getuser
+      content += mp_jsonout
+      content += await readFile(
+        path.join(macroCorePath, 'viya', 'mv_webout.sas')
+      )
       content +=
         '/* if calling viya service with _job param, _program will conflict */\n' +
         '/* so we provide instead as __program */\n' +
@@ -195,9 +204,11 @@ export async function getPreCodeForServicePack(
       break
 
     case ServerType.Sas9:
-      content += await readFile(`${macroCorePath}/base/mf_getuser.sas`)
-      content += await readFile(`${macroCorePath}/base/mp_jsonout.sas`)
-      content += await readFile(`${macroCorePath}/meta/mm_webout.sas`)
+      content += mf_getuser
+      content += mp_jsonout
+      content += await readFile(
+        path.join(macroCorePath, 'meta', 'mm_webout.sas')
+      )
       content +=
         '  %macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);\n' +
         '    %mm_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt\n' +
@@ -210,9 +221,11 @@ export async function getPreCodeForServicePack(
       break
 
     case ServerType.Sasjs:
-      content += await readFile(`${macroCorePath}/base/mf_getuser.sas`)
-      content += await readFile(`${macroCorePath}/base/mp_jsonout.sas`)
-      content += await readFile(`${macroCorePath}/server/ms_webout.sas`)
+      content += mf_getuser
+      content += mp_jsonout
+      content += await readFile(
+        path.join(macroCorePath, 'server', 'ms_webout.sas')
+      )
 
       content +=
         '  %macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);\n' +
