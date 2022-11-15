@@ -3,22 +3,16 @@ import {
   JobConfig,
   ServiceConfig,
   SASJsFileType,
-  ServerType,
   Target,
   readFile,
   Configuration,
   CompileTree,
   removeHeader
-} from '..'
-import * as internalModule from '../sasjsCli/getInitTerm'
-import { mockGetProgram } from '../sasjsCli/getInitTerm'
-import { loadDependenciesFile } from './loadDependenciesFile'
-import {
-  DependencyHeader,
-  getAllDependencies,
-  getPreCodeForServicePack
-} from './'
-import * as fileModule from '../file/file'
+} from '../..'
+import * as internalModule from '../getInitTerm'
+import { mockGetProgram } from '../getInitTerm'
+import { loadDependenciesFile } from '../loadDependenciesFile'
+import { DependencyHeader, getAllDependencies } from '../'
 
 const fakeInit = `/**
   @file serviceinit.sas
@@ -116,12 +110,12 @@ const compiledVars = (type: 'Job' | 'Service') => `* ${type} Variables start;
 
 * ${type} Variables end;`
 
-const root = path.join(__dirname, '..', '..')
+const root = path.join(__dirname, '..', '..', '..')
 const macroCorePath = path.join(root, 'node_modules', '@sasjs', 'core')
 const buildSourceFolder = ''
 
 const testFiles = path.join(__dirname, 'testFiles')
-const servicePath = path.join(testFiles, './service.sas')
+const servicePath = path.join(testFiles, 'service.sas')
 const target: Target = {
   jobConfig: jobConfig(false),
   serviceConfig: serviceConfig(false)
@@ -511,99 +505,5 @@ ${await readFile(dep2Path)}`
     await expect(getAllDependencies([dep1Path, dep2Path])).resolves.toEqual(
       expectedOutput
     )
-  })
-})
-
-describe('getPreCodeForServicePack', () => {
-  const getMacroContent = (filePath: string) => {
-    const fileName = filePath.split(path.sep).pop()
-
-    return `* ${fileName} content start;
-* ${fileName} content end;
-`
-  }
-
-  beforeEach(() => {
-    jest
-      .spyOn(fileModule, 'readFile')
-      .mockImplementation((filePath: string) =>
-        Promise.resolve(getMacroContent(filePath))
-      )
-  })
-
-  it(`should return preCode for ${ServerType.SasViya}`, async () => {
-    const expectedPreCode = `${
-      getMacroContent('mf_getuser.sas') +
-      getMacroContent('mp_jsonout.sas') +
-      getMacroContent('mv_webout.sas')
-    }/* if calling viya service with _job param, _program will conflict */
-/* so we provide instead as __program */
-%global __program _program;
-%let _program=%sysfunc(coalescec(&__program,&_program));
-%macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);
-  %mv_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt
-    ,missing=&missing
-    ,showmeta=&showmeta
-    ,maxobs=&maxobs
-  )%mend;
-/* provide additional debug info */
-%global _program;
-%put &=syscc;
-%put user=%mf_getuser();
-%put pgm=&_program;
-%put timestamp=%sysfunc(datetime(),datetime19.);
-`
-
-    await expect(
-      getPreCodeForServicePack(ServerType.SasViya, '')
-    ).resolves.toEqual(expectedPreCode)
-  })
-
-  it(`should return preCode for ${ServerType.Sas9}`, async () => {
-    const expectedPreCode = `${
-      getMacroContent('mf_getuser.sas') +
-      getMacroContent('mp_jsonout.sas') +
-      getMacroContent('mm_webout.sas')
-    }  %macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);
-    %mm_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt
-      ,missing=&missing
-      ,showmeta=&showmeta
-      ,maxobs=&maxobs
-    )  %mend;
-/* provide additional debug info */
-%global _program;
-%put &=syscc;
-%put user=%mf_getuser();
-%put pgm=&_program;
-%put timestamp=%sysfunc(datetime(),datetime19.);
-`
-
-    await expect(
-      getPreCodeForServicePack(ServerType.Sas9, '')
-    ).resolves.toEqual(expectedPreCode)
-  })
-
-  it(`should return preCode for ${ServerType.Sasjs}`, async () => {
-    const expectedPreCode = `${
-      getMacroContent('mf_getuser.sas') +
-      getMacroContent('mp_jsonout.sas') +
-      getMacroContent('ms_webout.sas')
-    }  %macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);
-    %ms_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt
-      ,missing=&missing
-      ,showmeta=&showmeta
-      ,maxobs=&maxobs
-    )  %mend;
-/* provide additional debug info */
-%global _program;
-%put &=syscc;
-%put user=%mf_getuser();
-%put pgm=&_program;
-%put timestamp=%sysfunc(datetime(),datetime19.);
-`
-
-    await expect(
-      getPreCodeForServicePack(ServerType.Sasjs, '')
-    ).resolves.toEqual(expectedPreCode)
   })
 })

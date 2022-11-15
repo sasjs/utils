@@ -1,5 +1,10 @@
 import path from 'path'
-import { readFile, getDependencies, validateFileRef, DependencyType } from '..'
+import {
+  readFile,
+  getDependencies,
+  validateFileRef,
+  DependencyType
+} from '../../'
 
 describe('getDependencies', () => {
   describe('SAS Includes', () => {
@@ -23,7 +28,7 @@ describe('getDependencies', () => {
     ]
 
     test('it should get all program dependencies', async () => {
-      const filePath = path.join(__dirname, 'testFiles', './example.sas')
+      const filePath = path.join(__dirname, 'testFiles', 'example.sas')
       const fileContent = await readFile(filePath)
 
       const dependencies = await getDependencies(
@@ -291,6 +296,7 @@ describe('getDependencies', () => {
       const fileContent = await readFile(filePath)
       const sasjsCoreViyaPath = path.join(
         __dirname,
+        '..',
         '..',
         '..',
         'node_modules',

@@ -6,10 +6,10 @@ import {
   ServiceConfig,
   Target,
   TestConfig
-} from '../types'
-import * as internalModule from '../file'
-import { getProgram, ProgramType } from './'
-import { CompileTree, Leaf } from '../'
+} from '../../types'
+import * as internalModule from '../../file'
+import { getProgram, ProgramType } from '..'
+import { CompileTree, Leaf } from '../..'
 
 const jobConfig = (root: boolean = true): JobConfig => ({
   initProgram: root

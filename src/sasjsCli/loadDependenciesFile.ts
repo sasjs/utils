@@ -1,14 +1,14 @@
-import { readFile } from '../file'
-import { Configuration, SASJsFileType, Target, ServerType } from '../types'
+import { Configuration, SASJsFileType, Target } from '../types'
 import { asyncForEach } from '../utils'
 import {
   getDependencyPaths,
   getInitTerm,
   getDependencies,
-  DependencyType
+  DependencyType,
+  getPreCode
 } from './'
 import { CompileTree } from '../compileTree'
-import path from 'path'
+import { readFile } from '../file'
 
 interface LoadDependenciesParams {
   filePath?: string
@@ -139,7 +139,7 @@ export const loadDependenciesFile = async ({
     (type === SASJsFileType.service || type === SASJsFileType.test) &&
     target
   ) {
-    fileContent = `${await getPreCodeForServicePack(
+    fileContent = `${await getPreCode(
       target.serverType,
       macroCorePath
     )}\n${fileContent}`
@@ -167,85 +167,4 @@ export const getAllDependencies = async (
   })
 
   return dependenciesContent.join('\n')
-}
-
-export async function getPreCodeForServicePack(
-  serverType: ServerType,
-  macroCorePath: string
-) {
-  let content = ''
-  const mf_getuser = await readFile(
-    path.join(macroCorePath, 'base', 'mf_getuser.sas')
-  )
-  const mp_jsonout = await readFile(
-    path.join(macroCorePath, 'base', 'mp_jsonout.sas')
-  )
-
-  switch (serverType) {
-    case ServerType.SasViya:
-      content += mf_getuser
-      content += mp_jsonout
-      content += await readFile(
-        path.join(macroCorePath, 'viya', 'mv_webout.sas')
-      )
-      content +=
-        '/* if calling viya service with _job param, _program will conflict */\n' +
-        '/* so we provide instead as __program */\n' +
-        '%global __program _program;\n' +
-        '%let _program=%sysfunc(coalescec(&__program,&_program));\n' +
-        '%macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);\n' +
-        '  %mv_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt\n' +
-        '    ,missing=&missing\n' +
-        '    ,showmeta=&showmeta\n' +
-        '    ,maxobs=&maxobs\n' +
-        '  )' +
-        '%mend;\n'
-
-      break
-
-    case ServerType.Sas9:
-      content += mf_getuser
-      content += mp_jsonout
-      content += await readFile(
-        path.join(macroCorePath, 'meta', 'mm_webout.sas')
-      )
-      content +=
-        '  %macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);\n' +
-        '    %mm_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt\n' +
-        '      ,missing=&missing\n' +
-        '      ,showmeta=&showmeta\n' +
-        '      ,maxobs=&maxobs\n' +
-        '    )' +
-        '  %mend;\n'
-
-      break
-
-    case ServerType.Sasjs:
-      content += mf_getuser
-      content += mp_jsonout
-      content += await readFile(
-        path.join(macroCorePath, 'server', 'ms_webout.sas')
-      )
-
-      content +=
-        '  %macro webout(action,ds,dslabel=,fmt=,missing=NULL,showmeta=NO,maxobs=MAX);\n' +
-        '    %ms_webout(&action,ds=&ds,dslabel=&dslabel,fmt=&fmt\n' +
-        '      ,missing=&missing\n' +
-        '      ,showmeta=&showmeta\n' +
-        '      ,maxobs=&maxobs\n' +
-        '    )' +
-        '  %mend;\n'
-
-      break
-  }
-
-  content +=
-    '/* provide additional debug info */\n' +
-    '%global _program;\n' +
-    '%put &=syscc;\n' +
-    '%put user=%mf_getuser();\n' +
-    '%put pgm=&_program;\n' +
-    '%put timestamp=%sysfunc(datetime(),datetime19.);\n'
-
-  return content
 }
