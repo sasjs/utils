@@ -2,11 +2,11 @@ groups:
   - name: SASjs Devs # name of the group
     reviewers: 1 # how many reviewers do you want to assign?
     usernames: # github usernames of the reviewers
-      - krishna-acondy
+      # - krishna-acondy
       - YuryShkoda
       - medjedovicm
       - sabhas
-  - name: SASjs QA
-    reviewers: 1
-    usernames:
-      - VladislavParhomchik
+  # - name: SASjs QA
+  #   reviewers: 1
+  #   usernames:
+  #     - VladislavParhomchik

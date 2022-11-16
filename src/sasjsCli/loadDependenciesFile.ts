@@ -1,13 +1,14 @@
-import { readFile } from '../file'
 import { Configuration, SASJsFileType, Target } from '../types'
 import { asyncForEach } from '../utils'
 import {
   getDependencyPaths,
   getInitTerm,
   getDependencies,
-  DependencyType
+  DependencyType,
+  getPreCode
 } from './'
 import { CompileTree } from '../compileTree'
+import { readFile } from '../file'
 
 interface LoadDependenciesParams {
   filePath?: string
@@ -132,6 +133,16 @@ export const loadDependenciesFile = async ({
     ${init}${fileContent}${term}`
 
     fileContent = `* ${type} Variables start;\n${startUpVars}\n* ${type} Variables end;\n${fileContent}`
+  }
+
+  if (
+    (type === SASJsFileType.service || type === SASJsFileType.test) &&
+    target
+  ) {
+    fileContent = `${await getPreCode(
+      target.serverType,
+      macroCorePath
+    )}\n${fileContent}`
   }
 
   return fileContent

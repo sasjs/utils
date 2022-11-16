@@ -8,11 +8,11 @@ import {
   Configuration,
   CompileTree,
   removeHeader
-} from '..'
-import * as internalModule from '../sasjsCli/getInitTerm'
-import { mockGetProgram } from '../sasjsCli/getInitTerm'
-import { loadDependenciesFile } from './loadDependenciesFile'
-import { DependencyHeader, getAllDependencies } from './'
+} from '../..'
+import * as internalModule from '../getInitTerm'
+import { mockGetProgram } from '../getInitTerm'
+import { loadDependenciesFile } from '../loadDependenciesFile'
+import { DependencyHeader, getAllDependencies } from '../'
 
 const fakeInit = `/**
   @file serviceinit.sas
@@ -110,12 +110,12 @@ const compiledVars = (type: 'Job' | 'Service') => `* ${type} Variables start;
 
 * ${type} Variables end;`
 
-const root = path.join(__dirname, '..', '..')
+const root = path.join(__dirname, '..', '..', '..')
 const macroCorePath = path.join(root, 'node_modules', '@sasjs', 'core')
 const buildSourceFolder = ''
 
 const testFiles = path.join(__dirname, 'testFiles')
-const servicePath = path.join(testFiles, './service.sas')
+const servicePath = path.join(testFiles, 'service.sas')
 const target: Target = {
   jobConfig: jobConfig(false),
   serviceConfig: serviceConfig(false)
@@ -151,7 +151,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Service'))
+    expect(dependencies).toContain(compiledVars('Service'))
     expect(/\* ServiceInit start;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceInit end;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceTerm start;/.test(dependencies)).toEqual(true)
@@ -176,7 +176,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Job'))
+    expect(dependencies).toContain(compiledVars('Job'))
     expect(/\* JobInit start;/.test(dependencies)).toEqual(true)
     expect(/\* JobInit end;/.test(dependencies)).toEqual(true)
     expect(/\* JobTerm start;/.test(dependencies)).toEqual(true)
@@ -204,7 +204,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Service'))
+    expect(dependencies).toContain(compiledVars('Service'))
     expect(/\* ServiceInit start;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceInit end;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceTerm start;/.test(dependencies)).toEqual(true)
@@ -232,7 +232,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Job'))
+    expect(dependencies).toContain(compiledVars('Job'))
     expect(/\* JobInit start;/.test(dependencies)).toEqual(true)
     expect(/\* JobInit end;/.test(dependencies)).toEqual(true)
     expect(/\* JobTerm start;/.test(dependencies)).toEqual(true)
@@ -260,7 +260,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Service'))
+    expect(dependencies).toContain(compiledVars('Service'))
     expect(/\* ServiceInit start;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceInit end;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceTerm start;/.test(dependencies)).toEqual(true)
@@ -288,7 +288,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Job'))
+    expect(dependencies).toContain(compiledVars('Job'))
     expect(/\* JobInit start;/.test(dependencies)).toEqual(true)
     expect(/\* JobInit end;/.test(dependencies)).toEqual(true)
     expect(/\* JobTerm start;/.test(dependencies)).toEqual(true)
@@ -316,7 +316,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Job'))
+    expect(dependencies).toContain(compiledVars('Job'))
     expect(/\* JobInit start;/.test(dependencies)).toEqual(true)
     expect(/\* JobInit end;/.test(dependencies)).toEqual(true)
     expect(/\* JobTerm start;/.test(dependencies)).toEqual(true)
@@ -350,7 +350,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Job'))
+    expect(dependencies).toContain(compiledVars('Job'))
     expect(/\* JobInit start;/.test(dependencies)).toEqual(true)
     expect(/\* JobInit end;/.test(dependencies)).toEqual(true)
     expect(/\* JobTerm start;/.test(dependencies)).toEqual(true)
@@ -383,7 +383,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Service'))
+    expect(dependencies).toContain(compiledVars('Service'))
     expect(/\* ServiceInit start;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceInit end;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceTerm start;/.test(dependencies)).toEqual(true)
@@ -417,7 +417,7 @@ describe('loadDependenciesFile', () => {
       compileTree
     })
 
-    expect(dependencies).toStartWith(compiledVars('Service'))
+    expect(dependencies).toContain(compiledVars('Service'))
     expect(/\* ServiceInit start;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceInit end;/.test(dependencies)).toEqual(true)
     expect(/\* ServiceTerm start;/.test(dependencies)).toEqual(true)

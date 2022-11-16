@@ -1,7 +1,11 @@
 import path from 'path'
-import { readFile, getDependencyPaths, prioritiseDependencyOverrides } from '..'
+import {
+  readFile,
+  getDependencyPaths,
+  prioritiseDependencyOverrides
+} from '../..'
 
-const root = path.join(__dirname, '..', '..')
+const root = path.join(__dirname, '..', '..', '..')
 const macroCorePath = path.join(root, 'node_modules', '@sasjs', 'core')
 
 describe('getDependencyPaths', () => {
