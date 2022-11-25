@@ -73,10 +73,9 @@ const generateCodeForFolderCreation = async (
         pathRelativeTo
       )
     } else {
-      resultCode += `%mf_mkdir(&fsTarget${generatePathForSas(member.absolutePath.replace(
-        pathRelativeTo,
-        ''
-      ))})\n`
+      resultCode += `%mf_mkdir(&fsTarget${generatePathForSas(
+        member.absolutePath.replace(pathRelativeTo, '')
+      )})\n`
       resultCode = await generateCodeForFolderCreation(
         member as HashedFolder,
         pathRelativeTo,

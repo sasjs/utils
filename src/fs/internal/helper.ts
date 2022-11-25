@@ -15,7 +15,9 @@ file _in64;
 ${chunkedFileContent}
 run;
 
-filename _out64 "&fsTarget${generatePathForSas(filePath.replace(pathRelativeTo, ''))}";
+filename _out64 "&fsTarget${generatePathForSas(
+    filePath.replace(pathRelativeTo, '')
+  )}";
 
 /* convert from base64 */
 data _null_;
