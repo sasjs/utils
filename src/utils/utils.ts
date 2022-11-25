@@ -30,3 +30,9 @@ export const escapeWinSlashes = (path: string) =>
   isWindows() ? path.replace(/\\/g, '\\\\') : path
 
 export const getMacrosPath = () => path.join(__dirname, '..', 'macros')
+
+/**
+ * sas code requires forward slashes as path separator in file or folder paths.
+ * So, this method replaces OS specific path separator with forward slash
+ */
+export const generatePathForSas = (resourcePath: string) => resourcePath.replace(path.sep, '/')

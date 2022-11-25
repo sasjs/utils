@@ -29,7 +29,7 @@ describe('createFSCompileProgram', () => {
 
     expect(program).toContain('%macro mf_mkdir')
     expect(program).toContain('%mf_mkdir(&fsTarget)')
-    expect(program).toContain(`%mf_mkdir(&fsTarget${path.sep}subFolder)`)
+    expect(program).toContain(`%mf_mkdir(&fsTarget/subFolder)`)
   })
 })
 
