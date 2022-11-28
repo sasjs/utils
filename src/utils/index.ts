@@ -5,7 +5,8 @@ export {
   isWindows,
   isLinux,
   escapeWinSlashes,
-  getMacrosPath
+  getMacrosPath,
+  generatePathForSas
 } from './utils'
 export * from './fileTree'
 

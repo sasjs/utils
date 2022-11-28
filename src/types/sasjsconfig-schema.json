@@ -689,6 +689,24 @@
       "description": "The contents of this folder are simply copied to the sasjsbuild directory AFTER the rest of the project is compiled.  Useful for synchronising random / generic content with SAS logical folders.",
       "default": "sasjs/static_files"
     },
+    "syncDirectories": {
+      "$id": "#/properties/syncDirectories",
+      "type": "array",
+      "title": "syncDirectories",
+      "description": "Maps the local filesystem to remote (SAS) physical directories.",
+      "examples": [
+        [
+          {
+            "local": "C:\\temp\\local\\fs1",
+            "remote": "/opt/data/fs1"
+          },
+          {
+            "local": "C:\\temp\\elsewhere",
+            "remote": "/opt/somewhere"
+          }
+        ]
+      ]
+    },
     "targets": {
       "$id": "#/properties/targets",
       "type": "array",

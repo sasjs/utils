@@ -1,5 +1,6 @@
 import path from 'path'
 import { isFolder, listFilesInFolder, listSubFoldersInFolder } from '../file'
+import { generatePathForSas } from '../utils'
 import {
   getInitialCode,
   getCompiledMacrosCode,
@@ -43,7 +44,9 @@ const fileAndDirectoryCreationCode = async (
     const folderPath = path.join(resourcePath, folder)
 
     resultCode = `${resultCode}
-%mf_mkdir(&fsTarget${folderPath.replace(pathRelativeTo, '')})
+%mf_mkdir(&fsTarget${generatePathForSas(
+      folderPath.replace(pathRelativeTo, '')
+    )})
 `
 
     resultCode = await fileAndDirectoryCreationCode(

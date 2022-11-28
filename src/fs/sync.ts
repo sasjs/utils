@@ -5,6 +5,7 @@ import {
   generateCodeForFileCreation
 } from './internal/helper'
 import { HashedFolder } from '../types'
+import { generatePathForSas } from '../utils'
 
 export const generateProgramToGetRemoteHash = async (remotePath: string) => {
   const compiledMacrosCode = await getCompiledMacrosCode([
@@ -72,9 +73,8 @@ const generateCodeForFolderCreation = async (
         pathRelativeTo
       )
     } else {
-      resultCode += `%mf_mkdir(&fsTarget${member.absolutePath.replace(
-        pathRelativeTo,
-        ''
+      resultCode += `%mf_mkdir(&fsTarget${generatePathForSas(
+        member.absolutePath.replace(pathRelativeTo, '')
       )})\n`
       resultCode = await generateCodeForFolderCreation(
         member as HashedFolder,
@@ -109,8 +109,8 @@ run;
 `
 }
 
-const setTargetAtStart = (code: string, target: string) => {
-  return `%let fsTarget=${target};\n${code}`
+const setTargetAtStart = (code: string, targetPath: string) => {
+  return `%let fsTarget=${generatePathForSas(targetPath)};\n${code}`
 }
 
 /**

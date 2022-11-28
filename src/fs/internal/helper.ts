@@ -1,5 +1,5 @@
 import path from 'path'
-import { chunk, getMacrosPath } from '../../utils'
+import { chunk, getMacrosPath, generatePathForSas } from '../../utils'
 import { readFile, base64EncodeFile } from '../../file'
 
 export const generateCodeForFileCreation = async (
@@ -15,7 +15,9 @@ file _in64;
 ${chunkedFileContent}
 run;
 
-filename _out64 "&fsTarget${filePath.replace(pathRelativeTo, '')}";
+filename _out64 "&fsTarget${generatePathForSas(
+    filePath.replace(pathRelativeTo, '')
+  )}";
 
 /* convert from base64 */
 data _null_;
