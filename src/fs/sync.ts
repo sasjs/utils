@@ -10,7 +10,13 @@ import { generatePathForSas } from '../utils'
 export const generateProgramToGetRemoteHash = async (remotePath: string) => {
   const compiledMacrosCode = await getCompiledMacrosCode([
     'mp_hashdirectory.sas',
-    'mp_jsonout.sas'
+    'mp_jsonout.sas',
+    'mp_dirlist.sas',
+    'mf_existds.sas',
+    'mf_getvarlist.sas',
+    'mf_wordsinstr1butnotstr2.sas',
+    'mp_dropmembers.sas',
+    'mf_isblank.sas'
   ])
 
   const codeForHashCreation = getCodeForHashCreation()
@@ -27,7 +33,13 @@ export const generateProgramToSyncHashDiff = async (
   const compiledMacrosCode = await getCompiledMacrosCode([
     'mp_hashdirectory.sas',
     'mp_jsonout.sas',
-    'mf_mkdir.sas'
+    'mf_mkdir.sas',
+    'mp_dirlist.sas',
+    'mf_existds.sas',
+    'mf_getvarlist.sas',
+    'mf_wordsinstr1butnotstr2.sas',
+    'mp_dropmembers.sas',
+    'mf_isblank.sas'
   ])
 
   const initialProgramContent = getInitialCode()
@@ -44,6 +56,7 @@ export const generateProgramToSyncHashDiff = async (
   const codeForHashCreation = getCodeForHashCreation()
 
   const code =
+    'options ls=max;' +
     compiledMacrosCode +
     initialProgramContent +
     folderCreationCode +
