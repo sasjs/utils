@@ -8,7 +8,14 @@ import {
 } from './internal/helper'
 
 export const generateCompileProgram = async (folderPath: string) => {
-  const compiledMacrosCode = await getCompiledMacrosCode(['mf_mkdir.sas'])
+  const compiledMacrosCode = await getCompiledMacrosCode([
+    'mf_mkdir.sas',
+    'mp_dirlist.sas',
+    'mf_existds.sas',
+    'mf_getvarlist.sas',
+    'mf_wordsinstr1butnotstr2.sas',
+    'mp_dropmembers.sas'
+  ])
 
   const initialProgramContent = getInitialCode()
 
