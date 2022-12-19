@@ -7,7 +7,6 @@ import {
 import { HashedFolder } from '../types'
 import { generatePathForSas } from '../utils'
 
-
 // we need to inject this line to generated sas program
 // ls means line size and ps means page size
 // bigger page = less chance of hitting the page number
