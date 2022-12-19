@@ -36,4 +36,4 @@ export const getMacrosPath = () => path.join(__dirname, '..', 'macros')
  * So, this method replaces OS specific path separator with forward slash
  */
 export const generatePathForSas = (resourcePath: string) =>
-  resourcePath.replace(path.sep, '/')
+  resourcePath.replaceAll(path.sep, '/')
