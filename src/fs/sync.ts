@@ -7,6 +7,11 @@ import {
 import { HashedFolder } from '../types'
 import { generatePathForSas } from '../utils'
 
+// we need to inject this line to generated sas program
+// ls means line size and ps means page size
+// bigger page = less chance of hitting the page number
+const OPTIONS = 'options ls=max ps=max;'
+
 export const generateProgramToGetRemoteHash = async (remotePath: string) => {
   const compiledMacrosCode = await getCompiledMacrosCode([
     'mp_hashdirectory.sas',
@@ -21,7 +26,7 @@ export const generateProgramToGetRemoteHash = async (remotePath: string) => {
 
   const codeForHashCreation = getCodeForHashCreation()
 
-  const code = compiledMacrosCode + codeForHashCreation
+  const code = OPTIONS + compiledMacrosCode + codeForHashCreation
 
   return setTargetAtStart(code, remotePath)
 }
@@ -56,11 +61,12 @@ export const generateProgramToSyncHashDiff = async (
   const codeForHashCreation = getCodeForHashCreation()
 
   const code =
-    'options ls=max;' +
+    OPTIONS +
     compiledMacrosCode +
     initialProgramContent +
     folderCreationCode +
     codeForHashCreation
+
   return setTargetAtStart(code, remotePath)
 }
 
