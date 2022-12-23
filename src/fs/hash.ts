@@ -40,8 +40,8 @@ export const extractHashArray = (log: string) => {
   if (log.includes('>>weboutBEGIN<<')) {
     try {
       const webout = log
-        .split(/>>weboutBEGIN<<(\n|\r\n)/)[1]
-        .split(/>>weboutEND<<(\n|\r\n)/)[0]
+        .split(/>>weboutBEGIN<<[\n|\r\n]/)[1]
+        .split(/>>weboutEND<<[\n|\r\n]/)[0]
 
       const weboutWithoutLF = webout.replace(/\n|\r\n/g, '')
       const jsonWebout = JSON.parse(weboutWithoutLF)
