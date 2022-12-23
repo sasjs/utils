@@ -52,8 +52,6 @@ describe('extractHashArray', () => {
 
   it('should throw an error when webout is not valid json', () => {
     const logContent = `>>weboutBEGIN<<\n${webout}\n>>weboutEND<<\n`
-    expect(() => extractHashArray(logContent)).toThrowError(
-      `An error occurred while extracting hashes array from webout: "[object Object]" is not valid JSON`
-    )
+    expect(() => extractHashArray(logContent)).toThrowError()
   })
 })
