@@ -36,6 +36,24 @@ export function compareHashes(
   return hashDifference(localHash, remoteHashMap)
 }
 
+export const extractHashArray = (log: string) => {
+  if (log.includes('>>weboutBEGIN<<')) {
+    try {
+      const webout = log
+        .split(/>>weboutBEGIN<<(\n|\r\n)/)[1]
+        .split(/>>weboutEND<<(\n|\r\n)/)[0]
+
+      const weboutWithoutLF = webout.replace(/\n|\r\n/g, '')
+      const jsonWebout = JSON.parse(weboutWithoutLF)
+      return jsonWebout.hashes
+    } catch (err: any) {
+      throw new Error(
+        `An error occurred while extracting hashes array from webout: ${err.message}`
+      )
+    }
+  }
+}
+
 const hashDifference = (
   localHash: HashedFolder,
   remoteHashMap: { [key: string]: string },
