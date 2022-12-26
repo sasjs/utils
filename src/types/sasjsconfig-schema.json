@@ -944,22 +944,7 @@
                 "$ref": "#/properties/streamConfig"
               },
               "syncDirectories": {
-                "$id": "#/properties/targets/items/anyOf/0/properties/syncDirectories",
-                "type": "array",
-                "title": "syncDirectories",
-                "description": "Maps the local filesystem to remote (SAS) physical directories.",
-                "examples": [
-                  [
-                    {
-                      "local": "C:\\temp\\local\\fs1",
-                      "remote": "/opt/data/fs1"
-                    },
-                    {
-                      "local": "C:\\temp\\elsewhere",
-                      "remote": "/opt/somewhere"
-                    }
-                  ]
-                ]
+                "$ref": "#/properties/syncDirectories"
               },
               "syncFolder": {
                 "$ref": "#/properties/syncFolder"
