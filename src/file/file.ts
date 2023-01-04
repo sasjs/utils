@@ -47,7 +47,14 @@ export async function listIniFilesInFolder(folderName: string) {
     name.endsWith('.ini')
   )
 }
-
+/**
+ * This function returns a list of all SAS files in a folder
+ *
+ * @param folderName a string that contains the folder path
+ * @param recurse (optional) a boolean that identifies the searching of sas files in nested folders recursively
+ * @param ignoredFolders (optional) a string array that contains the folders to be ignored in recursive search
+ * @returns a string array containing sas files paths relatived to folderName
+ */
 export async function listSasFilesInFolder(
   folderName: string,
   recurse: boolean = false,
