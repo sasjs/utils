@@ -47,6 +47,27 @@ export async function listIniFilesInFolder(folderName: string) {
     name.endsWith('.ini')
   )
 }
+/**
+ * This function returns a list of all SAS files in a folder
+ *
+ * @param folderName a string that contains the folder path
+ * @param recurse (optional) a boolean that identifies the searching of sas files in nested folders recursively
+ * @param ignoredFolders (optional) a string array that contains the folders to be ignored in recursive search
+ * @returns a string array containing sas files paths relatived to folderName
+ */
+export async function listSasFilesInFolder(
+  folderName: string,
+  recurse: boolean = false,
+  ignoredFolders: string[] = []
+) {
+  const filesAndFolders = await listFilesAndSubFoldersInFolder(
+    folderName,
+    recurse,
+    ignoredFolders
+  )
+  const sasFiles = filesAndFolders.filter((f) => f.endsWith('.sas'))
+  return sasFiles
+}
 
 export async function listSubFoldersInFolder(
   folderName: string
@@ -58,7 +79,8 @@ export async function listSubFoldersInFolder(
 
 export async function listFilesAndSubFoldersInFolder(
   folderName: string,
-  recurse: boolean = true
+  recurse: boolean = true,
+  ignoredFolders: string[] = []
 ): Promise<string[]> {
   return fs.promises
     .readdir(folderName, { withFileTypes: true })
@@ -73,14 +95,20 @@ export async function listFilesAndSubFoldersInFolder(
             list.filter((f) => f.isDirectory()),
             async (f) => {
               const subFolder = f.name
-              const subPath = path.join(folderName, subFolder)
+              if (!ignoredFolders.includes(subFolder)) {
+                const subPath = path.join(folderName, subFolder)
 
-              subFoldersFilesAndFolders = [
-                ...subFoldersFilesAndFolders,
-                ...(await listFilesAndSubFoldersInFolder(subPath)).map((f) =>
-                  path.join(subFolder, f)
-                )
-              ]
+                subFoldersFilesAndFolders = [
+                  ...subFoldersFilesAndFolders,
+                  ...(
+                    await listFilesAndSubFoldersInFolder(
+                      subPath,
+                      recurse,
+                      ignoredFolders
+                    )
+                  ).map((f) => path.join(subFolder, f))
+                ]
+              }
             }
           )
 

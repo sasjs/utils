@@ -12,6 +12,7 @@ import {
   getRelativePath,
   createFolder,
   listFilesInFolder,
+  listSasFilesInFolder,
   listIniFilesInFolder,
   listSubFoldersInFolder,
   listFilesAndSubFoldersInFolder,
@@ -254,6 +255,83 @@ describe('getRelativePath', () => {
     const fromFolder = process.cwd()
     const toFolder = fromFolder
     expect(getRelativePath(fromFolder, toFolder)).toEqual(`.${path.sep}`)
+  })
+})
+
+describe('listSasFilesInFolder', () => {
+  const timestamp = new Date().valueOf()
+
+  const fileName = `test-create-file-${timestamp}.sas`
+  const subFolderFileName = `test-create-sub-file-${timestamp}.sas`
+  const subSubFolderFileName = `test-create-sub-sub-file-${timestamp}.sas`
+
+  const testFolderName = `test-create-folder-${timestamp}`
+  const subFolderName = `test-create-sub-folder-${timestamp}`
+  const subSubFolderName = `test-create-sub-sub-folder-${timestamp}`
+
+  const createTestFoldersAndFiles = async () => {
+    const testFolderPath = path.join(__dirname, testFolderName)
+    await createFolder(testFolderPath)
+
+    const testSubFolderPath = path.join(testFolderPath, subFolderName)
+    await createFolder(testSubFolderPath)
+
+    const testSubSubFolderPath = path.join(testSubFolderPath, subSubFolderName)
+    await createFolder(testSubSubFolderPath)
+
+    await createFile(path.join(testFolderPath, fileName), content)
+    await createFile(path.join(testSubFolderPath, subFolderFileName), content)
+    await createFile(
+      path.join(testSubSubFolderPath, subSubFolderFileName),
+      content
+    )
+
+    return testFolderPath
+  }
+
+  it('should return a list of sas files present at all levels', async () => {
+    const testFolderPath = await createTestFoldersAndFiles()
+
+    const expectedResult = [
+      fileName,
+      path.join(subFolderName, subFolderFileName),
+      path.join(subFolderName, subSubFolderName, subSubFolderFileName)
+    ]
+
+    await expect(listSasFilesInFolder(testFolderPath, true)).resolves.toEqual(
+      expectedResult
+    )
+
+    await deleteFolder(testFolderPath)
+  })
+
+  it('should return a list of sas files in current folder only', async () => {
+    const testFolderPath = await createTestFoldersAndFiles()
+
+    const expectedResult = [fileName]
+
+    await expect(listSasFilesInFolder(testFolderPath, false)).resolves.toEqual(
+      expectedResult
+    )
+
+    await deleteFolder(testFolderPath)
+  })
+
+  it('should return a list of sas files present at all levels except a specific folder', async () => {
+    const testFolderPath = await createTestFoldersAndFiles()
+
+    const expectedResult = [
+      fileName,
+      path.join(subFolderName, subFolderFileName)
+    ]
+
+    const ignoredFolders = [subSubFolderName]
+
+    await expect(
+      listSasFilesInFolder(testFolderPath, true, ignoredFolders)
+    ).resolves.toEqual(expectedResult)
+
+    await deleteFolder(testFolderPath)
   })
 })
 

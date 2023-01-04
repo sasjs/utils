@@ -6,6 +6,7 @@ export {
   readFileBinary,
   listFilesInFolder,
   listIniFilesInFolder,
+  listSasFilesInFolder,
   listSubFoldersInFolder,
   listFilesAndSubFoldersInFolder,
   createFile,
