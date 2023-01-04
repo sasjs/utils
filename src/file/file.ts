@@ -93,9 +93,13 @@ export async function listFilesAndSubFoldersInFolder(
 
                 subFoldersFilesAndFolders = [
                   ...subFoldersFilesAndFolders,
-                  ...(await listFilesAndSubFoldersInFolder(subPath)).map((f) =>
-                    path.join(subFolder, f)
-                  )
+                  ...(
+                    await listFilesAndSubFoldersInFolder(
+                      subPath,
+                      recurse,
+                      ignoredFolders
+                    )
+                  ).map((f) => path.join(subFolder, f))
                 ]
               }
             }
