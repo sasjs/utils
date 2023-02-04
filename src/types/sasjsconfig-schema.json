@@ -592,7 +592,7 @@
           "$id": "#/properties/streamConfig/properties/webSourcePath",
           "type": "string",
           "title": "The webSourcePath schema",
-          "description": "When `streamConfig` is set to `true`, all files in this folder will be converted to streaming web services.  The `index.html` will be taken as a baseline, and all relative URLS will be prefixed such that the links still work and the assets still load.",
+          "description": "Active when `streamConfig` is `true`. Is the source (or build, or dist) LOCAL folder, relative to the `sasjs` folder, which contains the frontend to be deployed.  All assets (PNG, JS, CSS, HTML etc) are taken from here and converted to streaming services in `streamWebFolder`.  In Viya and SAS 9, any relative URLS will be modified such that the links still work and the assets still load.",
           "default": "dist"
         },
         "streamServiceName": {
