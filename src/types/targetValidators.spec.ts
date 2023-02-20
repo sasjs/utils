@@ -630,7 +630,7 @@ describe('validateStreamConfig', () => {
         webSourcePath: ''
       } as unknown as StreamConfig)
     ).toThrowError(
-      'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
+      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
     )
   })
 
@@ -642,7 +642,7 @@ describe('validateStreamConfig', () => {
         webSourcePath: null
       } as unknown as StreamConfig)
     ).toThrowError(
-      'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
+      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
     )
   })
 
@@ -654,7 +654,7 @@ describe('validateStreamConfig', () => {
         webSourcePath: undefined
       } as unknown as StreamConfig)
     ).toThrowError(
-      'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
+      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
     )
   })
 
