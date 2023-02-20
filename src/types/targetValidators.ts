@@ -322,7 +322,7 @@ export const validateStreamConfig = (
 
   if (streamConfig.streamWeb && !streamConfig.webSourcePath) {
     throw new Error(
-      'Invalid stream config: `webSourcePath` cannot be empty, null or undefined.'
+      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
     )
   }
 
