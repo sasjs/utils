@@ -15,9 +15,5 @@ module.exports = {
       statements: -10
     }
   },
-  collectCoverageFrom: ['src/**/{!(index),}.ts'],
-  moduleNameMapper: {
-    '^csv-stringify/sync':
-      '<rootDir>/node_modules/csv-stringify/dist/cjs/sync.cjs'
-  }
+  collectCoverageFrom: ['src/**/{!(index),}.ts']
 }
