@@ -19,7 +19,7 @@ export const readCsv = async (csvFilePath: string): Promise<string[][]> => {
  * creates a csv file at given path with provided data
  * @param csvFilePath location where to create file
  * @param csvData data which needs to be populated in file
- * @param options a object which specify header and contains an array of column names
+ * @param headers an array of column names
  */
 export const createCsv = async <T extends Row[]>(
   csvFilePath: string,
