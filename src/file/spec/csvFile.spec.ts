@@ -1,6 +1,5 @@
 import path from 'path'
-import fs from 'fs-extra'
-import { updateCsv, readCsv, createCsv } from '../csvFile'
+import { updateCsv } from '../csvFile'
 import * as fileModule from '../file'
 
 const csvFilePath = path.join(__dirname, 'tests-csv')

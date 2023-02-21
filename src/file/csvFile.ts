@@ -1,5 +1,5 @@
 import { readFile, createFile } from './file'
-import stringify from 'csv-stringify/lib/sync'
+import { stringify, Input } from 'csv-stringify/sync'
 
 /**
  * reads a CSV file and returns parsed data
@@ -19,18 +19,17 @@ export const readCsv = async (csvFilePath: string): Promise<string[][]> => {
  * creates a csv file at given path with provided data
  * @param csvFilePath location where to create file
  * @param csvData data which needs to be populated in file
- * @param columns an array of header for file, i.e column names
+ * @param options a object which specify header and contains an array of column names
  */
-export const createCsv = async (
+export const createCsv = async <T extends Input>(
   csvFilePath: string,
-  csvData: any[][],
-  columns: string[]
+  csvData: T,
+  options: {
+    header: boolean
+    columns: string[]
+  }
 ) => {
-  const output = stringify(csvData, {
-    header: csvData.length === 1,
-    columns: columns
-  })
-
+  const output = stringify(csvData, options)
   await createFile(csvFilePath, output)
 }
 
@@ -69,7 +68,10 @@ export const updateCsv = async (
 
   csvData.push(newRecord)
 
-  await createCsv(csvFilePath, csvData, columns)
+  await createCsv(csvFilePath, csvData, {
+    header: csvData.length === 1,
+    columns
+  })
 }
 
 const validateInput = async (
