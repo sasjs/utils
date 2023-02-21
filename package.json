@@ -54,7 +54,7 @@
     "@fast-csv/format": "4.3.5",
     "@types/fs-extra": "9.0.13",
     "@types/prompts": "2.0.13",
-    "chalk": "4.1.1",
+    "chalk": "5.2.0",
     "cli-table": "0.3.6",
     "consola": "2.15.0",
     "find": "0.3.0",
