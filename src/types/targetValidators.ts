@@ -17,6 +17,9 @@ const DEFAULT_CONTEXT_NAME = 'SAS Job Execution compute context'
 const DEFAULT_SERVER_NAME = 'SASApp'
 const DEFAULT_REPOSITORY_NAME = 'Foundation'
 
+export const DEFAULT_SASJS_BUILD_FOLDER = 'sasjsbuild'
+export const DEFAULT_SASJS_RESULTS_FOLDER = 'sasjsresults'
+
 export const validateServerType = (serverType: any): ServerType => {
   if (!serverType) {
     throw new Error(
@@ -193,13 +196,6 @@ export const validateBuildConfig = (
 ): BuildConfig => {
   if (!buildConfig) {
     throw new Error('Invalid build config: JSON cannot be null or undefined.')
-  }
-  if (!buildConfig.buildResultsFolder) {
-    buildConfig.buildResultsFolder = 'sasjsresults'
-  }
-
-  if (!buildConfig.buildOutputFolder) {
-    buildConfig.buildOutputFolder = 'sasjsbuild'
   }
 
   if (!buildConfig.buildOutputFileName) {
@@ -401,4 +397,28 @@ export const validateSyncDirectories = (
   })
 
   return syncDirectories
+}
+
+export const validateSasjsBuildFolder = (folderName: any) => {
+  if (typeof folderName !== 'string') {
+    throw new Error(
+      `Invalid type of value (${typeof folderName}) is provided for property 'sasjsBuildFolder' in config. Required is string.`
+    )
+  }
+
+  if (!folderName) return DEFAULT_SASJS_BUILD_FOLDER
+
+  return folderName
+}
+
+export const validateSasjsResultsFolder = (folderName: any) => {
+  if (typeof folderName !== 'string') {
+    throw new Error(
+      `Invalid type of value (${typeof folderName}) is provided for property 'sasjsResultsFolder' in config. Required is string.`
+    )
+  }
+
+  if (!folderName) return DEFAULT_SASJS_RESULTS_FOLDER
+
+  return folderName
 }

@@ -14,6 +14,8 @@ import { HttpsAgentOptions } from './httpsAgentOptions'
 
 export interface Configuration {
   $schema?: string
+  sasjsBuildFolder?: string
+  sasjsResultsFolder?: string
   httpsAgentOptions?: HttpsAgentOptions
   docConfig?: DocConfig
   buildConfig?: BuildConfig

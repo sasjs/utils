@@ -32,7 +32,11 @@ import {
   validateAuthConfigSas9,
   validateTestConfig,
   validateSyncFolder,
-  validateSyncDirectories
+  validateSyncDirectories,
+  validateSasjsBuildFolder,
+  validateSasjsResultsFolder,
+  DEFAULT_SASJS_BUILD_FOLDER,
+  DEFAULT_SASJS_RESULTS_FOLDER
 } from './targetValidators'
 import { Configuration } from '../types/configuration'
 
@@ -59,6 +63,8 @@ export interface TargetJson {
   isDefault?: boolean
   testConfig?: TestConfig
   syncDirectories?: SyncDirectoryMap[]
+  sasjsBuildFolder?: string
+  sasjsResultsFolder?: string
 }
 
 export class Target implements TargetJson {
@@ -174,6 +180,16 @@ export class Target implements TargetJson {
   }
   private _syncDirectories: SyncDirectoryMap[] | undefined
 
+  get sasjsBuildFolder(): string | undefined {
+    return this._sasjsBuildFolder
+  }
+  private _sasjsBuildFolder: string | undefined
+
+  get sasjsResultsFolder(): string | undefined {
+    return this._sasjsResultsFolder
+  }
+  private _sasjsResultsFolder: string | undefined
+
   constructor(json: any, config: Configuration = {}) {
     try {
       if (!json) {
@@ -272,6 +288,16 @@ export class Target implements TargetJson {
       if (json.syncDirectories && json.syncDirectories.length) {
         this._syncDirectories = validateSyncDirectories(json.syncDirectories)
       }
+
+      if (json.sasjsBuildFolder) {
+        this._sasjsBuildFolder = validateSasjsBuildFolder(json.sasjsBuildFolder)
+      }
+
+      if (json.sasjsResultsFolder) {
+        this._sasjsResultsFolder = validateSasjsResultsFolder(
+          json.sasjsResultsFolder
+        )
+      }
     } catch (e) {
       throw new Error(`Error parsing target: ${(e as Error).message}`)
     }
@@ -311,6 +337,18 @@ export class Target implements TargetJson {
       json.authConfigSas9 = this.authConfigSas9
     }
 
+    if (this.sasjsBuildFolder) {
+      json.sasjsBuildFolder = this.sasjsBuildFolder
+    } else if (withDefaults) {
+      json.sasjsBuildFolder = DEFAULT_SASJS_BUILD_FOLDER
+    }
+
+    if (this.sasjsResultsFolder) {
+      json.sasjsResultsFolder = this.sasjsResultsFolder
+    } else if (withDefaults) {
+      json.sasjsResultsFolder = DEFAULT_SASJS_RESULTS_FOLDER
+    }
+
     if (this.syncDirectories) {
       json.syncDirectories = this.syncDirectories
     } else if (withDefaults) {
@@ -324,8 +362,6 @@ export class Target implements TargetJson {
         initProgram: '',
         termProgram: '',
         buildOutputFileName: `${this.name}.sas`,
-        buildOutputFolder: 'sasjsbuild',
-        buildResultsFolder: 'sasjsresults',
         macroVars: {}
       }
 
