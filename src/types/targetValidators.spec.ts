@@ -31,7 +31,11 @@ import {
   validateTestConfig,
   validateAuthConfigSas9,
   validateSyncFolder,
-  validateSyncDirectories
+  validateSyncDirectories,
+  validateSasjsBuildFolder,
+  validateSasjsResultsFolder,
+  DEFAULT_SASJS_BUILD_FOLDER,
+  DEFAULT_SASJS_RESULTS_FOLDER
 } from './targetValidators'
 
 describe('validateTargetName', () => {
@@ -233,8 +237,6 @@ describe('validateBuildConfig', () => {
 
   it('should use the default when build output filename is undefined', () => {
     expect(validateBuildConfig({} as unknown as BuildConfig, 'test')).toEqual({
-      buildOutputFolder: 'sasjsbuild',
-      buildResultsFolder: 'sasjsresults',
       buildOutputFileName: 'test.sas',
       initProgram: '',
       termProgram: '',
@@ -267,8 +269,6 @@ describe('validateBuildConfig', () => {
     expect(
       validateBuildConfig(
         {
-          buildOutputFolder: 'sasjsbuild',
-          buildResultsFolder: 'sasjsresults',
           buildOutputFileName: 'output.sas',
           initProgram: 'test',
           termProgram: null
@@ -276,8 +276,6 @@ describe('validateBuildConfig', () => {
         'test'
       )
     ).toEqual({
-      buildOutputFolder: 'sasjsbuild',
-      buildResultsFolder: 'sasjsresults',
       buildOutputFileName: 'output.sas',
       initProgram: 'test',
       termProgram: '',
@@ -289,8 +287,6 @@ describe('validateBuildConfig', () => {
     expect(
       validateBuildConfig(
         {
-          buildOutputFolder: 'sasjsbuild',
-          buildResultsFolder: 'sasjsresults',
           buildOutputFileName: 'output.sas',
           initProgram: 'test',
           termProgram: 'test',
@@ -299,8 +295,6 @@ describe('validateBuildConfig', () => {
         'test'
       )
     ).toEqual({
-      buildOutputFolder: 'sasjsbuild',
-      buildResultsFolder: 'sasjsresults',
       buildOutputFileName: 'output.sas',
       initProgram: 'test',
       termProgram: 'test',
@@ -1130,5 +1124,41 @@ describe('validateSyncFolder', () => {
 
   it('should return syncFolder when valid', () => {
     expect(validateSyncFolder('some/path')).toEqual('some/path')
+  })
+})
+
+describe('validateSasjsBuildFolder', () => {
+  it('should return sasjsBuildFolder', () => {
+    expect(validateSasjsBuildFolder('build')).toEqual('build')
+  })
+
+  it('should return default when provided value is blank string', () => {
+    expect(validateSasjsBuildFolder('')).toEqual(DEFAULT_SASJS_BUILD_FOLDER)
+  })
+
+  it('should throw an error when non-string value is provided', () => {
+    expect(() =>
+      validateSasjsBuildFolder(123 as unknown as string)
+    ).toThrowError(
+      `Invalid type of value (number) is provided for property 'sasjsBuildFolder' in config. Required is string.`
+    )
+  })
+})
+
+describe('validateSasjsResultsFolder', () => {
+  it('should return the provided value', () => {
+    expect(validateSasjsResultsFolder('results')).toEqual('results')
+  })
+
+  it('should return default when provided value is blank string', () => {
+    expect(validateSasjsResultsFolder('')).toEqual(DEFAULT_SASJS_RESULTS_FOLDER)
+  })
+
+  it('should throw an error when non-string value is provided', () => {
+    expect(() =>
+      validateSasjsResultsFolder(123 as unknown as string)
+    ).toThrowError(
+      `Invalid type of value (number) is provided for property 'sasjsResultsFolder' in config. Required is string.`
+    )
   })
 })

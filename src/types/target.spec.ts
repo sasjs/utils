@@ -80,6 +80,116 @@ describe('Target', () => {
     expect(target.syncFolder).toBeUndefined()
   })
 
+  it('should create an instance when the JSON is valid and contains sasjsBuildFolder', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      sasjsBuildFolder: 'sasjsbuild'
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.name).toEqual('test')
+    expect(target.serverUrl).toEqual('')
+    expect(target.serverType).toEqual(ServerType.Sas9)
+    expect(target.appLoc).toEqual('/test')
+    expect(target.sasjsBuildFolder).toEqual('sasjsbuild')
+  })
+
+  it('should convert an instance to JSON when containing sasjsBuildFolder', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      sasjsBuildFolder: 'sasjsbuild'
+    })
+
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.name).toEqual('test')
+    expect(json.serverUrl).toEqual('')
+    expect(json.serverType).toEqual(ServerType.Sas9)
+    expect(json.appLoc).toEqual('/test')
+    expect(json.sasjsBuildFolder).toEqual('sasjsbuild')
+  })
+
+  it('should create an instance when the JSON is valid and contains sasjsResultsFolder', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      sasjsResultsFolder: 'sasjsresults'
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.name).toEqual('test')
+    expect(target.serverUrl).toEqual('')
+    expect(target.serverType).toEqual(ServerType.Sas9)
+    expect(target.appLoc).toEqual('/test')
+    expect(target.sasjsResultsFolder).toEqual('sasjsresults')
+  })
+
+  it('should convert an instance to JSON containing sasjsResultsFolder', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      sasjsResultsFolder: 'sasjsresults'
+    })
+
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.name).toEqual('test')
+    expect(json.serverUrl).toEqual('')
+    expect(json.serverType).toEqual(ServerType.Sas9)
+    expect(json.appLoc).toEqual('/test')
+    expect(json.sasjsResultsFolder).toEqual('sasjsresults')
+  })
+
+  it('should create an instance when the JSON is valid and contains syncDirectories', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      syncDirectories: [{ local: 'local', remote: 'remote' }]
+    })
+
+    expect(target).toBeTruthy()
+    expect(target instanceof Target).toEqual(true)
+    expect(target.name).toEqual('test')
+    expect(target.serverUrl).toEqual('')
+    expect(target.serverType).toEqual(ServerType.Sas9)
+    expect(target.appLoc).toEqual('/test')
+    expect(target.syncDirectories).toEqual([
+      { local: 'local', remote: 'remote' }
+    ])
+  })
+
+  it('should convert an instance to JSON containing syncDirectories', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      syncDirectories: [{ local: 'local', remote: 'remote' }]
+    })
+
+    const json = target.toJson()
+    expect(json).toBeTruthy()
+    expect(json.name).toEqual('test')
+    expect(json.serverUrl).toEqual('')
+    expect(json.serverType).toEqual(ServerType.Sas9)
+    expect(json.appLoc).toEqual('/test')
+    expect(json.syncDirectories).toEqual([{ local: 'local', remote: 'remote' }])
+  })
+
   it('should convert an instance to json containing build config', () => {
     const target = new Target({
       name: 'test',
@@ -448,8 +558,6 @@ describe('Target', () => {
       initProgram: '',
       termProgram: '',
       buildOutputFileName: `${target.name}.sas`,
-      buildOutputFolder: 'sasjsbuild',
-      buildResultsFolder: 'sasjsresults',
       macroVars: {}
     })
     expect(json.jobConfig).toEqual({
