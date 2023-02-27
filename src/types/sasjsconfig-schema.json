@@ -109,13 +109,21 @@
       "description": "These local folders are searched for Binary Files when running sasjs compile.  Folders are relative to the sasjs/sasjsconfig.json file.",
       "examples": [["binaries", "../../more_binaries"]]
     },
-    "buildOutputFolder": {
-      "$id": "#/properties/buildOutputFolder",
+    "sasjsBuildFolder": {
+      "$id": "#/properties/sasjsBuildFolder",
       "type": "string",
-      "title": "buildOutputFolder",
-      "description": "In a local config, outputs go to the `sasjsbuild` folder by default.  In global, the default is `~/.sasjsbuild`.",
+      "title": "sasjsBuildFolder",
+      "description": "The name of the folder containing the compiled output.  The `sasjs build` command will take all of the subfolders here as inputs to create the build pack.  By default this will be named `sasjsbuild`.  In global, the default is `~/.sasjsbuild`.",
       "default": "sasjsbuild",
       "examples": ["sasjsbuild", ".sasjsbuild"]
+    },
+    "sasjsResultsFolder": {
+      "$id": "#/properties/sasjsResultsFolder",
+      "type": "string",
+      "title": "sasjsResultsFolder",
+      "description": "The name of the folder containing the output (eg logs, ODS output) from `sasjs run`.  By default this will be named `sasjsresults`.  In global, the default is `~/.sasjsresults`.",
+      "default": "sasjsbuild",
+      "examples": ["sasjsresults", ".sasjsresults"]
     },
     "defaultTarget": {
       "$id": "#/properties/defaultTarget",
@@ -336,9 +344,7 @@
             "name": "value",
             "numvar": "42"
           },
-          "buildOutputFileName": "buildpack.sas",
-          "buildOutputFolder": "sasjsbuild",
-          "buildResultsFolder": "sasjsresults"
+          "buildOutputFileName": "buildpack.sas"
         }
       ],
       "properties": {
@@ -348,20 +354,6 @@
           "title": "buildOutputFileName",
           "description": "The name of the generated .sas program, which can be used to deploy the app using only SAS Studio. By default, this will be the name of the target.",
           "examples": ["viya.sas", "sas9.sas"]
-        },
-        "buildOutputFolder": {
-          "$id": "#/properties/buildConfig/properties/buildOutputFolder",
-          "type": "string",
-          "title": "buildOutputFolder",
-          "description": "The name of the folder containing the compiled output.  The `sasjs build` command will take all of the subfolders here as inputs to create the build pack.  By default this will be named `sasjsbuild`.",
-          "default": "sasjsbuild"
-        },
-        "buildResultsFolder": {
-          "$id": "#/properties/buildConfig/properties/buildResultsFolder",
-          "type": "string",
-          "title": "buildResultsFolder",
-          "description": "The name of the folder containing the output (eg logs, ODS output) from `sasjs run`.  By default this will be named `sasjsresults`.",
-          "default": "sasjsresults"
         },
         "initProgram": {
           "$id": "#/properties/buildConfig/properties/initProgram",
@@ -957,6 +949,12 @@
               },
               "programFolders": {
                 "$ref": "#/properties/programFolders"
+              },
+              "sasjsBuildFolder": {
+                "$ref": "#properties/sasjsBuildFolder"
+              },
+              "sasjsResultsFolder": {
+                "$ref": "#properties/sasjsResultsFolder"
               }
             }
           }
