@@ -6,7 +6,8 @@ import {
   JobConfig,
   StreamConfig,
   AuthConfig,
-  TestConfig
+  TestConfig,
+  SyncDirectoryMap
 } from './config'
 import { ServerType } from './serverType'
 import { TargetJson } from './target'
@@ -32,4 +33,5 @@ export interface Configuration {
   defaultTarget?: string
   testConfig?: TestConfig
   syncFolder?: string
+  syncDirectories?: SyncDirectoryMap[]
 }
