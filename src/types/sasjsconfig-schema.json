@@ -122,7 +122,7 @@
       "type": "string",
       "title": "sasjsResultsFolder",
       "description": "The name of the folder containing the output (eg logs, ODS output) from `sasjs run`.  By default this will be named `sasjsresults`.  In global, the default is `~/.sasjsresults`.",
-      "default": "sasjsbuild",
+      "default": "sasjsresults",
       "examples": ["sasjsresults", ".sasjsresults"]
     },
     "defaultTarget": {
@@ -413,7 +413,7 @@
           "type": "boolean",
           "title": "The deployConfig deployServicePack flag",
           "description": "If set to `true` the json pack produced by `sasjs build` will be auto-deployed to the `appLoc` of the specified target (creating all jobs and services in the SAS folder tree).  Currently only Viya is supported for this flag.",
-          "default": [false]
+          "default": false
         }
       }
     },
@@ -585,7 +585,8 @@
           "type": "string",
           "title": "The webSourcePath schema",
           "description": "Active when `streamConfig` is `true`. Is the source (or build, or dist) LOCAL folder, relative to the `sasjs` folder, which contains the frontend to be deployed.  All assets (PNG, JS, CSS, HTML etc) are taken from here and converted to streaming services in `streamWebFolder`.  In Viya and SAS 9, any relative URLS will be modified such that the links still work and the assets still load.",
-          "default": "dist"
+          "default": "dist",
+          "examples": ["dist", "build"]
         },
         "streamServiceName": {
           "$id": "#/properties/streamConfig/properties/streamServiceName",
