@@ -1,1 +1,5 @@
-export { timestampToYYYYMMDDHHMMSS, generateTimestamp } from './timestamp'
+export {
+  convertSecondsToHms,
+  timestampToYYYYMMDDHHMMSS,
+  generateTimestamp
+} from './timestamp'
