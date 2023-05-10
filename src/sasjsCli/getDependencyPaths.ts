@@ -5,7 +5,8 @@ import {
   prioritiseDependencyOverrides,
   getList,
   DependencyHeader,
-  getDeprecatedHeader
+  getDeprecatedHeader,
+  DependencyType
 } from './'
 import { CompileTree, Leaf } from '../compileTree'
 
@@ -19,10 +20,12 @@ export async function getDependencyPaths(
   let dependencyPaths: string[] = []
   const foundDependencies: string[] = []
   const sourcePaths = [...macroFolders, macroCorePath]
+
   const dependenciesHeader = getDeprecatedHeader(
     fileContent,
     DependencyHeader.Macro
   )
+
   const dependencies =
     leaf?.dependencies ||
     getList(dependenciesHeader, fileContent).filter((d) => d.endsWith('.sas'))
@@ -38,7 +41,11 @@ export async function getDependencyPaths(
           let leaf: Leaf | undefined = undefined
 
           if (compileTree && Object.keys(compileTree).length) {
-            fileContent = await compileTree.getDepContent(filePaths[0])
+            fileContent = await compileTree.getDepContent(
+              filePaths[0],
+              DependencyType.Macro
+            )
+
             leaf = compileTree.getLeaf(filePaths[0])
           } else {
             fileContent = await readFile(filePaths[0])
