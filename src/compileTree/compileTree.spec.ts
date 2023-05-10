@@ -1,5 +1,11 @@
 import { CompileTree, Tree, removeHeader } from './'
-import { readFile, deleteFile, fileExists } from '../'
+import {
+  readFile,
+  deleteFile,
+  fileExists,
+  DependencyType,
+  DependencyHeader
+} from '../'
 import path from 'path'
 
 describe('CompileTree', () => {
@@ -28,6 +34,55 @@ describe('CompileTree', () => {
     await expect(readFile(treePath)).resolves.toEqual(
       JSON.stringify(tree, null, 2)
     )
+  })
+
+  it('should validate dependencies', () => {
+    const testDepPath = 'test.sas'
+    const getTestContent = (header: DependencyHeader) => `/**
+  @file macroWithInclude.sas
+  @brief test macro
+
+  ${header}
+**/
+
+proc sql;
+create table areas as select distinct area
+  from mydb.springs;
+  `
+
+    const getExpectedError = (header: DependencyHeader) =>
+      new Error(
+        `Dependency '${header}' can not be used in artefact type '${DependencyType.Macro}'. Please remove it from '${testDepPath}'.`
+      )
+
+    expect(() =>
+      compileTree['validateDependency'](
+        getTestContent(DependencyHeader.Include),
+        testDepPath,
+        DependencyType.Macro
+      )
+    ).toThrow(getExpectedError(DependencyHeader.Include))
+    expect(() =>
+      compileTree['validateDependency'](
+        getTestContent(DependencyHeader.Binary),
+        testDepPath,
+        DependencyType.Macro
+      )
+    ).toThrow(getExpectedError(DependencyHeader.Binary))
+
+    expect(() =>
+      compileTree['validateDependency'](
+        getTestContent(DependencyHeader.Binary),
+        testDepPath
+      )
+    ).not.toThrow()
+    expect(() =>
+      compileTree['validateDependency'](
+        getTestContent(DependencyHeader.Binary),
+        testDepPath,
+        DependencyType.Binary
+      )
+    ).not.toThrow()
   })
 })
 

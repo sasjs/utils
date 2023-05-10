@@ -104,7 +104,10 @@ export const getDependencies = async (
             Object.keys(compileTree).length &&
             depType !== DependencyType.Binary
           ) {
-            encodedFileContent = await compileTree.getDepContent(filePaths[0])
+            encodedFileContent = await compileTree.getDepContent(
+              filePaths[0],
+              depType
+            )
           } else {
             encodedFileContent = await readFile(
               filePaths[0],
