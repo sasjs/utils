@@ -6,7 +6,7 @@ describe('urlOrigin', () => {
   })
 
   it('should return url origin', () => {
-    let url = 'https://sas.4gl.io'
+    let url = 'https://your-sas-server.com'
 
     expect(urlOrigin(url)).toEqual(url)
 
