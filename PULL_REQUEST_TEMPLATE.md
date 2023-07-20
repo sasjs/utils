@@ -16,3 +16,7 @@ What code changes have been made to achieve the intent.
 - [ ] All unit tests are passing (`npm test`).
 - [ ] All `sasjs-cli` unit tests are passing (`npm test`).
 - [ ] Reviewer is assigned.
+
+### Reviewer checks
+
+- [ ] Any new code is documented.
