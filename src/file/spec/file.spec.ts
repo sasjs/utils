@@ -502,7 +502,7 @@ describe('createReadStream', () => {
     jest.mock('../file')
     jest
       .spyOn(fs, 'createReadStream')
-      .mockImplementation(() => ({} as unknown as ReadStream))
+      .mockImplementation(() => ({}) as unknown as ReadStream)
     jest
       .spyOn(fileModule, 'createFile')
       .mockImplementation(() => Promise.resolve())
@@ -527,7 +527,7 @@ describe('createWriteStream', () => {
     jest.mock('../file')
     jest
       .spyOn(fs, 'createWriteStream')
-      .mockImplementation(() => ({} as unknown as WriteStream))
+      .mockImplementation(() => ({}) as unknown as WriteStream)
     jest
       .spyOn(fileModule, 'createFile')
       .mockImplementation(() => Promise.resolve())
