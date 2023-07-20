@@ -24,7 +24,8 @@ export {
   base64EncodeFile,
   getRealPath,
   isTestFile,
-  testFileRegExp
+  testFileRegExp,
+  getLineEnding
 } from './file'
 
 export { updateCsv, createCsv, readCsv } from './csvFile'

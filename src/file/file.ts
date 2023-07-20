@@ -3,6 +3,7 @@ import rimraf from 'rimraf'
 import path from 'path'
 import { asyncForEach } from '../utils'
 import * as file from '.'
+import { LineEndings } from '../types'
 
 export async function fileExists(filePath: string): Promise<boolean> {
   return fs.promises
@@ -268,3 +269,6 @@ export const createReadStream = async (filePath: string) =>
 export const testFileRegExp = /\.test\.(\d+\.)?sas$/i
 
 export const isTestFile = (fileName: string) => testFileRegExp.test(fileName)
+
+export const getLineEnding = (content: string) =>
+  new RegExp(LineEndings.CRLF).test(content) ? LineEndings.CRLF : LineEndings.LF

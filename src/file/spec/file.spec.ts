@@ -22,12 +22,14 @@ import {
   base64EncodeImageFile,
   getRealPath,
   createWriteStream,
-  createReadStream
+  createReadStream,
+  getLineEnding
 } from '../file'
 import * as fileModule from '../file'
 import { generateTimestamp } from '../../time'
 import { svgBase64EncodedUnix, svgBase64EncodedWin } from './expectedOutputs'
 import { isWindows } from '../../utils'
+import { LineEndings } from '../../types'
 
 const content = 'test content'
 
@@ -604,5 +606,19 @@ describe('deleteFolder', () => {
     isFolderPresent = await folderExists(folderPath)
 
     expect(isFolderPresent).toBeFalsy()
+  })
+})
+
+describe('getLineEnding', () => {
+  it('should return correct line ending', () => {
+    let lineEnding = LineEndings.CRLF
+    let line: LineEndings = lineEnding
+
+    expect(getLineEnding(line)).toEqual(lineEnding)
+
+    lineEnding = LineEndings.LF
+    line = lineEnding
+
+    expect(getLineEnding(line)).toEqual(lineEnding)
   })
 })
