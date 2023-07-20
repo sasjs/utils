@@ -270,5 +270,10 @@ export const testFileRegExp = /\.test\.(\d+\.)?sas$/i
 
 export const isTestFile = (fileName: string) => testFileRegExp.test(fileName)
 
+/**
+ * Returns end of line sequence
+ * @param content to get end of line sequence.
+ * @returns CRLF(\r\n) or LF(\n) end of line sequence
+ */
 export const getLineEnding = (content: string) =>
   new RegExp(LineEndings.CRLF).test(content) ? LineEndings.CRLF : LineEndings.LF
