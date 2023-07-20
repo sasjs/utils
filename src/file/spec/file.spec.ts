@@ -22,12 +22,14 @@ import {
   base64EncodeImageFile,
   getRealPath,
   createWriteStream,
-  createReadStream
+  createReadStream,
+  getLineEnding
 } from '../file'
 import * as fileModule from '../file'
 import { generateTimestamp } from '../../time'
 import { svgBase64EncodedUnix, svgBase64EncodedWin } from './expectedOutputs'
 import { isWindows } from '../../utils'
+import { LineEndings } from '../../types'
 
 const content = 'test content'
 
@@ -500,7 +502,7 @@ describe('createReadStream', () => {
     jest.mock('../file')
     jest
       .spyOn(fs, 'createReadStream')
-      .mockImplementation(() => ({} as unknown as ReadStream))
+      .mockImplementation(() => ({}) as unknown as ReadStream)
     jest
       .spyOn(fileModule, 'createFile')
       .mockImplementation(() => Promise.resolve())
@@ -525,7 +527,7 @@ describe('createWriteStream', () => {
     jest.mock('../file')
     jest
       .spyOn(fs, 'createWriteStream')
-      .mockImplementation(() => ({} as unknown as WriteStream))
+      .mockImplementation(() => ({}) as unknown as WriteStream)
     jest
       .spyOn(fileModule, 'createFile')
       .mockImplementation(() => Promise.resolve())
@@ -604,5 +606,19 @@ describe('deleteFolder', () => {
     isFolderPresent = await folderExists(folderPath)
 
     expect(isFolderPresent).toBeFalsy()
+  })
+})
+
+describe('getLineEnding', () => {
+  it('should return correct line ending', () => {
+    let lineEnding = LineEndings.CRLF
+    let line: LineEndings = lineEnding
+
+    expect(getLineEnding(line)).toEqual(lineEnding)
+
+    lineEnding = LineEndings.LF
+    line = lineEnding
+
+    expect(getLineEnding(line)).toEqual(lineEnding)
   })
 })
