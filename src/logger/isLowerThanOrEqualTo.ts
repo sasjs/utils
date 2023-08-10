@@ -4,12 +4,10 @@ export const isLowerThanOrEqualTo = (
   currentLevel: LogLevel,
   level: LogLevel
 ): boolean => {
+  // REFACTOR: use switch
   if (currentLevel === LogLevel.Off) return false
-
   if (currentLevel === LogLevel.Debug) return true
-
   if (currentLevel === LogLevel.Trace) return true
-
   if (currentLevel === LogLevel.Info) {
     return (
       level === LogLevel.Info ||
@@ -17,9 +15,9 @@ export const isLowerThanOrEqualTo = (
       level === LogLevel.Error
     )
   }
-
-  if (currentLevel === LogLevel.Warn)
+  if (currentLevel === LogLevel.Warn) {
     return level === LogLevel.Warn || level === LogLevel.Error
+  }
 
   return level === LogLevel.Error
 }

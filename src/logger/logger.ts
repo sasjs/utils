@@ -1,4 +1,4 @@
-import consola from 'consola'
+import { consola } from 'consola'
 import { isLowerThanOrEqualTo } from './isLowerThanOrEqualTo'
 import { isNullOrUndefined } from './isNullOrUndefined'
 import { LogLevel } from './logLevel'
