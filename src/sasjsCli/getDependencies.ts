@@ -161,8 +161,8 @@ export const getDeprecatedHeader = (
   fileContent.includes(header)
     ? header
     : header === DependencyHeader.Macro
-    ? DependencyHeader.DeprecatedMacro
-    : DependencyHeader.DeprecatedInclude
+      ? DependencyHeader.DeprecatedMacro
+      : DependencyHeader.DeprecatedInclude
 
 const deconstructDependency = (
   deps: string[],
