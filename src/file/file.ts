@@ -1,5 +1,5 @@
 import fs from 'fs-extra'
-import {rimraf } from 'rimraf'
+import { rimraf } from 'rimraf'
 import path from 'path'
 import { asyncForEach } from '../utils'
 import * as file from '.'
