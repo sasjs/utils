@@ -92,6 +92,15 @@
         "test",
         "review"
       ]
+    },
+    {
+      "login": "glM26",
+      "name": "glM26",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35031631?v=4",
+      "profile": "https://github.com/glM26",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -99,5 +108,7 @@
   "projectOwner": "sasjs",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitType": "docs",
+  "commitConvention": "angular"
 }
