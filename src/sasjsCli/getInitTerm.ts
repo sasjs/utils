@@ -84,10 +84,10 @@ const getVars = (
     varType === SASJsFileType.service
       ? config?.serviceConfig?.macroVars
       : varType === SASJsFileType.job
-      ? config?.jobConfig?.macroVars
-      : varType === SASJsFileType.test
-      ? config?.testConfig?.macroVars
-      : {}
+        ? config?.jobConfig?.macroVars
+        : varType === SASJsFileType.test
+          ? config?.testConfig?.macroVars
+          : {}
 
   const targetVars = getInternalVars(target)
 
