@@ -14,7 +14,7 @@
     "nodeVersionMessage": "echo \u001b[33m make sure you are running node lts version \u001b[0m",
     "preinstall": "npm run nodeVersionMessage",
     "prebuild": "npm run nodeVersionMessage",
-    "build": "rimraf build && tsc",
+    "build": "npx rimraf build && tsc",
     "postbuild": "npm run copy:macros",
     "copy:macros": "ts-node ./scripts/copySASjsCore.ts",
     "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm tsconfig.json",
@@ -60,7 +60,6 @@
     "fs-extra": "10.0.0",
     "jwt-decode": "3.1.2",
     "prompts": "2.4.1",
-    "rimraf": "5.0.10",
     "valid-url": "1.0.9"
   }
 }
