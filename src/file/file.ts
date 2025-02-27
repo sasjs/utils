@@ -1,5 +1,4 @@
 import fs from 'fs-extra'
-import { rimraf } from 'rimraf'
 import path from 'path'
 import { asyncForEach } from '../utils'
 import * as file from '.'
@@ -154,7 +153,10 @@ export async function deleteFile(filePath: string) {
 }
 
 export async function deleteFolder(folderPath: string) {
-  return rimraf(folderPath, {})
+  return fs.rm(folderPath, {
+    recursive: true,
+    force: true
+  })
 }
 
 export function unifyFilePath(

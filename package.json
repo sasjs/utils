@@ -14,7 +14,7 @@
     "nodeVersionMessage": "echo \u001b[33m make sure you are running node lts version \u001b[0m",
     "preinstall": "npm run nodeVersionMessage",
     "prebuild": "npm run nodeVersionMessage",
-    "build": "rimraf build && tsc",
+    "build": "npx rimraf build && tsc",
     "postbuild": "npm run copy:macros",
     "copy:macros": "ts-node ./scripts/copySASjsCore.ts",
     "prepublishOnly": "cp -r ./build/* . && rm -rf ./build && rm -rf ./src && rm jest.config.js && rm tsconfig.json",
@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/sasjs/utils#readme",
   "devDependencies": {
-    "@sasjs/core": "^4.43.1",
+    "@sasjs/core": "4.54.0",
     "@types/cli-table": "0.3.0",
     "@types/find": "0.2.1",
     "@types/jest": "29.4.0",
@@ -51,16 +51,15 @@
   },
   "dependencies": {
     "@fast-csv/format": "4.3.5",
-    "@types/fs-extra": "9.0.13",
+    "@types/fs-extra": "11.0.4",
     "@types/prompts": "2.0.13",
     "chalk": "4.1.1",
     "cli-table": "0.3.6",
     "consola": "2.15.0",
     "find": "0.3.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "11.3.0",
     "jwt-decode": "3.1.2",
     "prompts": "2.4.1",
-    "rimraf": "4.1.4",
     "valid-url": "1.0.9"
   }
 }
