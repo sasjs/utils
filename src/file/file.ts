@@ -155,7 +155,7 @@ export async function deleteFile(filePath: string) {
 export async function deleteFolder(folderPath: string) {
   return fs.rm(folderPath, {
     recursive: true,
-        force: true
+    force: true
   })
 }
 
