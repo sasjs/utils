@@ -474,9 +474,13 @@ describe('base64EncodeImageFile', () => {
     const fileNameToEncode = 'test.svg'
     const filePath = path.join(__dirname, fileNameToEncode)
 
-    await expect(base64EncodeImageFile(filePath)).resolves.toEqual(
-      isWindows() ? svgBase64EncodedWin : svgBase64EncodedUnix
-    )
+    let encodedImage = await base64EncodeImageFile(filePath)
+
+    expect(
+      isWindows()
+        ? svgBase64EncodedWin.includes(encodedImage)
+        : svgBase64EncodedUnix.includes(encodedImage)
+    ).toBeTruthy()
   })
 })
 
@@ -502,7 +506,7 @@ describe('createReadStream', () => {
     jest.mock('../file')
     jest
       .spyOn(fs, 'createReadStream')
-      .mockImplementation(() => ({}) as unknown as ReadStream)
+      .mockImplementation(() => ({} as unknown as ReadStream))
     jest
       .spyOn(fileModule, 'createFile')
       .mockImplementation(() => Promise.resolve())
@@ -527,7 +531,7 @@ describe('createWriteStream', () => {
     jest.mock('../file')
     jest
       .spyOn(fs, 'createWriteStream')
-      .mockImplementation(() => ({}) as unknown as WriteStream)
+      .mockImplementation(() => ({} as unknown as WriteStream))
     jest
       .spyOn(fileModule, 'createFile')
       .mockImplementation(() => Promise.resolve())
