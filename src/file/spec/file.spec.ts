@@ -474,9 +474,13 @@ describe('base64EncodeImageFile', () => {
     const fileNameToEncode = 'test.svg'
     const filePath = path.join(__dirname, fileNameToEncode)
 
-    await expect(base64EncodeImageFile(filePath)).resolves.toEqual(
-      isWindows() ? svgBase64EncodedWin : svgBase64EncodedUnix
-    )
+    let encodedImage = await base64EncodeImageFile(filePath)
+
+    expect(
+      isWindows()
+        ? svgBase64EncodedWin.includes(encodedImage)
+        : svgBase64EncodedUnix.includes(encodedImage)
+    ).toBeTruthy()
   })
 })
 

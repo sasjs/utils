@@ -23,6 +23,7 @@ describe('getDependencyPaths', () => {
       'mf_getplatform.sas',
       'mf_abort.sas',
       'mfv_existfolder.sas',
+      'mfv_getpathuri.sas',
       'mv_createfolder.sas'
     ]
 
@@ -113,6 +114,7 @@ describe('getDependencyPaths', () => {
       'mf_getplatform.sas',
       'mf_abort.sas',
       'mfv_existfolder.sas',
+      'mfv_getpathuri.sas',
       'mv_createfolder.sas'
     ]
 
