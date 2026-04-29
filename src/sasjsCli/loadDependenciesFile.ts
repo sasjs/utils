@@ -130,7 +130,7 @@ export const loadDependenciesFile = async ({
       .join('\n')
   } else {
     fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
-    ${init}${fileContent}${term}`
+${init}${fileContent}${term}`
 
     fileContent = `* ${type} Variables start;\n${startUpVars}\n* ${type} Variables end;\n${fileContent}`
   }
