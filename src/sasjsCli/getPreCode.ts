@@ -8,7 +8,8 @@ export const callWeboutMacro = (macro: string) =>
     ,missing=&missing
     ,showmeta=&showmeta
     ,maxobs=&maxobs
-  ) %mend;
+  )
+%mend;
 `
 export const preCodeEnd = `/* provide additional debug info */
 %global _program;
