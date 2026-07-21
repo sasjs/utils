@@ -27,13 +27,11 @@ export const validateServerType = (serverType: any): ServerType => {
     )
   }
 
-  if (
-    !(
-      serverType === ServerType.Sas9 ||
-      serverType === ServerType.SasViya ||
-      serverType === ServerType.Sasjs
-    )
-  ) {
+  if (!(
+    serverType === ServerType.Sas9 ||
+    serverType === ServerType.SasViya ||
+    serverType === ServerType.Sasjs
+  )) {
     throw new Error(
       `Invalid server type: Supported values for  \`serverType\` are ${ServerType.SasViya}, ${ServerType.Sas9} and ${ServerType.Sasjs}.`
     )
