@@ -38,7 +38,9 @@ describe('isAccessTokenExpiring', () => {
   })
 
   it('should return false for an opaque (non-JWT) token', () => {
-    expect(isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')).toBeFalsy()
+    expect(
+      isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')
+    ).toBeFalsy()
   })
 })
 
@@ -74,7 +76,9 @@ describe('isRefreshTokenExpiring', () => {
   })
 
   it('should return false for an opaque (non-JWT) token', () => {
-    expect(isRefreshTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')).toBeFalsy()
+    expect(
+      isRefreshTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')
+    ).toBeFalsy()
   })
 })
 
