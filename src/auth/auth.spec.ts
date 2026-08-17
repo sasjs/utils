@@ -42,6 +42,10 @@ describe('isAccessTokenExpiring', () => {
       isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')
     ).toBeFalsy()
   })
+
+  it('should return false for a JWT without an exp claim', () => {
+    expect(isAccessTokenExpiring(generateTokenWithoutExp())).toBeFalsy()
+  })
 })
 
 describe('isRefreshTokenExpiring', () => {
@@ -145,4 +149,15 @@ const generateToken = (timeToLiveSeconds: number): string => {
   const signature = '4-iaDojEVl0pJQMjrbM1EzUIfAZgsbK_kgnVyVxFSVo'
   const token = `${header}.${payload}.${signature}`
   return token
+}
+
+const generateTokenWithoutExp = (): string => {
+  const header = Buffer.from(
+    JSON.stringify({ alg: 'HS256', typ: 'JWT' })
+  ).toString('base64url')
+  const payload = Buffer.from(JSON.stringify({ sub: 'test' })).toString(
+    'base64url'
+  )
+  const signature = '4-iaDojEVl0pJQMjrbM1EzUIfAZgsbK_kgnVyVxFSVo'
+  return `${header}.${payload}.${signature}`
 }
