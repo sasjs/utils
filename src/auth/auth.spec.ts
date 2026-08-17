@@ -36,6 +36,10 @@ describe('isAccessTokenExpiring', () => {
     const token = generateToken(120)
     expect(isAccessTokenExpiring(token, 60)).toBeFalsy()
   })
+
+  it('should return false for an opaque (non-JWT) token', () => {
+    expect(isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')).toBeFalsy()
+  })
 })
 
 describe('isRefreshTokenExpiring', () => {
@@ -68,6 +72,10 @@ describe('isRefreshTokenExpiring', () => {
     const token = generateToken(120)
     expect(isRefreshTokenExpiring(token, 60)).toBeFalsy()
   })
+
+  it('should return false for an opaque (non-JWT) token', () => {
+    expect(isRefreshTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')).toBeFalsy()
+  })
 })
 
 describe('hasTokenExpired', () => {
@@ -83,6 +91,19 @@ describe('hasTokenExpired', () => {
   it('should return false if a token has not expired', () => {
     const token = generateToken(36000)
     expect(hasTokenExpired(token)).toBeFalsy()
+  })
+
+  it('should return false for an opaque (non-JWT) token', () => {
+    expect(hasTokenExpired('1f8da55057bd4f50a6577f0bc2b38b1a-r')).toBeFalsy()
+  })
+
+  it('should return false for a JWT without an exp claim', () => {
+    const header = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9'
+    const payload = Buffer.from(JSON.stringify({ sub: 'test' })).toString(
+      'base64'
+    )
+    const signature = '4-iaDojEVl0pJQMjrbM1EzUIfAZgsbK_kgnVyVxFSVo'
+    expect(hasTokenExpired(`${header}.${payload}.${signature}`)).toBeFalsy()
   })
 })
 

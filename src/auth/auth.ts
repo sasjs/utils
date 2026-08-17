@@ -52,7 +52,23 @@ export function hasTokenExpired(token?: string): boolean {
 }
 
 function isTokenExpiring(token: string, timeToLiveSeconds: number) {
-  const payload = jwtDecode<{ exp: number }>(token)
+  let payload: { exp?: number }
+  try {
+    payload = jwtDecode<{ exp?: number }>(token)
+  } catch {
+    // Opaque (non-JWT) tokens cannot be expiry-checked client-side.
+    // Assume the token is usable and let the server reject it if expired.
+    const logger =
+      (typeof process !== 'undefined' && (process as any).logger) || console
+    logger.debug(
+      'isTokenExpiring: token is not a decodable JWT, treating it as not expiring.'
+    )
+    return false
+  }
+
+  // A JWT without an `exp` claim cannot be expiry-checked either.
+  if (!payload.exp) return false
+
   const timeToLive = payload.exp - new Date().valueOf() / 1000
 
   return timeToLive <= timeToLiveSeconds
