@@ -102,9 +102,11 @@ describe('hasTokenExpired', () => {
   })
 
   it('should return false for a JWT without an exp claim', () => {
-    const header = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9'
+    const header = Buffer.from(
+      JSON.stringify({ alg: 'HS256', typ: 'JWT' })
+    ).toString('base64url')
     const payload = Buffer.from(JSON.stringify({ sub: 'test' })).toString(
-      'base64'
+      'base64url'
     )
     const signature = '4-iaDojEVl0pJQMjrbM1EzUIfAZgsbK_kgnVyVxFSVo'
     expect(hasTokenExpired(`${header}.${payload}.${signature}`)).toBeFalsy()
@@ -136,8 +138,10 @@ describe('decodeToken', () => {
 const generateToken = (timeToLiveSeconds: number): string => {
   const exp =
     new Date(new Date().getTime() + timeToLiveSeconds * 1000).getTime() / 1000
-  const header = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9'
-  const payload = Buffer.from(JSON.stringify({ exp })).toString('base64')
+  const header = Buffer.from(
+    JSON.stringify({ alg: 'HS256', typ: 'JWT' })
+  ).toString('base64url')
+  const payload = Buffer.from(JSON.stringify({ exp })).toString('base64url')
   const signature = '4-iaDojEVl0pJQMjrbM1EzUIfAZgsbK_kgnVyVxFSVo'
   const token = `${header}.${payload}.${signature}`
   return token

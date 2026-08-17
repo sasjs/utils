@@ -58,9 +58,7 @@ function isTokenExpiring(token: string, timeToLiveSeconds: number) {
   } catch {
     // Opaque (non-JWT) tokens cannot be expiry-checked client-side.
     // Assume the token is usable and let the server reject it if expired.
-    const logger =
-      (typeof process !== 'undefined' && (process as any).logger) || console
-    logger.debug(
+    console.debug(
       'isTokenExpiring: token is not a decodable JWT, treating it as not expiring.'
     )
     return false
