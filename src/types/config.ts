@@ -68,8 +68,16 @@ export interface StreamConfig {
 export interface AuthConfig {
   access_token: string
   refresh_token: string
-  client: string
-  secret: string
+  /**
+   * OAuth client ID. Optional: tokens minted without a registered client
+   * (e.g. via the password grant against the built-in public `sas.cli`
+   * client) have none. When absent, refresh falls back to `sas.cli`.
+   */
+  client?: string
+  /**
+   * OAuth client secret. Optional for the same reason as `client`.
+   */
+  secret?: string
 }
 
 export interface AuthConfigSas9 {

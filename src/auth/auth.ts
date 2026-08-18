@@ -1,4 +1,4 @@
-import jwtDecode from 'jwt-decode'
+import jwtDecode, { InvalidTokenError } from 'jwt-decode'
 import { DecodedToken } from '../types'
 
 /**
@@ -52,7 +52,26 @@ export function hasTokenExpired(token?: string): boolean {
 }
 
 function isTokenExpiring(token: string, timeToLiveSeconds: number) {
-  const payload = jwtDecode<{ exp: number }>(token)
+  let payload: { exp?: number }
+  try {
+    payload = jwtDecode<{ exp?: number }>(token)
+  } catch (err) {
+    // Only tolerate undecodable (opaque / non-JWT) tokens - anything else
+    // is a genuine bug and should surface.
+    if (!(err instanceof InvalidTokenError)) throw err
+    // Opaque tokens cannot be expiry-checked client-side.
+    // Assume the token is usable and let the server reject it if expired.
+    console.debug(
+      'isTokenExpiring: token is not a decodable JWT, treating it as not expiring.'
+    )
+    return false
+  }
+
+  // A JWT without an `exp` claim cannot be expiry-checked either.
+  // Note: `== null` (not `!`) - exp of 0 is a real (long-expired) claim,
+  // not a missing one.
+  if (payload.exp == null) return false
+
   const timeToLive = payload.exp - new Date().valueOf() / 1000
 
   return timeToLive <= timeToLiveSeconds
