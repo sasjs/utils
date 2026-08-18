@@ -61,7 +61,10 @@ function isTokenExpiring(token: string, timeToLiveSeconds: number) {
     if (!(err instanceof InvalidTokenError)) throw err
     // Opaque tokens cannot be expiry-checked client-side.
     // Assume the token is usable and let the server reject it if expired.
-    console.debug(
+    // Route through process.logger so the message respects the configured
+    // log level and doesn't pollute stdout in CI/test runs. Falls back to a
+    // no-op when no logger has been installed (e.g. library-only usage).
+    process.logger?.debug?.(
       'isTokenExpiring: token is not a decodable JWT, treating it as not expiring.'
     )
     return false
