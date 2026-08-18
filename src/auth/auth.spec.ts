@@ -5,6 +5,7 @@ import {
   decodeToken
 } from './auth'
 import { DecodedToken } from '../types'
+import { Logger, LogLevel } from '../logger'
 
 describe('isAccessTokenExpiring', () => {
   it('should return true if the token is expiring in an hour', () => {
@@ -41,6 +42,56 @@ describe('isAccessTokenExpiring', () => {
     expect(
       isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')
     ).toBeFalsy()
+  })
+
+  it('should route opaque-token debug message through process.logger, not console.debug', () => {
+    const debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {})
+    const logger = new Logger(LogLevel.Debug)
+    const loggerSpy = jest.spyOn(logger, 'debug').mockImplementation(() => {})
+    const originalLogger = process.logger
+    Object.defineProperty(process, 'logger', {
+      value: logger,
+      configurable: true,
+      writable: true
+    })
+
+    try {
+      isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')
+      expect(loggerSpy).toHaveBeenCalledWith(
+        'isTokenExpiring: token is not a decodable JWT, treating it as not expiring.'
+      )
+      expect(debugSpy).not.toHaveBeenCalled()
+    } finally {
+      Object.defineProperty(process, 'logger', {
+        value: originalLogger,
+        configurable: true,
+        writable: true
+      })
+      debugSpy.mockRestore()
+      loggerSpy.mockRestore()
+    }
+  })
+
+  it('should not call console.debug for an opaque token when no logger is set', () => {
+    const debugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {})
+    const originalLogger = process.logger
+    Object.defineProperty(process, 'logger', {
+      value: undefined,
+      configurable: true,
+      writable: true
+    })
+
+    try {
+      isAccessTokenExpiring('1f8da55057bd4f50a6577f0bc2b38b1a-r')
+      expect(debugSpy).not.toHaveBeenCalled()
+    } finally {
+      Object.defineProperty(process, 'logger', {
+        value: originalLogger,
+        configurable: true,
+        writable: true
+      })
+      debugSpy.mockRestore()
+    }
   })
 
   it('should return false for a JWT without an exp claim', () => {

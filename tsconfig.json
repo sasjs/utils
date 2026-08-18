@@ -14,5 +14,8 @@
     "sourceMap": true
   },
   "exclude": ["node_modules", "**/*.spec.ts"],
-  "include": ["src"]
+  "include": ["src"],
+  "ts-node": {
+    "files": true
+  }
 }
