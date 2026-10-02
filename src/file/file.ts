@@ -18,6 +18,36 @@ export async function folderExists(folderPath: string): Promise<boolean> {
     .catch(() => false)
 }
 
+/**
+ * Returns the paths of every file named `fileName` at or below `folder`.
+ * Node's own fs covers this now, so it replaces the unmaintained `find`
+ * package. Unreadable folders are skipped rather than throwing.
+ */
+export function findFilesByName(fileName: string, folder: string): string[] {
+  const matches: string[] = []
+
+  const walk = (dir: string) => {
+    let entries: fs.Dirent[]
+
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true })
+    } catch (_) {
+      return
+    }
+
+    for (const entry of entries) {
+      const entryPath = path.join(dir, entry.name)
+
+      if (entry.isDirectory()) walk(entryPath)
+      else if (entry.name === fileName) matches.push(entryPath)
+    }
+  }
+
+  walk(folder)
+
+  return matches
+}
+
 export async function isFolder(inputPath: string): Promise<boolean> {
   return fs.promises
     .lstat(inputPath)

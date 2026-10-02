@@ -1,5 +1,4 @@
-import find from 'find'
-import { folderExists, readFile } from '../file'
+import { folderExists, readFile, findFilesByName } from '../file'
 import { asyncForEach, diff } from '../utils'
 import {
   prioritiseDependencyOverrides,
@@ -34,7 +33,7 @@ export async function getDependencyPaths(
   await asyncForEach(sourcePaths, async (sourcePath) => {
     if (await folderExists(sourcePath)) {
       await asyncForEach(dependencies, async (dep) => {
-        const filePaths = find.fileSync(dep, sourcePath)
+        const filePaths = findFilesByName(dep, sourcePath)
 
         if (filePaths.length) {
           let fileContent = ''

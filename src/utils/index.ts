@@ -10,7 +10,7 @@ export {
 } from './utils'
 export * from './fileTree'
 
-export { urlOrigin } from './url'
+export { urlOrigin, isHttpUri, isHttpsUri } from './url'
 
 export { encodeToBase64, decodeFromBase64 } from './base64'
 
