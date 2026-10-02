@@ -11,3 +11,17 @@ export const urlOrigin = (str: string) => {
 
   return origin
 }
+
+const hasHttpProtocol = (str: string, protocol: string) => {
+  try {
+    const url = new URL(str)
+
+    return url.protocol === protocol && !!url.hostname
+  } catch (_) {
+    return false
+  }
+}
+
+export const isHttpUri = (str: string) => hasHttpProtocol(str, 'http:')
+
+export const isHttpsUri = (str: string) => hasHttpProtocol(str, 'https:')

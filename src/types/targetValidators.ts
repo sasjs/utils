@@ -1,4 +1,4 @@
-import validUrl from 'valid-url'
+import { isHttpUri, isHttpsUri } from '../utils/url'
 import { ServerType, HttpsAgentOptions } from '.'
 import {
   DocConfig,
@@ -65,11 +65,7 @@ export const validateServerUrl = (serverUrl: string): string => {
     serverUrl = ''
   }
 
-  if (
-    serverUrl !== '' &&
-    !validUrl.isHttpUri(serverUrl) &&
-    !validUrl.isHttpsUri(serverUrl)
-  ) {
+  if (serverUrl !== '' && !isHttpUri(serverUrl) && !isHttpsUri(serverUrl)) {
     throw new Error(
       'Invalid server URL: `serverUrl` should either be an empty string or a valid URL of the form http(s)://your-server.com(:port).'
     )
@@ -149,8 +145,8 @@ export const validateDocConfig = (docConfig: DocConfig): DocConfig => {
   if (typeof docConfig.dataControllerUrl === 'string') {
     if (
       docConfig.dataControllerUrl !== '' &&
-      !validUrl.isHttpUri(docConfig.dataControllerUrl) &&
-      !validUrl.isHttpsUri(docConfig.dataControllerUrl)
+      !isHttpUri(docConfig.dataControllerUrl) &&
+      !isHttpsUri(docConfig.dataControllerUrl)
     ) {
       throw new Error(
         'Invalid Data Controller Url: `dataControllerUrl` should either be an empty string or a valid URL of the form http(s)://your-server.com(:port).'

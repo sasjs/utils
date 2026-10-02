@@ -1,6 +1,7 @@
 export {
   fileExists,
   folderExists,
+  findFilesByName,
   isFolder,
   readFile,
   readFileBinary,

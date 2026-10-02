@@ -1,10 +1,7 @@
-import validUrl from 'valid-url'
+import { isHttpUri, isHttpsUri } from '../utils/url'
 
 export const urlValidator = (value: string, errorMessage: string) =>
-  !!validUrl.isHttpUri(value) ||
-  !!validUrl.isHttpsUri(value) ||
-  value === '' ||
-  errorMessage
+  isHttpUri(value) || isHttpsUri(value) || value === '' || errorMessage
 
 export const confirmationValidator = (value: any) =>
   value === true || value === false

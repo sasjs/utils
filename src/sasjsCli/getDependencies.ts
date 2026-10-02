@@ -1,8 +1,7 @@
 import { uniqArray } from '../utils'
 import { getList, validateFileRef } from './'
 import { asyncForEach, chunk } from '../utils'
-import find from 'find'
-import { readFile } from '../file'
+import { readFile, findFilesByName } from '../file'
 import { capitalizeFirstChar } from '../formatter'
 import { CompileTree } from '../compileTree'
 
@@ -94,7 +93,7 @@ export const getDependencies = async (
 
     await asyncForEach(folders, async (folder) => {
       await asyncForEach(uniqDeps, async (dep) => {
-        const filePaths = find.fileSync(dep.fileName, folder)
+        const filePaths = findFilesByName(dep.fileName, folder)
 
         if (filePaths.length) {
           let encodedFileContent = ''
