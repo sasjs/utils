@@ -1,4 +1,4 @@
-import jwtDecode, { InvalidTokenError } from 'jwt-decode'
+import { jwtDecode, InvalidTokenError } from 'jwt-decode'
 import { DecodedToken } from '../types'
 
 /**
