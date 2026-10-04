@@ -1,4 +1,4 @@
-import consola from 'consola'
+import { consola } from 'consola'
 import { isLowerThanOrEqualTo } from './isLowerThanOrEqualTo'
 import { isNullOrUndefined } from './isNullOrUndefined'
 import { LogLevel } from './logLevel'
@@ -49,7 +49,7 @@ export class Logger {
 
   warn = (message: string, ...args: any): void => {
     if (isLowerThanOrEqualTo(this._logLevel, LogLevel.Warn)) {
-      consola.warn(message, ...args)
+      consola.warn(message, ...this.filterArgs(args))
     }
   }
 
