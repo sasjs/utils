@@ -63,20 +63,19 @@
     "jest-extended": "3.2.4",
     "semantic-release": "25.0.9",
     "ts-jest": "29.4.14",
-    "ts-loader": "9.6.2",
     "ts-node": "10.9.2",
     "typescript": "4.5.4",
     "@nogoo9/gitleaks": "8.30.1-post.2"
   },
   "dependencies": {
-    "@fast-csv/format": "4.3.5",
+    "@fast-csv/format": "5.0.7",
     "@types/fs-extra": "11.0.4",
     "@types/prompts": "2.4.9",
     "chalk": "4.1.1",
     "cli-table": "0.3.11",
     "consola": "3.4.2",
     "fs-extra": "11.4.1",
-    "jwt-decode": "3.1.2",
+    "jwt-decode": "4.0.0",
     "prompts": "2.4.2"
   },
   "version": "3.6.5"
