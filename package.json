@@ -77,5 +77,5 @@
     "jwt-decode": "3.1.2",
     "prompts": "2.4.2"
   },
-  "version": "3.6.2"
+  "version": "3.6.3"
 }
