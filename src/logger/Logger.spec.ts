@@ -33,6 +33,15 @@ describe('Logger', () => {
     expect(consola.warn).not.toHaveBeenCalled()
   })
 
+  it('should drop invalid args from a warning, as the other log methods do', () => {
+    const logger = new Logger(LogLevel.Debug)
+    jest.spyOn(consola, 'warn')
+
+    logger.warn('This is a warning.', false, '', undefined, null, 'extra')
+
+    expect(consola.warn).toHaveBeenCalledWith('This is a warning.', 'extra')
+  })
+
   it('should log errors when the log level is Warn', () => {
     const logger = new Logger(LogLevel.Warn)
     jest.spyOn(consola, 'error')
