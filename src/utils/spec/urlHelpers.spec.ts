@@ -19,6 +19,31 @@ describe('isHttpUri', () => {
     expect(isHttpUri('')).toBe(false)
     expect(isHttpUri('not a url')).toBe(false)
   })
+
+  it('rejects a backslash in place of the scheme slashes', () => {
+    // The parser normalises a backslash to a slash for special schemes, so
+    // `new URL('http:\\server')` parses to http://server. valid-url required
+    // the literal prefix and rejected it, and so do we.
+    expect(isHttpUri('http:\\server')).toBe(false)
+    expect(isHttpUri('http:\\ww.example.com')).toBe(false)
+    expect(isHttpsUri('https:\\server')).toBe(false)
+  })
+
+  it('accepts an uppercase scheme', () => {
+    // The parser lowercases the scheme, and valid-url compared it
+    // case-insensitively, so these are usable urls.
+    expect(isHttpUri('HTTP://example.com')).toBe(true)
+    expect(isHttpUri('Http://example.com')).toBe(true)
+    expect(isHttpsUri('HTTPS://example.com')).toBe(true)
+  })
+
+  it('rejects control characters the parser would strip', () => {
+    // The parser strips tab, newline and carriage return before parsing, so
+    // these would otherwise resolve to a valid host.
+    expect(isHttpUri('http://exa\tmple.com')).toBe(false)
+    expect(isHttpUri('http://example.com\n')).toBe(false)
+    expect(isHttpUri('http://example.com\r')).toBe(false)
+  })
 })
 
 describe('isHttpsUri', () => {

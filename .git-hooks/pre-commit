@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Scan staged changes for secrets before anything else runs.
+# The binary is pinned by the @nogoo9/gitleaks devDependency and lands
+# in node_modules/.bin after npm i. Commits are blocked until it is
+# installed so no clone silently skips the secrets scan.
+gitleaks_bin=node_modules/.bin/gitleaks
+
+if [ ! -x "$gitleaks_bin" ]; then
+    echo "❌ gitleaks not found - run 'npm i' to install it"
+    exit 1
+fi
+
+if ! "$gitleaks_bin" protect --staged --redact; then
+    echo "❌ gitleaks detected a potential secret in your staged changes"
+    echo "Remove the secret, or add a .gitleaksignore entry if it is a false positive"
+    exit 1
+fi
+
+# Avoid commits to the main branch
+BRANCH=`git rev-parse --abbrev-ref HEAD`
+
+if [[ "$BRANCH" =~ ^(master|main|develop)$ ]]; then
+  echo "You are on branch $BRANCH. Are you sure you want to commit to this branch?"
+  echo "If so, commit with -n to bypass the pre-commit hook."
+  exit 1
+fi
