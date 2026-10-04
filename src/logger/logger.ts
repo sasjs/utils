@@ -2,8 +2,6 @@ import { consola } from 'consola'
 import { isLowerThanOrEqualTo } from './isLowerThanOrEqualTo'
 import { isNullOrUndefined } from './isNullOrUndefined'
 import { LogLevel } from './logLevel'
-import { sanitizeSpecialChars } from '../formatter'
-import cliTable from 'cli-table'
 import chalk from 'chalk'
 
 export class Logger {
@@ -63,54 +61,46 @@ export class Logger {
     consola.log(message, ...this.filterArgs(args))
   }
 
-  table = (
-    data: string[][],
-    options?: { chars?: {}; head?: string[] },
-    disableStyling?: boolean
-  ) => {
-    const defaultOptions = {
-      chars: {
-        top: '═',
-        'top-mid': '╤',
-        'top-left': '╔',
-        'top-right': '╗',
-        bottom: '═',
-        'bottom-mid': '╧',
-        'bottom-left': '╚',
-        'bottom-right': '╝',
-        left: '║',
-        'left-mid': '╟',
-        mid: '─',
-        'mid-mid': '┼',
-        right: '║',
-        'right-mid': '╢',
-        middle: '│'
-      },
-      head: []
-    }
-
-    let table: cliTable
-
-    if (options && Object.keys(options).length) {
-      table = new cliTable({
-        chars: options.chars || defaultOptions.chars,
-        head:
-          options.head?.map((header: string) => chalk.white.bold(header)) ||
-          defaultOptions.head
-      })
-    } else {
-      table = new cliTable({
-        chars: defaultOptions.chars
-      })
-    }
-
-    data.forEach((item) => table.push(item))
-
-    this.log(
-      (disableStyling
-        ? sanitizeSpecialChars(table.toString())
-        : table.toString()) + '\n'
+  /**
+   * Prints rows as aligned columns, separated by two spaces. When `head` is
+   * given it is printed first, underlined with dashes.
+   *
+   * Cells may carry colour codes, which occupy no screen columns, so column
+   * widths are measured on the text with the codes removed.
+   */
+  table = (data: string[][], options?: { head?: string[] }) => {
+    const head = options?.head?.map((header: string) =>
+      chalk.white.bold(header)
     )
+    const rows = head?.length ? [head, ...data] : data
+
+    const widths: number[] = []
+    rows.forEach((row) =>
+      row.forEach((cell, column) => {
+        widths[column] = Math.max(widths[column] || 0, this.visibleLength(cell))
+      })
+    )
+
+    const lines = rows.map((row) =>
+      row
+        .map(
+          (cell, column) =>
+            cell +
+            ' '.repeat(Math.max(0, widths[column] - this.visibleLength(cell)))
+        )
+        .join('  ')
+        .trimEnd()
+    )
+
+    if (head?.length) {
+      lines.splice(1, 0, widths.map((width) => '-'.repeat(width)).join('  '))
+    }
+
+    this.log(lines.join('\n') + '\n')
+  }
+
+  private visibleLength(value: string) {
+    return String(value).replace(/\u001b\[[0-9;]*m/g, '').length
   }
 
   private filterArgs(args: any[]) {

@@ -1,7 +1,6 @@
 import { consola } from 'consola'
 import { Logger, LogLevel } from '.'
 import chalk from 'chalk'
-import { sanitizeSpecialChars } from '../formatter'
 
 jest.mock('consola')
 
@@ -173,57 +172,24 @@ describe('Logger', () => {
   })
 
   describe('logger.table', () => {
-    it('should log a table with default border style without head', () => {
+    it('should log rows as aligned columns without a head', () => {
       const logger = new Logger(LogLevel.Debug)
       jest.spyOn(consola, 'log')
 
-      logger.table(
-        [
-          ['test_1_1', 'test_1_2'],
-          ['test_2_1', 'tes_t2_2']
-        ],
-        {},
-        true
-      )
+      logger.table([
+        ['test_1_1', 'test_1_2'],
+        ['test_2_1', 'tes_t2_2']
+      ])
 
-      const expectedOutput = sanitizeSpecialChars(`╔══════════╤══════════╗
-║ test_1_1 │ test_1_2 ║
-╟──────────┼──────────╢
-║ test_2_1 │ tes_t2_2 ║
-╚══════════╧══════════╝
-`)
+      const expectedOutput = `test_1_1  test_1_2
+test_2_1  tes_t2_2
+`
 
       expect(consola.log).toHaveBeenCalledTimes(1)
       expect(consola.log).toHaveBeenCalledWith(expectedOutput)
     })
 
-    it('should log a table with default border style', () => {
-      const logger = new Logger(LogLevel.Debug)
-      jest.spyOn(consola, 'log')
-
-      logger.table(
-        [
-          ['test_1_1', 'test_1_2'],
-          ['test_2_1', 'tes_t2_2']
-        ],
-        { head: ['title 1', 'title 2'] },
-        true
-      )
-
-      const expectedOutput = sanitizeSpecialChars(`╔══════════╤══════════╗
-║ ${chalk.white.bold('title 1')}  │ ${chalk.white.bold('title 2')}  ║
-╟──────────┼──────────╢
-║ test_1_1 │ test_1_2 ║
-╟──────────┼──────────╢
-║ test_2_1 │ tes_t2_2 ║
-╚══════════╧══════════╝
-`)
-
-      expect(consola.log).toHaveBeenCalledTimes(1)
-      expect(consola.log).toHaveBeenCalledWith(expectedOutput)
-    })
-
-    it('should log a table with default border and special chars', () => {
+    it('should underline the head with dashes', () => {
       const logger = new Logger(LogLevel.Debug)
       jest.spyOn(consola, 'log')
 
@@ -235,49 +201,39 @@ describe('Logger', () => {
         { head: ['title 1', 'title 2'] }
       )
 
-      const expectedOutput = sanitizeSpecialChars(`╔══════════╤══════════╗
-║ ${chalk.white.bold('title 1')}  │ ${chalk.white.bold('title 2')}  ║
-╟──────────┼──────────╢
-║ test_1_1 │ test_1_2 ║
-╟──────────┼──────────╢
-║ test_2_1 │ tes_t2_2 ║
-╚══════════╧══════════╝
-`)
-
-      expect(consola.log).toHaveBeenCalledTimes(1)
-
-      try {
-        expect(consola.log).toHaveBeenCalledWith(expectedOutput)
-      } catch (error) {
-        const err = error as unknown as any
-
-        expect(err.matcherResult.pass).toEqual(false)
-      }
-    })
-
-    it('should log a table with custom border style', () => {
-      const logger = new Logger(LogLevel.Debug)
-      jest.spyOn(consola, 'log')
-
-      logger.table(
-        [
-          ['test_1_1', 'test_1_2'],
-          ['test_2_1', 'tes_t2_2']
-        ],
-        {
-          chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
-        },
-        true
-      )
-
-      const expectedOutput = sanitizeSpecialChars(`┌──────────┬──────────┐
-│ test_1_1 │ test_1_2 │
-│ test_2_1 │ tes_t2_2 │
-└──────────┴──────────┘
-`)
+      const expectedOutput = `${chalk.white.bold('title 1')}   ${chalk.white.bold(
+        'title 2'
+      )}
+--------  --------
+test_1_1  test_1_2
+test_2_1  tes_t2_2
+`
 
       expect(consola.log).toHaveBeenCalledTimes(1)
       expect(consola.log).toHaveBeenCalledWith(expectedOutput)
+    })
+
+    it('should measure column width on the visible text when cells carry colour', () => {
+      const logger = new Logger(LogLevel.Debug)
+      jest.spyOn(consola, 'log')
+
+      logger.table([
+        ['ok', chalk.green('pass')],
+        ['longer_key', 'fail']
+      ])
+
+      const output = (consola.log as unknown as jest.Mock).mock
+        .calls[0][0] as string
+      const visible = output
+        .split('\n')
+        .filter((line) => line.length)
+        .map((line) => line.replace(/\u001b\[[0-9;]*m/g, ''))
+
+      // The colour codes occupy no screen columns, so the second column starts
+      // at the same offset in both rows and the rows are the same width. If the
+      // codes were counted as width, the first row would be padded further.
+      expect(visible[0].indexOf('pass')).toEqual(visible[1].indexOf('fail'))
+      expect(new Set(visible.map((line) => line.length)).size).toEqual(1)
     })
   })
 })
