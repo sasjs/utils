@@ -1,4 +1,4 @@
-import consola from 'consola'
+import { consola } from 'consola'
 import { Logger, LogLevel } from '.'
 import chalk from 'chalk'
 import { sanitizeSpecialChars } from '../formatter'
