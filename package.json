@@ -33,6 +33,26 @@
     ]
   },
   "typings": "./index.d.ts",
+  "files": [
+    "index.js",
+    "index.js.map",
+    "*.d.ts",
+    "auth/**",
+    "compileTree/**",
+    "conversion/**",
+    "error/**",
+    "file/**",
+    "formatter/**",
+    "fs/**",
+    "input/**",
+    "logger/**",
+    "macros/**",
+    "sasjsCli/**",
+    "time/**",
+    "types/**",
+    "utils/**",
+    "README.md"
+  ],
   "scripts": {
     "nodeVersionMessage": "echo \u001b[33m make sure you are running node lts version \u001b[0m",
     "build": "npm run nodeVersionMessage && npx rimraf build && tsc && npm run copy:macros",
