@@ -7,6 +7,11 @@ on:
   push:
     branches:
       - main
+  # A release should not depend on the push trigger firing. On 2026-10-05 the
+  # merge of #277 produced no workflow run at all - no run, no check run - so
+  # nothing was published and there was no way to trigger it by hand. This makes
+  # the release reachable from the Actions UI or the API when that happens.
+  workflow_dispatch:
 
 jobs:
   build:
