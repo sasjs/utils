@@ -242,12 +242,10 @@ export class Target implements TargetJson {
         this._deployConfig = validateDeployConfig(
           this.getConfig(ConfigTypes.Deploy, json)
         )
-      } else {
-        this._deployConfig = validateDeployConfig({
-          deployServicePack: true,
-          deployScripts: []
-        })
       }
+      // No else: a target that declares no deployConfig has none. Inserting a
+      // default here put `deployConfig` into every saved sasjsconfig - see
+      // sasjs/utils#221.
 
       if (json.serviceConfig) {
         this._serviceConfig = validateServiceConfig(
@@ -312,7 +310,7 @@ export class Target implements TargetJson {
     }
   }
 
-  toJson(withDefaults: boolean = true): TargetJson {
+  toJson(withDefaults: boolean = false): TargetJson {
     const json: TargetJson = {
       name: this.name,
       serverUrl: this.serverUrl,
