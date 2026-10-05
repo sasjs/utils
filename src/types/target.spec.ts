@@ -1,5 +1,9 @@
 import { ServerType } from './serverType'
 import { Target } from './target'
+import {
+  DEFAULT_SASJS_BUILD_FOLDER,
+  DEFAULT_SASJS_RESULTS_FOLDER
+} from './targetValidators'
 
 describe('Target', () => {
   it('should throw an error with null JSON', () => {
@@ -565,6 +569,60 @@ describe('Target', () => {
     expect(json.sasjsBuildFolder).toBeUndefined()
     expect(json.sasjsResultsFolder).toBeUndefined()
     expect(json.syncDirectories).toBeUndefined()
+  })
+
+  it('should insert the default attributes when toJson is asked for them', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.SasViya,
+      appLoc: '/test'
+    })
+
+    const json = target.toJson(true)
+
+    expect(json.name).toEqual(target.name)
+    expect(json.serverUrl).toEqual(target.serverUrl)
+    expect(json.serverType).toEqual(target.serverType)
+    expect(json.appLoc).toEqual(target.appLoc)
+    // The four mandatory attributes above are always present. Everything below
+    // is inserted only because `true` was passed - which is the escape hatch a
+    // caller opts into, and no longer the default.
+    expect(json.sasjsBuildFolder).toEqual(DEFAULT_SASJS_BUILD_FOLDER)
+    expect(json.sasjsResultsFolder).toEqual(DEFAULT_SASJS_RESULTS_FOLDER)
+    expect(json.syncDirectories).toEqual([])
+    expect(json.buildConfig).toEqual({
+      initProgram: '',
+      termProgram: '',
+      buildOutputFileName: `${target.name}.sas`,
+      macroVars: {}
+    })
+    expect(json.jobConfig).toEqual({
+      jobFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
+    expect(json.serviceConfig).toEqual({
+      serviceFolders: [],
+      initProgram: '',
+      termProgram: '',
+      macroVars: {}
+    })
+    expect(json.streamConfig).toEqual({
+      streamWebFolder: '',
+      streamWeb: false,
+      webSourcePath: '',
+      streamServiceName: '',
+      assetPaths: []
+    })
+    expect(json.testConfig).toEqual({
+      initProgram: '',
+      termProgram: '',
+      macroVars: {},
+      testSetUp: '',
+      testTearDown: ''
+    })
   })
 
   it('should convert to JSON without default attributes', () => {
