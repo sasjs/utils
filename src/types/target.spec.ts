@@ -554,42 +554,17 @@ describe('Target', () => {
     expect(json.appLoc).toEqual(target.appLoc)
     expect(json.authConfig).toBeUndefined()
     expect(json.authConfigSas9).toBeUndefined()
-    expect(json.buildConfig).toEqual({
-      initProgram: '',
-      termProgram: '',
-      buildOutputFileName: `${target.name}.sas`,
-      macroVars: {}
-    })
-    expect(json.jobConfig).toEqual({
-      jobFolders: [],
-      initProgram: '',
-      termProgram: '',
-      macroVars: {}
-    })
-    expect(json.serviceConfig).toEqual({
-      serviceFolders: [],
-      initProgram: '',
-      termProgram: '',
-      macroVars: {}
-    })
-    expect(json.streamConfig).toEqual({
-      streamWebFolder: '',
-      streamWeb: false,
-      webSourcePath: '',
-      assetPaths: [],
-      streamServiceName: ''
-    })
-    expect(json.deployConfig).toEqual({
-      deployScripts: [],
-      deployServicePack: true
-    })
-    expect(json.testConfig).toEqual({
-      initProgram: '',
-      termProgram: '',
-      macroVars: {},
-      testSetUp: '',
-      testTearDown: ''
-    })
+    // Nothing beyond the four mandatory attributes is inserted unless it was
+    // explicitly defined - see sasjs/utils#221.
+    expect(json.buildConfig).toBeUndefined()
+    expect(json.jobConfig).toBeUndefined()
+    expect(json.serviceConfig).toBeUndefined()
+    expect(json.streamConfig).toBeUndefined()
+    expect(json.deployConfig).toBeUndefined()
+    expect(json.testConfig).toBeUndefined()
+    expect(json.sasjsBuildFolder).toBeUndefined()
+    expect(json.sasjsResultsFolder).toBeUndefined()
+    expect(json.syncDirectories).toBeUndefined()
   })
 
   it('should convert to JSON without default attributes', () => {
@@ -606,10 +581,7 @@ describe('Target', () => {
     expect(json.serverUrl).toEqual(target.serverUrl)
     expect(json.serverType).toEqual(target.serverType)
     expect(json.appLoc).toEqual(target.appLoc)
-    expect(json.deployConfig).toEqual({
-      deployServicePack: true,
-      deployScripts: []
-    })
+    expect(json.deployConfig).toEqual(undefined)
     expect(json.authConfig).toEqual(undefined)
     expect(json.buildConfig).toEqual(undefined)
     expect(json.jobConfig).toEqual(undefined)
@@ -805,13 +777,20 @@ describe('Target', () => {
       ...defaultConfig,
       ...targetServiceConfig
     })
-    expect(json.jobConfig).toEqual(configurationJobConfig)
+    // The target declares no jobConfig, so none is carried. A config present
+    // only in the configuration is not merged - Target guards each assignment
+    // with `if (json.<config>)`. That is pre-existing and out of scope here;
+    // the merge for the configs the target does declare is asserted below.
+    expect(json.jobConfig).toBeUndefined()
     expect(json.testConfig).toEqual({
       ...configurationTestConfig,
       ...targetTestConfig
     })
     expect(json.docConfig).toEqual(targetDocConfig)
-    expect(json.deployConfig).toEqual(configurationDeployConfig)
+    // As with jobConfig above: the target declares no deployConfig, so none is
+    // carried. Pre-existing, and no longer papered over by the default that
+    // Target used to insert - see sasjs/utils#221.
+    expect(json.deployConfig).toBeUndefined()
     expect(json.authConfig).toEqual(targetAuthConfig)
   })
 })
