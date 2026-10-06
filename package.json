@@ -95,5 +95,5 @@
     "jwt-decode": "4.0.0",
     "prompts": "2.4.2"
   },
-  "version": "3.7.1"
+  "version": "3.7.2"
 }
