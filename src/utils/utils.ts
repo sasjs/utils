@@ -19,9 +19,16 @@ export const uuidv4 = () =>
 
 export const uniqArray = (data: any[]) => Array.from(new Set(data))
 
-export const isWindows = () => process.platform === 'win32'
+/**
+ * Whether the host is Windows. process may not exist - these helpers are
+ * exported from the package root and called from browser code - so the
+ * platform is read defensively and a browser answers false.
+ */
+export const isWindows = () =>
+  typeof process !== 'undefined' && process.platform === 'win32'
 
-export const isLinux = () => process.platform === 'linux'
+export const isLinux = () =>
+  typeof process !== 'undefined' && process.platform === 'linux'
 
 /**
  * replace single backslash with double backslash
