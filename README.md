@@ -6,6 +6,29 @@
 
 A library of utilities and types for SASjs written in TypeScript.
 
+## Entry points
+
+This is a Node library, and the barrel - `import { x } from '@sasjs/utils'` - is its Node
+entry point. Importing from it pulls in the modules that only Node can run: `fs-extra` and
+`@fast-csv/format` through `./file`, `prompts` through `./input`, `chalk` and `consola`
+through `./logger` and `./formatter`.
+
+Code that is bundled for a browser imports the subpath it needs instead:
+
+```
+import { ServerType } from '@sasjs/utils/types'
+import { prefixMessage } from '@sasjs/utils/error'
+import { isSpecialMissing } from '@sasjs/utils/input/validators'
+import { bytesToSize } from '@sasjs/utils/utils'
+```
+
+The hash and sync helpers - `getHash`, `compareHashes`, `extractHashArray`,
+`generateCompileProgram`, `generateProgramToGetRemoteHash`, `generateProgramToSyncHashDiff`
+and `findResourcesNotPresentLocally` - live in `@sasjs/utils/fs`. They hash files and
+folders on disk, so they are Node-only, and the barrel does not re-export them: a browser
+bundle that imports the barrel for anything else no longer reaches `crypto`, which used to
+arrive with the whole AES/RSA/ECDSA polyfill suite behind it.
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
