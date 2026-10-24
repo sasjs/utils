@@ -58,7 +58,13 @@ export interface DeployConfig {
 
 export interface StreamConfig {
   assetPaths: string[]
-  streamWeb: boolean
+  /**
+   * When true, the app in `webSourcePath` is converted to streaming services in
+   * `streamWebFolder` on the SAS side. Optional: a target that only builds a
+   * browser app (`mockWeb`) or only serves a pre-built frontend does not need
+   * it, and an absent value means "do not stream".
+   */
+  streamWeb?: boolean
   streamWebFolder: string
   webSourcePath: string
   streamServiceName: string

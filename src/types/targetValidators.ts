@@ -298,7 +298,12 @@ export const validateStreamConfig = (
     throw new Error('Invalid stream config: JSON cannot be null or undefined.')
   }
 
-  if (streamConfig.streamWeb !== true && streamConfig.streamWeb !== false) {
+  // Presence is optional - a target can build a browser app without ever
+  // streaming from SAS - but a value that is present has to be a boolean.
+  if (
+    streamConfig.streamWeb !== undefined &&
+    typeof streamConfig.streamWeb !== 'boolean'
+  ) {
     throw new Error(
       'Invalid stream config: `streamWeb` cannot be a non-boolean value.'
     )

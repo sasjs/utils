@@ -547,7 +547,6 @@
           "streamLogo": "logo.png"
         }
       ],
-      "required": ["streamWeb"],
       "properties": {
         "assetPaths": {
           "$id": "#/properties/streamConfig/properties/assetPaths",

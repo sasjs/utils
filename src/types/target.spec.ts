@@ -288,6 +288,40 @@ describe('Target', () => {
     expect(json.streamConfig!.streamWeb).toEqual(true)
   })
 
+  it('should accept a streamConfig with only mockWeb', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sasjs,
+      appLoc: '/test',
+      streamConfig: {
+        webSourcePath: 'dist',
+        mockWeb: true
+      } as any
+    })
+
+    const json = target.toJson()
+    expect(json.streamConfig!.mockWeb).toEqual(true)
+    // absent streamWeb means "do not stream from SAS" rather than an error
+    expect(json.streamConfig!.streamWeb).toBeUndefined()
+  })
+
+  it('should still reject a present but non boolean streamWeb', () => {
+    expect(
+      () =>
+        new Target({
+          name: 'test',
+          serverUrl: '',
+          serverType: ServerType.Sasjs,
+          appLoc: '/test',
+          streamConfig: {
+            streamWeb: 'yes' as any,
+            webSourcePath: 'dist'
+          }
+        })
+    ).toThrowError(/streamWeb/)
+  })
+
   it('should reject a non boolean mockWeb', () => {
     expect(
       () =>
