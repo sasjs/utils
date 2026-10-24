@@ -577,6 +577,7 @@
           "type": "string",
           "title": "The streamConfig streamWebFolder",
           "description": "This is the target SAS folder (relative to the appLoc) where the compiled web assets will be created.",
+          "minLength": 1,
           "default": "webv"
         },
         "mockWeb": {
@@ -592,6 +593,7 @@
           "type": "string",
           "title": "The streamConfig mockWebFolder",
           "description": "The folder (relative to the project root) where the browser build is written. Defaults to `sasjsbuild/mock`. Serve that folder over http or https - a service worker needs a secure context, so localhost works but `file://` does not - and deploy it to any static host.",
+          "minLength": 1,
           "default": "sasjsbuild/mock",
           "examples": ["sasjsbuild/mock"]
         },
@@ -599,7 +601,8 @@
           "$id": "#/properties/streamConfig/properties/webSourcePath",
           "type": "string",
           "title": "The webSourcePath schema",
-          "description": "Active when `streamConfig` is `true`. Is the source (or build, or dist) LOCAL folder, relative to the `sasjs` folder, which contains the frontend to be deployed.  All assets (PNG, JS, CSS, HTML etc) are taken from here and converted to streaming services in `streamWebFolder`.  In Viya and SAS 9, any relative URLS will be modified such that the links still work and the assets still load.",
+          "description": "The source (or build, or dist) LOCAL folder, relative to the project root, which contains the frontend to be deployed or built. Defaults to `dist`, the folder most projects build into - set it when your app builds elsewhere (for example `build`). A blank value is rejected, so omit the key rather than setting it to an empty string. With `streamWeb`, all assets (PNG, JS, CSS, HTML etc) are taken from here and converted to streaming services in `streamWebFolder`, and in Viya and SAS 9 relative URLs are modified so the links still work. With `mockWeb`, the same folder is bundled into the browser build.",
+          "minLength": 1,
           "default": "dist",
           "examples": ["dist", "build"]
         },

@@ -322,6 +322,38 @@ describe('Target', () => {
     ).toThrowError(/streamWeb/)
   })
 
+  it('should reject mockWeb with an empty webSourcePath', () => {
+    expect(
+      () =>
+        new Target({
+          name: 'test',
+          serverUrl: '',
+          serverType: ServerType.Sasjs,
+          appLoc: '/test',
+          streamConfig: {
+            webSourcePath: '',
+            mockWeb: true
+          } as any
+        })
+    ).toThrowError(/webSourcePath/)
+  })
+
+  it('should reject mockWeb with a blank webSourcePath', () => {
+    expect(
+      () =>
+        new Target({
+          name: 'test',
+          serverUrl: '',
+          serverType: ServerType.Sasjs,
+          appLoc: '/test',
+          streamConfig: {
+            webSourcePath: '   ',
+            mockWeb: true
+          } as any
+        })
+    ).toThrowError(/webSourcePath/)
+  })
+
   it('should reject a non boolean mockWeb', () => {
     expect(
       () =>
@@ -342,7 +374,7 @@ describe('Target', () => {
     ).toThrowError(/mockWeb/)
   })
 
-  it('should require webSourcePath when mockWeb is true', () => {
+  it('should reject an empty webSourcePath when mockWeb is true', () => {
     expect(
       () =>
         new Target({
@@ -360,6 +392,24 @@ describe('Target', () => {
           }
         })
     ).toThrowError(/webSourcePath/)
+  })
+
+  it('should default webSourcePath to dist when mockWeb is true and it is absent', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      streamConfig: {
+        streamWeb: false,
+        streamWebFolder: 'web9',
+        streamServiceName: 'clickme',
+        assetPaths: [],
+        mockWeb: true
+      } as any
+    })
+
+    expect(target.toJson().streamConfig!.webSourcePath).toEqual('dist')
   })
 
   it('should convert an instance to json containing service config', () => {

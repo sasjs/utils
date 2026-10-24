@@ -315,12 +315,6 @@ export const validateStreamConfig = (
     )
   }
 
-  if (streamConfig.streamWeb && !streamConfig.webSourcePath) {
-    throw new Error(
-      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
-    )
-  }
-
   if (
     streamConfig.mockWeb !== undefined &&
     typeof streamConfig.mockWeb !== 'boolean'
@@ -339,10 +333,27 @@ export const validateStreamConfig = (
     )
   }
 
-  if (streamConfig.mockWeb && !streamConfig.webSourcePath) {
+  // `webSourcePath` is optional: the schema documents `dist` as its default and
+  // most projects build into ./dist or ./build, so it is filled in below when a
+  // switch needs it. A value that is present but blank is a typo rather than a
+  // decision to accept the default, so it is rejected - the schema's minLength
+  // of 1 says the same thing.
+  if (
+    streamConfig.webSourcePath !== undefined &&
+    streamConfig.webSourcePath !== null &&
+    !String(streamConfig.webSourcePath).trim()
+  ) {
     throw new Error(
-      'Invalid stream config: `webSourcePath` should contain the path to your frontend application, and is required when `mockWeb` is true.'
+      'Invalid stream config: `webSourcePath` cannot be empty - omit it to use the default (dist).'
     )
+  }
+
+  // Both switches build from the same folder, so one default covers them.
+  if (
+    (streamConfig.streamWeb === true || streamConfig.mockWeb === true) &&
+    streamConfig.webSourcePath == null
+  ) {
+    streamConfig.webSourcePath = 'dist'
   }
 
   if (streamConfig.streamLogo && typeof streamConfig.streamLogo !== 'string') {

@@ -616,7 +616,7 @@ describe('validateStreamConfig', () => {
     )
   })
 
-  it('should throw an error when webSourcePath is empty', () => {
+  it('should throw an error when webSourcePath is an empty string', () => {
     expect(() =>
       validateStreamConfig({
         streamWeb: true,
@@ -624,32 +624,27 @@ describe('validateStreamConfig', () => {
         webSourcePath: ''
       } as unknown as StreamConfig)
     ).toThrowError(
-      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
+      'Invalid stream config: `webSourcePath` cannot be empty - omit it to use the default (dist).'
     )
   })
 
-  it('should throw an error when webSourcePath is null', () => {
-    expect(() =>
-      validateStreamConfig({
-        streamWeb: true,
-        streamWebFolder: '.',
-        webSourcePath: null
-      } as unknown as StreamConfig)
-    ).toThrowError(
-      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
-    )
+  it('should default webSourcePath to dist when it is null', () => {
+    const validated = validateStreamConfig({
+      streamWeb: true,
+      streamWebFolder: '.',
+      webSourcePath: null
+    } as unknown as StreamConfig)
+
+    expect(validated.webSourcePath).toEqual('dist')
   })
 
-  it('should throw an error when webSourcePath is undefined', () => {
-    expect(() =>
-      validateStreamConfig({
-        streamWeb: true,
-        streamWebFolder: '.',
-        webSourcePath: undefined
-      } as unknown as StreamConfig)
-    ).toThrowError(
-      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
-    )
+  it('should default webSourcePath to dist when it is undefined', () => {
+    const validated = validateStreamConfig({
+      streamWeb: true,
+      streamWebFolder: '.'
+    } as unknown as StreamConfig)
+
+    expect(validated.webSourcePath).toEqual('dist')
   })
 
   it('should return the stream config when valid', () => {
