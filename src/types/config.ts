@@ -63,6 +63,22 @@ export interface StreamConfig {
   webSourcePath: string
   streamServiceName: string
   streamLogo?: string
+  /**
+   * Build the app in `webSourcePath` as a self-contained site whose backend
+   * runs in the browser: the project's JavaScript services execute in a service
+   * worker, so the app makes the same requests it would make to a SASjs server
+   * and needs no server to run. State written by those services is kept in the
+   * browser.
+   *
+   * Independent of `streamWeb` - a target can serve a real deployment and a
+   * browser build at the same time.
+   */
+  mockWeb?: boolean
+  /**
+   * Where the browser build is written, relative to the project root.
+   * Defaults to `<buildDestinationFolder>/mock`.
+   */
+  mockWebFolder?: string
 }
 
 export interface AuthConfig {

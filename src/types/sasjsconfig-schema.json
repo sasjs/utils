@@ -580,6 +580,22 @@
           "description": "This is the target SAS folder (relative to the appLoc) where the compiled web assets will be created.",
           "default": "webv"
         },
+        "mockWeb": {
+          "$id": "#/properties/streamConfig/properties/mockWeb",
+          "type": "boolean",
+          "title": "The streamConfig mockWeb flag",
+          "description": "When set to `true`, the app in `webSourcePath` is also built as a self-contained site whose backend runs in the browser. The project's JavaScript services are bundled with the app and execute in a service worker, so the app makes exactly the requests it would make to a SASjs server - same services, same webout, same tables - and runs with no server, no SAS and no network. State written by those services is kept in the browser, so a refresh does not lose it. Independent of `streamWeb`: a single target can serve a real deployment and a browser build at the same time. Useful for testing and demonstrating an app without infrastructure; nothing in the bundle is secret, so it is public by nature.",
+          "default": false,
+          "examples": [true]
+        },
+        "mockWebFolder": {
+          "$id": "#/properties/streamConfig/properties/mockWebFolder",
+          "type": "string",
+          "title": "The streamConfig mockWebFolder",
+          "description": "The folder (relative to the project root) where the browser build is written. Defaults to `sasjsbuild/mock`. Serve that folder over http or https - a service worker needs a secure context, so localhost works but `file://` does not - and deploy it to any static host.",
+          "default": "sasjsbuild/mock",
+          "examples": ["sasjsbuild/mock"]
+        },
         "webSourcePath": {
           "$id": "#/properties/streamConfig/properties/webSourcePath",
           "type": "string",

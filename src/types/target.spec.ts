@@ -264,6 +264,70 @@ describe('Target', () => {
     expect(json.streamConfig!.assetPaths).toEqual([])
   })
 
+  it('should carry the browser build settings through to json', () => {
+    const target = new Target({
+      name: 'test',
+      serverUrl: '',
+      serverType: ServerType.Sas9,
+      appLoc: '/test',
+      streamConfig: {
+        streamWeb: true,
+        streamWebFolder: 'web9',
+        webSourcePath: 'dist',
+        streamServiceName: 'clickme',
+        assetPaths: [],
+        mockWeb: true,
+        mockWebFolder: 'sasjsbuild/browser'
+      }
+    })
+
+    const json = target.toJson()
+    expect(json.streamConfig!.mockWeb).toEqual(true)
+    expect(json.streamConfig!.mockWebFolder).toEqual('sasjsbuild/browser')
+    // the two settings are independent: a target can deploy and mock at once
+    expect(json.streamConfig!.streamWeb).toEqual(true)
+  })
+
+  it('should reject a non boolean mockWeb', () => {
+    expect(
+      () =>
+        new Target({
+          name: 'test',
+          serverUrl: '',
+          serverType: ServerType.Sas9,
+          appLoc: '/test',
+          streamConfig: {
+            streamWeb: false,
+            streamWebFolder: 'web9',
+            webSourcePath: 'dist',
+            streamServiceName: 'clickme',
+            assetPaths: [],
+            mockWeb: 'yes' as any
+          }
+        })
+    ).toThrowError(/mockWeb/)
+  })
+
+  it('should require webSourcePath when mockWeb is true', () => {
+    expect(
+      () =>
+        new Target({
+          name: 'test',
+          serverUrl: '',
+          serverType: ServerType.Sas9,
+          appLoc: '/test',
+          streamConfig: {
+            streamWeb: false,
+            streamWebFolder: 'web9',
+            webSourcePath: '',
+            streamServiceName: 'clickme',
+            assetPaths: [],
+            mockWeb: true
+          }
+        })
+    ).toThrowError(/webSourcePath/)
+  })
+
   it('should convert an instance to json containing service config', () => {
     const target = new Target({
       name: 'test',

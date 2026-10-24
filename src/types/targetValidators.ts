@@ -316,6 +316,30 @@ export const validateStreamConfig = (
     )
   }
 
+  if (
+    streamConfig.mockWeb !== undefined &&
+    typeof streamConfig.mockWeb !== 'boolean'
+  ) {
+    throw new Error(
+      'Invalid stream config: `mockWeb` cannot be a non-boolean value.'
+    )
+  }
+
+  if (
+    streamConfig.mockWebFolder !== undefined &&
+    typeof streamConfig.mockWebFolder !== 'string'
+  ) {
+    throw new Error(
+      'Invalid stream config: `mockWebFolder` cannot be a non-string value.'
+    )
+  }
+
+  if (streamConfig.mockWeb && !streamConfig.webSourcePath) {
+    throw new Error(
+      'Invalid stream config: `webSourcePath` should contain the path to your frontend application, and is required when `mockWeb` is true.'
+    )
+  }
+
   if (streamConfig.streamLogo && typeof streamConfig.streamLogo !== 'string') {
     streamConfig.streamLogo = undefined
   }
