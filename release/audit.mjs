@@ -14,11 +14,15 @@
  * drifts out of step with the tree it describes.
  *
  * The list is short because the locked npm is current: npm 11.21.1 vendors
- * fixed brace-expansion, http-cache-semantics, postcss-selector-parser and
- * undici, so the advisories against those do not appear. A lockfile that pinned
- * npm back would bring them back, and they would fail this gate until they are
- * listed again. The ip-address advisory published after that npm release does
- * appear - npm vendors the affected version - and is exempted below.
+ * fixed brace-expansion, http-cache-semantics and postcss-selector-parser, so
+ * the advisories against those do not appear. A lockfile that pinned npm back
+ * would bring them back, and they would fail this gate until they are listed
+ * again. Advisories published after that npm release do appear where npm
+ * vendors the affected version - ip-address and undici - and are exempted
+ * below. Where an advisory also affects a copy of the package that is NOT
+ * bundled inside npm, `overrides` in release/package.json fixes that copy: the
+ * undici entries below cover only npm's own bundled copy, which no override can
+ * reach.
  *
  * Every exemption carries its own argument - where the affected code sits,
  * whether this repo's release path runs it, and whose input reaches it. An
@@ -46,8 +50,12 @@ const releaseDir = dirname(fileURLToPath(import.meta.url))
  */
 const EXEMPT = new Map([
   [
-    'GHSA-vfj7-8cjw-p6xm',
-    "braces 3.0.3, reached via semantic-release -> micromatch. Affected through 3.0.3, which is the latest release, so no bump clears it. NOT REACHABLE HERE: the stack exhaustion needs a deeply nested brace PATTERN, and the patterns the release flow matches against come from this repo's own release config (branch globs and releaseRules), not from the commits being matched."
+    'GHSA-xjj6-f33q-929c',
+    "undici 6.29.0, bundled inside npm 11.21.1 (npm declares 65 bundleDependencies), which @semantic-release/npm@13.2.0 resolves from its npm ^11.6.2 range; 11.21.1 is the newest 11.x. Patched in 6.29.1, published after it. Measured in this tree: an `overrides` entry for undici leaves node_modules/npm/node_modules/undici at 6.29.0, because a bundled dependency is a file inside npm's own tarball rather than a resolvable node; and forcing npm 12.2.1 was measured too - its published tarball also bundles undici 6.29.0. The two copies that CAN be reached were fixed by override in release/package.json (top level 7.30.0 -> 7.30.1, @actions/http-client 6.29.0 -> 6.29.1), which cleared the sibling advisory GHSA-f72v-6w45-q472 outright. RISK ACCEPTANCE for the remainder: the affected code paths are npm's own HTTP client during publish, exercised only against the registry over a metadata response, so what reaches it is the registry's reply rather than anything in this repo - a publish-time denial of service, not code execution. Clears when npm ships undici >= 6.29.1 in its bundled tree; the advisory then disappears and this entry fails the gate until it is deleted."
+  ],
+  [
+    'GHSA-4qv8-2p9j-2685',
+    "Same bundled copy as GHSA-xjj6-f33q-929c above - undici 6.29.0 inside npm 11.21.1, not reachable by `overrides`, and not moved by npm 12.2.1 (measured: that tarball bundles 6.29.0). This one is the EventSource parser's memory growth; the release toolchain never constructs an EventSource, so the affected parser is not instantiated on this path at all. Clears with the same npm bump, and this entry fails the gate until it is deleted."
   ],
   [
     'GHSA-rxp7-6hxx-x8q5',

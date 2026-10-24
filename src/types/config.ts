@@ -58,11 +58,33 @@ export interface DeployConfig {
 
 export interface StreamConfig {
   assetPaths: string[]
-  streamWeb: boolean
+  /**
+   * When true, the app in `webSourcePath` is converted to streaming services in
+   * `streamWebFolder` on the SAS side. Optional: a target that only builds a
+   * browser app (`mockWeb`) or only serves a pre-built frontend does not need
+   * it, and an absent value means "do not stream".
+   */
+  streamWeb?: boolean
   streamWebFolder: string
   webSourcePath: string
   streamServiceName: string
   streamLogo?: string
+  /**
+   * Build the app in `webSourcePath` as a self-contained site whose backend
+   * runs in the browser: the project's JavaScript services execute in a service
+   * worker, so the app makes the same requests it would make to a SASjs server
+   * and needs no server to run. State written by those services is kept in the
+   * browser.
+   *
+   * Independent of `streamWeb` - a target can serve a real deployment and a
+   * browser build at the same time.
+   */
+  mockWeb?: boolean
+  /**
+   * Where the browser build is written, relative to the project root.
+   * Defaults to `<buildDestinationFolder>/mock`.
+   */
+  mockWebFolder?: string
 }
 
 export interface AuthConfig {

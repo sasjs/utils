@@ -298,22 +298,73 @@ export const validateStreamConfig = (
     throw new Error('Invalid stream config: JSON cannot be null or undefined.')
   }
 
-  if (streamConfig.streamWeb !== true && streamConfig.streamWeb !== false) {
+  // Presence is optional - a target can build a browser app without ever
+  // streaming from SAS - but a value that is present has to be a boolean.
+  if (
+    streamConfig.streamWeb !== undefined &&
+    typeof streamConfig.streamWeb !== 'boolean'
+  ) {
     throw new Error(
       'Invalid stream config: `streamWeb` cannot be a non-boolean value.'
     )
   }
 
-  if (streamConfig.streamWeb && !streamConfig.streamWebFolder) {
+  // `streamWebFolder` follows the same contract as `webSourcePath`: the schema
+  // documents a default (web), which is applied when the key is absent, and a
+  // value that is present but blank is rejected as a typo.
+  if (
+    streamConfig.streamWebFolder !== undefined &&
+    streamConfig.streamWebFolder !== null &&
+    !String(streamConfig.streamWebFolder).trim()
+  ) {
     throw new Error(
-      'Invalid stream config: `streamWebFolder` cannot be empty, null or undefined when `streamWeb` is true.'
+      'Invalid stream config: `streamWebFolder` cannot be empty - omit it to use the default (web).'
     )
   }
 
-  if (streamConfig.streamWeb && !streamConfig.webSourcePath) {
+  if (streamConfig.streamWeb === true && streamConfig.streamWebFolder == null) {
+    streamConfig.streamWebFolder = 'web'
+  }
+
+  if (
+    streamConfig.mockWeb !== undefined &&
+    typeof streamConfig.mockWeb !== 'boolean'
+  ) {
     throw new Error(
-      'Invalid stream config: `webSourcePath` should contain the path to your frontend application eg build, dist, or src.'
+      'Invalid stream config: `mockWeb` cannot be a non-boolean value.'
     )
+  }
+
+  if (
+    streamConfig.mockWebFolder !== undefined &&
+    typeof streamConfig.mockWebFolder !== 'string'
+  ) {
+    throw new Error(
+      'Invalid stream config: `mockWebFolder` cannot be a non-string value.'
+    )
+  }
+
+  // `webSourcePath` is optional: the schema documents `dist` as its default and
+  // most projects build into ./dist or ./build, so it is filled in below when a
+  // switch needs it. A value that is present but blank is a typo rather than a
+  // decision to accept the default, so it is rejected - the schema's minLength
+  // of 1 says the same thing.
+  if (
+    streamConfig.webSourcePath !== undefined &&
+    streamConfig.webSourcePath !== null &&
+    !String(streamConfig.webSourcePath).trim()
+  ) {
+    throw new Error(
+      'Invalid stream config: `webSourcePath` cannot be empty - omit it to use the default (dist).'
+    )
+  }
+
+  // Both switches build from the same folder, so one default covers them.
+  if (
+    (streamConfig.streamWeb === true || streamConfig.mockWeb === true) &&
+    streamConfig.webSourcePath == null
+  ) {
+    streamConfig.webSourcePath = 'dist'
   }
 
   if (streamConfig.streamLogo && typeof streamConfig.streamLogo !== 'string') {
