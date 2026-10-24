@@ -605,14 +605,22 @@ describe('validateStreamConfig', () => {
     )
   })
 
-  it('should throw an error when streamWeb is true and a streamWebFolder is not specified', () => {
+  it('should default streamWebFolder to web when streamWeb is true and it is not specified', () => {
+    const validated = validateStreamConfig({
+      streamWeb: true
+    } as unknown as StreamConfig)
+
+    expect(validated.streamWebFolder).toEqual('web')
+  })
+
+  it('should throw an error when streamWebFolder is an empty string', () => {
     expect(() =>
       validateStreamConfig({
         streamWeb: true,
         streamWebFolder: ''
       } as unknown as StreamConfig)
     ).toThrowError(
-      'Invalid stream config: `streamWebFolder` cannot be empty, null or undefined when `streamWeb` is true.'
+      'Invalid stream config: `streamWebFolder` cannot be empty - omit it to use the default (web).'
     )
   })
 

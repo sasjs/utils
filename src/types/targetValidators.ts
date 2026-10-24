@@ -309,10 +309,21 @@ export const validateStreamConfig = (
     )
   }
 
-  if (streamConfig.streamWeb && !streamConfig.streamWebFolder) {
+  // `streamWebFolder` follows the same contract as `webSourcePath`: the schema
+  // documents a default (web), which is applied when the key is absent, and a
+  // value that is present but blank is rejected as a typo.
+  if (
+    streamConfig.streamWebFolder !== undefined &&
+    streamConfig.streamWebFolder !== null &&
+    !String(streamConfig.streamWebFolder).trim()
+  ) {
     throw new Error(
-      'Invalid stream config: `streamWebFolder` cannot be empty, null or undefined when `streamWeb` is true.'
+      'Invalid stream config: `streamWebFolder` cannot be empty - omit it to use the default (web).'
     )
+  }
+
+  if (streamConfig.streamWeb === true && streamConfig.streamWebFolder == null) {
+    streamConfig.streamWebFolder = 'web'
   }
 
   if (

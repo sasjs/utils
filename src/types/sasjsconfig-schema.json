@@ -40,7 +40,7 @@
           "streamConfig": {
             "assetPaths": [],
             "streamWeb": false,
-            "streamWebFolder": "webv",
+            "streamWebFolder": "web",
             "webSourcePath": "dist"
           },
           "testConfig": {
@@ -542,7 +542,7 @@
         {
           "assetPaths": [],
           "streamWeb": false,
-          "streamWebFolder": "webv",
+          "streamWebFolder": "web",
           "webSourcePath": "dist",
           "streamLogo": "logo.png"
         }
@@ -576,9 +576,9 @@
           "$id": "#/properties/streamConfig/properties/streamWebFolder",
           "type": "string",
           "title": "The streamConfig streamWebFolder",
-          "description": "This is the target SAS folder (relative to the appLoc) where the compiled web assets will be created.",
+          "description": "The target SAS folder, relative to the appLoc, where the compiled web assets are created. Defaults to `web` - set it when your project keeps streamed assets under a different name. A blank value is rejected, so omit the key rather than setting an empty string.",
           "minLength": 1,
-          "default": "webv"
+          "default": "web"
         },
         "mockWeb": {
           "$id": "#/properties/streamConfig/properties/mockWeb",
@@ -765,7 +765,7 @@
             "streamConfig": {
               "assetPaths": [],
               "streamWeb": false,
-              "streamWebFolder": "webv",
+              "streamWebFolder": "web",
               "webSourcePath": "dist"
             },
             "testConfig": {
@@ -869,7 +869,7 @@
                 "streamConfig": {
                   "assetPaths": [],
                   "streamWeb": false,
-                  "streamWebFolder": "webv",
+                  "streamWebFolder": "web",
                   "webSourcePath": "dist"
                 },
                 "testConfig": {
