@@ -149,6 +149,26 @@ describe('getDependencies', () => {
         `SAS Programs test.sas is missing fileref. Please specify SAS Programs dependencies in the format: @li <filename> <fileref>`
       )
     })
+
+    test('it should throw when a program header closes early', async () => {
+      const filePath = path.join(
+        __dirname,
+        'testFiles',
+        './nested-comment-dep.sas'
+      )
+      const fileContent = await readFile(filePath)
+
+      await expect(
+        getDependencies(
+          filePath,
+          fileContent,
+          [path.join(__dirname, 'testFiles', 'programs')],
+          DependencyType.Include
+        )
+      ).rejects.toThrow(
+        /bad-header\.sas: the doxygen header is closed at line 6, before its \*\*\/ terminator at line 10/
+      )
+    })
   })
 
   describe('Binary Files', () => {

@@ -452,6 +452,40 @@ describe('loadDependenciesFile', () => {
       expect(dependencies).toEqual(testFileContent)
     }
   )
+
+  it('should throw when a service header is truncated by a nested block comment', async () => {
+    const nestedHeader = `/**
+  @file nested.sas
+  @brief Example
+  @details a usage example with a comment in it:
+
+      data _null_;
+        /* this comment closes the header */
+        set work.status;
+      run;
+
+**/
+
+%put hello;`
+
+    await expect(
+      loadDependenciesFile({
+        target,
+        configuration,
+        filePath: 'src/services/nested.sas',
+        fileContent: nestedHeader,
+        macroFolders: [],
+        programFolders: [],
+        type: SASJsFileType.service,
+        buildSourceFolder,
+        macroCorePath,
+        binaryFolders: [],
+        compileTree
+      })
+    ).rejects.toThrow(
+      /^src\/services\/nested\.sas: the doxygen header is closed at line 7, before its \*\*\/ terminator at line 11/
+    )
+  })
 })
 
 describe('getAllDependencies', () => {

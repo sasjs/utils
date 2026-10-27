@@ -120,4 +120,26 @@ describe('removeHeader', () => {
       removeHeader(whiteSpaces + lineBreaks + whiteSpaces + header + content)
     ).toEqual(content)
   })
+
+  it('should throw when a nested block comment truncates the header', () => {
+    const nestedHeader = `/**
+  @file test.sas
+  @brief Example
+  @details Usage:
+
+      %my_macro()
+      /* reaching here means the child completed */
+      data _null_;
+        set work.status;
+      run;
+
+**/
+
+%macro my_macro();
+%mend my_macro;`
+
+    expect(() => removeHeader(nestedHeader, 'macros/test.sas')).toThrow(
+      /^macros\/test\.sas: the doxygen header is closed at line 7, before its \*\*\/ terminator at line 12/
+    )
+  })
 })
