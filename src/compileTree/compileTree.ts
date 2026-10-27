@@ -6,6 +6,7 @@ import {
   getDeprecatedHeader,
   DependencyType
 } from '../sasjsCli'
+import { throwIfDoxygenHeaderClosesEarly } from './doxygenHeader'
 
 export interface Leaf {
   content: string
@@ -42,7 +43,7 @@ export class CompileTree {
       getDeprecatedHeader(leaf.content, DependencyHeader.Macro),
       leaf.content
     )
-    leaf.content = removeHeader(leaf.content)
+    leaf.content = removeHeader(leaf.content, leaf.location)
 
     this._tree[this.getFileName(leaf.location)] = leaf
 
@@ -113,5 +114,11 @@ export class CompileTree {
 // Removes header from SAS file
 // If string begins with a multiline comment, remove the comment
 // Ignore any preceding white space or line breaks
-export const removeHeader = (content: string) =>
-  content.replace(new RegExp(`^\\s*\\/(\\*){1,2}([\\s\\S]*?)(\\*){1,2}\\/`), '')
+export const removeHeader = (content: string, filePath?: string) => {
+  throwIfDoxygenHeaderClosesEarly(content, filePath)
+
+  return content.replace(
+    new RegExp(`^\\s*\\/(\\*){1,2}([\\s\\S]*?)(\\*){1,2}\\/`),
+    ''
+  )
+}

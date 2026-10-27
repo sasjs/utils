@@ -8,6 +8,7 @@ import {
   getPreCode
 } from './'
 import { CompileTree } from '../compileTree'
+import { throwIfDoxygenHeaderClosesEarly } from '../compileTree/doxygenHeader'
 import { readFile } from '../file'
 
 interface LoadDependenciesParams {
@@ -37,6 +38,8 @@ export const loadDependenciesFile = async ({
   binaryFolders,
   compileTree
 }: LoadDependenciesParams) => {
+  throwIfDoxygenHeaderClosesEarly(fileContent, filePath)
+
   const { init, initPath, term, termPath, startUpVars, initLeaf, termLeaf } =
     await getInitTerm({
       configuration,

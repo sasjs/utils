@@ -4,6 +4,7 @@ import { asyncForEach, chunk } from '../utils'
 import { readFile, findFilesByName } from '../file'
 import { capitalizeFirstChar } from '../formatter'
 import { CompileTree } from '../compileTree'
+import { throwIfDoxygenHeaderClosesEarly } from '../compileTree/doxygenHeader'
 
 // REFACTOR: move logic supporting SAS Macros dependencies to this file
 
@@ -112,6 +113,11 @@ export const getDependencies = async (
               filePaths[0],
               depType === DependencyType.Binary ? 'base64' : undefined
             )
+
+            // Without a compile tree the file goes in as read, so its header
+            // reaches the compiled output unstripped and has to be checked here.
+            if (depType !== DependencyType.Binary)
+              throwIfDoxygenHeaderClosesEarly(encodedFileContent, filePaths[0])
           }
 
           const depContent = compileDep(
