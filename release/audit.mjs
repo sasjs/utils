@@ -18,11 +18,11 @@
  * the advisories against those do not appear. A lockfile that pinned npm back
  * would bring them back, and they would fail this gate until they are listed
  * again. Advisories published after that npm release do appear where npm
- * vendors the affected version - ip-address and undici - and are exempted
- * below. Where an advisory also affects a copy of the package that is NOT
- * bundled inside npm, `overrides` in release/package.json fixes that copy: the
- * undici entries below cover only npm's own bundled copy, which no override can
- * reach.
+ * vendors the affected version - ip-address, undici, glob and minimatch - and
+ * are exempted below. Where an advisory also affects a copy of the package that
+ * is NOT bundled inside npm, `overrides` in release/package.json fixes that
+ * copy: the undici entries below cover only npm's own bundled copy, which no
+ * override can reach.
  *
  * Every exemption carries its own argument - where the affected code sits,
  * whether this repo's release path runs it, and whose input reaches it. An
@@ -60,6 +60,26 @@ const EXEMPT = new Map([
   [
     'GHSA-rxp7-6hxx-x8q5',
     "ip-address 10.7.2, bundled inside npm 11.21.1, which @semantic-release/npm resolves from its npm ^11.6.2 range. 11.21.1 is the newest 11.x, and the version npm bundles cannot be overridden from here - adding `overrides` for ip-address to release/package.json leaves the lockfile at 10.7.2, which was measured. RISK ACCEPTANCE, not unreachability: the parse runs only on a proxy address that carries an Address6 zone identifier; the exposure is a stall during publish, and that string can arrive from standard npm proxy configuration (`npm_config_proxy`, `HTTPS_PROXY`), so the input path is reachable and the accepted risk is a publish-time stall rather than a package-supplied one. No bump in this repo moves it - forcing npm 12.2.1 inside the toolchain was measured too, and the lockfile still resolves ip-address 10.7.2 through socks 2.8.9. It clears only when npm ships ip-address >= 10.7.4 in its own bundled tree; the advisory then disappears and this entry fails the gate until it is deleted."
+  ],
+  [
+    'GHSA-2m5v-pch6-74hx',
+    "undici 6.29.0, the same bundled copy as GHSA-xjj6-f33q-929c above - inside npm 11.21.1's own tarball, out of reach of `overrides`. Published 2026-10-27, after that npm release, so the copy that CAN be reached is already fixed (top level 7.30.1, @actions/http-client 6.29.1, both patched versions for this advisory). No bump clears the bundled copy: npm 12.2.1's published tarball was measured and also bundles undici 6.29.0, and @semantic-release/npm 13.2.0 - the newest - still declares npm ^11.6.2, so nothing in the chain reaches the current 11.x. RISK ACCEPTANCE: this is the Agent's TLS certificate validation, and the input is the registry's certificate chain on the publish connection, so a party able to answer for the registry is the threat model rather than anything this repo supplies. Clears when npm bundles undici >= 6.29.1; this entry then fails the gate until it is deleted."
+  ],
+  [
+    'GHSA-qrxm-fqhp-jwvm',
+    "Same bundled undici 6.29.0 inside npm 11.21.1 as above, published in the same batch. This one is DoS through repeated TLS 1.2 renegotiation during a connection, and the connection in question is the publish upload. RISK ACCEPTANCE for a publish-time stall: the party that can drive renegotiation is the endpoint across that socket, and no input from this repository reaches it. Clears with the same npm bump, and this entry fails the gate until it is deleted."
+  ],
+  [
+    'GHSA-9fm3-97px-rjf6',
+    "Same bundled undici 6.29.0 inside npm 11.21.1. This advisory is in the WebSocket client's PONG buffering, and npm's bundled copy is used here for HTTP requests only - the release path never constructs an EventSource or a WebSocket, so the affected parser is not instantiated at all. Clears with the same npm bump, and this entry fails the gate until it is deleted."
+  ],
+  [
+    'GHSA-3g3m-2fjr-6pw4',
+    "glob 13.0.6, bundled inside npm 11.21.1 (npm declares it as a dependency of its own tree, and the copy that ships sits under node_modules/npm, so `overrides` cannot reach it). Patched in 14.0.2, published 2026-10-30. No bump in this repo moves it: npm 12.2.1 - the newest major, measured from its published tarball - still bundles glob 13.0.6, which is inside the vulnerable range (>= 9.0.0, <= 14.0.1), and @semantic-release/npm 13.2.0 is the newest release and still pins npm ^11.6.2. RISK ACCEPTANCE: the traversal that this advisory weakens - a cancelled or timed-out walk continuing to read - runs over the tree being packed, with the patterns coming from this repo's own package.json `files` list. The exposure is a publish-time stall in npm's file selection, not a change in what is published and not code execution. Clears when npm moves to glob >= 14.0.2, which is a major bump on npm's side; this entry then fails the gate until it is deleted."
+  ],
+  [
+    'GHSA-g3hv-75wg-m249',
+    "minimatch 10.2.5, bundled inside npm 11.21.1 in the same way, and out of reach of `overrides`. Patched in 11.0.1, published 2026-10-30. No bump in this repo moves it: npm 12.2.1's published tarball also bundles minimatch 10.2.5, and @semantic-release/npm 13.2.0 - the newest - still declares npm ^11.6.2. RISK ACCEPTANCE: this is a CPU amplification on pathological patterns (globparts), and the patterns reaching it here are the ones in this repo's package.json and npm's own internal matching. There is no path by which a third party supplies the pattern, so the accepted risk is a slow publish if this repo ever carried a pathological pattern of its own. Clears when npm moves to minimatch >= 11.0.1; this entry then fails the gate until it is deleted."
   ]
 ])
 
