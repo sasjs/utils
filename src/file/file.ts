@@ -19,12 +19,64 @@ export async function folderExists(folderPath: string): Promise<boolean> {
 }
 
 /**
+ * Folders already walked, keyed by resolved path.
+ *
+ * A caller asks for one file name at a time across the whole search path, and
+ * asks thousands of times over the same handful of folders - a compile resolves
+ * every declared macro of every file against the project's macro folders and
+ * @sasjs/core. The walk is the expensive part (one `readdir` per directory, per
+ * name), and what it finds does not change while a command runs, so each folder
+ * is walked once.
+ */
+const folderIndex = new Map<string, Map<string, string[]>>()
+
+/**
  * Returns the paths of every file named `fileName` at or below `folder`.
  * Node's own fs covers this now, so it replaces the unmaintained `find`
  * package. Unreadable folders are skipped rather than throwing.
+ *
+ * The first lookup in a folder indexes it; later lookups are answered from that
+ * index. `clearFileSearchIndex` forgets them, which is what a caller that adds
+ * or removes files after a lookup has to do.
  */
 export function findFilesByName(fileName: string, folder: string): string[] {
-  const matches: string[] = []
+  const key = path.resolve(folder)
+  let index = folderIndex.get(key)
+
+  if (!index) {
+    index = indexFolder(folder)
+
+    // A folder that cannot be read is not remembered: it can be created later
+    // in the same process, and a cached empty result would hide its files.
+    if (index) folderIndex.set(key, index)
+  }
+
+  // A copy, so a caller adding to the result cannot change the index.
+  return index ? [...(index.get(fileName) || [])] : []
+}
+
+/**
+ * Forgets every indexed folder.
+ *
+ * Anything that creates, renames or deletes files and then looks them up in the
+ * same process has to call this first, or the lookup answers from the tree as
+ * it was when the folder was first searched.
+ */
+export const clearFileSearchIndex = () => folderIndex.clear()
+
+/**
+ * Walks a folder once, collecting every file path by name. Returns undefined
+ * when the folder itself cannot be read; unreadable subfolders are skipped, as
+ * they always have been.
+ */
+const indexFolder = (folder: string): Map<string, string[]> | undefined => {
+  try {
+    fs.readdirSync(folder, { withFileTypes: true })
+  } catch (_) {
+    return undefined
+  }
+
+  const index = new Map<string, string[]>()
 
   const walk = (dir: string) => {
     let entries: fs.Dirent[]
@@ -38,14 +90,21 @@ export function findFilesByName(fileName: string, folder: string): string[] {
     for (const entry of entries) {
       const entryPath = path.join(dir, entry.name)
 
-      if (entry.isDirectory()) walk(entryPath)
-      else if (entry.name === fileName) matches.push(entryPath)
+      if (entry.isDirectory()) {
+        walk(entryPath)
+        continue
+      }
+
+      const paths = index.get(entry.name)
+
+      if (paths) paths.push(entryPath)
+      else index.set(entry.name, [entryPath])
     }
   }
 
   walk(folder)
 
-  return matches
+  return index
 }
 
 export async function isFolder(inputPath: string): Promise<boolean> {
