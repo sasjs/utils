@@ -2,6 +2,7 @@ export {
   fileExists,
   folderExists,
   findFilesByName,
+  clearFileSearchIndex,
   isFolder,
   readFile,
   readFileBinary,
