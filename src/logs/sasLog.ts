@@ -74,7 +74,8 @@ export type IssueDirection = 'next' | 'previous'
  * then a colon. The prefix is captured so the marker's column is exact even when
  * tags lead it.
  */
-const MARKER = /^((?:<[^>]*>)*\s*)(ERROR|WARNING|NOTE)(?:\s+(\d+-\d+))?:[ \t]?(.*)$/i
+const MARKER =
+  /^((?:<[^>]*>)*\s*)(ERROR|WARNING|NOTE)(?:\s+(\d+-\d+))?:[ \t]?(.*)$/i
 
 /**
  * The notes worth reporting, matched case-insensitively against the folded
@@ -122,7 +123,9 @@ const NOTE_KEYWORDS = [
   'The SAS System stopped processing this step because of errors'
 ]
 
-const NOTABLE_NOTE_KEYWORDS = NOTE_KEYWORDS.map((keyword) => keyword.toLowerCase())
+const NOTABLE_NOTE_KEYWORDS = NOTE_KEYWORDS.map((keyword) =>
+  keyword.toLowerCase()
+)
 
 /** How many wrapped lines one message may absorb, so a malformed log cannot run away. */
 const MAX_WRAPPED_LINES = 10
@@ -136,7 +139,9 @@ export const isNotableNote = (message: string): boolean => {
 
 /** A line SAS wrapped: indented, and not one of the pointer lines it prints under source. */
 const isWrappedLine = (line: string): boolean =>
-  /^\s+\S/.test(line) && !/^\s*[-_]+\s*$/.test(line) && !/^\s*\d+\s*$/.test(line)
+  /^\s+\S/.test(line) &&
+  !/^\s*[-_]+\s*$/.test(line) &&
+  !/^\s*\d+\s*$/.test(line)
 
 /** Removes markup and collapses the whitespace a wrapped message carries. */
 const clean = (text: string): string =>
