@@ -7,6 +7,9 @@ module.exports = {
   transform: {
     '^.+\\.ts?$': 'ts-jest'
   },
+  // json-summary is what .github/scripts/coverage-ratchet.mjs compares against
+  // the published baseline; the rest are for a human reading a local run.
+  coverageReporters: ['clover', 'json', 'json-summary', 'lcov', 'text'],
   coverageThreshold: {
     global: {
       branches: 80,
