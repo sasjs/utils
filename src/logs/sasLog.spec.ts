@@ -199,6 +199,14 @@ describe('parseLog', () => {
     expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
+  it('should not fold an indented marker into the issue above it', () => {
+    const [issue] = parseLog('ERROR: first\n  ERROR: second\n')
+
+    expect(parseLog('ERROR: first\n  ERROR: second\n')).toHaveLength(1)
+    expect(issue.message).toEqual('first')
+    expect(issue.endLine).toEqual(0)
+  })
+
   it('should not absorb the pointer lines SAS prints under a source statement', () => {
     const log = [
       '14       x = age / 0;',
@@ -381,6 +389,14 @@ describe('isSasLog', () => {
     ]
 
     expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should not accept a padded number that is not a SAS statement', () => {
+    expect(isSasLog('1   item')).toBe(false)
+    expect(isSasLog('12  Building target')).toBe(false)
+    expect(isSasLog(['7  first point', '8  second point'].join('\n'))).toBe(
+      false
+    )
   })
 
   it('should accept a SAS log on a message code alone', () => {

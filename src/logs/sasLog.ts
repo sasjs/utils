@@ -100,8 +100,13 @@ export type IssueDirection = 'next' | 'previous'
 const MARKER =
   /^((?:<[^>]*>)+[ \t]*|)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE)(?:\s+(\d+-\d+))?:[ \t]?)(.*)$/
 
-/** A line SAS numbers at the start, e.g. `1    data want;` - unlike a sequence number, it is padded. */
-const NUMBERED_STEP = /^\d+ {2,}\S/
+/**
+ * A line SAS numbers at the start: a padded number, then a statement - which
+ * begins with a macro call, a comment, or ends in the semicolon SAS statement
+ * syntax requires. The padding alone is not evidence: `1   item` is a numbered
+ * list in somebody else's output.
+ */
+const NUMBERED_STEP = /^\d+ {2,}(?:[%*/]|[^;]*;)/
 
 /**
  * The phrases SAS prints about itself, and nothing else does: the version banner,
@@ -204,11 +209,17 @@ export const isNotableNote = (message: string): boolean => {
   return NOTABLE_NOTE_KEYWORDS.some((keyword) => lower.includes(keyword))
 }
 
-/** A line SAS wrapped: indented, and not one of the pointer lines it prints under source. */
+/**
+ * A line SAS wrapped: indented, and not one of the pointer lines it prints under
+ * source. An indented marker is not a continuation either - continuation lines
+ * carry the rest of a message, and a marker on its own line starts the next one -
+ * so it is left for the scan to ignore rather than folded into the issue above.
+ */
 const isWrappedLine = (line: string): boolean =>
   /^\s+\S/.test(line) &&
   !/^\s*[-_]+\s*$/.test(line) &&
-  !/^\s*\d+\s*$/.test(line)
+  !/^\s*\d+\s*$/.test(line) &&
+  !MARKER.test(line.trim())
 
 /** Removes markup and collapses the whitespace a wrapped message carries. */
 const clean = (text: string): string =>
