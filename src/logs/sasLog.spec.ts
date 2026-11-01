@@ -154,6 +154,10 @@ describe('parseLog', () => {
   it('should not match a marker with nothing after it', () => {
     expect(parseLog('ERROR\n')).toEqual([])
     expect(parseLog('WARNING\n')).toEqual([])
+    expect(parseLog('ERROR \n')).toEqual([])
+    expect(parseLog('WARNING   \n')).toEqual([])
+    expect(parseLog('ERROR: \n')).toEqual([])
+    expect(parseLog('ERROR:\t\n')).toEqual([])
   })
 
   it('should not match a word that merely begins with the marker', () => {

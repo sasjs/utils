@@ -125,6 +125,16 @@ const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
  * banner it prints about itself, its message codes, and its padded step numbers.
  * Each of those is written by SAS and by nothing else.
  *
+ * This is a heuristic, and one way only: a true answer means SAS wrote the text,
+ * while a false answer does not prove it did not - a trimmed excerpt of a log,
+ * pasted with only its `ERROR:` lines, carries none of the three and reads as
+ * somebody else's. A host that publishes diagnostics should therefore treat false
+ * as "not obviously SAS" rather than "not SAS".
+ *
+ * Counting marker lines instead was considered and rejected: two `ERROR:` lines is
+ * what a Python log is made of, so it would readmit exactly the files this
+ * predicate exists to keep out.
+ *
  * The check is deliberately cheap and runs before a host publishes anything, so
  * a `.log` from another tool is left alone.
  */
@@ -252,6 +262,13 @@ export const parseLog = (text: string): LogIssue[] => {
     // The wrapped lines belong to this message whether or not it is reported, so
     // the scan resumes after them either way.
     line = endLine
+
+    // A marker with nothing after it is not a message: SAS does not print a bare
+    // `ERROR` or `ERROR:` line, and an empty issue would reach a host as a blank
+    // line in its problem list.
+    if (message === '') {
+      continue
+    }
 
     if (severity === 'note' && !isNotableNote(message)) {
       continue
