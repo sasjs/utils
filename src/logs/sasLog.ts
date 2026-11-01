@@ -96,9 +96,13 @@ export type IssueDirection = 'next' | 'previous'
  * line's text. Padding without markup is not allowed: an indented marker is text
  * in a listing, not a message. The prefix is captured so the marker's column is
  * exact, and the code and message are captured separately.
+ *
+ * The spaces either side of a message code are a character class, not `\s`: the
+ * expression now runs over the whole text, where `\s` would let a match swallow
+ * the line break and read the next line as this message's code.
  */
 const MARKER =
-  /^((?:<[^>]*>)+[ \t]*|)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE)(?:\s+(\d+-\d+))?:[ \t]?)(.*)$/
+  /^((?:<[^>]*>)+[ \t]*|)(?:(ERROR|WARNING)(?:[ \t]+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE)(?:[ \t]+(\d+-\d+))?:[ \t]?)(.*)$/
 
 /**
  * The shapes only SAS writes, tested over the whole text in one pass so no line
@@ -108,10 +112,13 @@ const MARKER =
  * is not evidence: `1   item` is a numbered list in somebody else's output.
  *
  * The statement tail is `[^\n;]*` rather than `[^;]*` because a negated class
- * matches a newline, and a shape match must not span two lines.
+ * matches a newline, and a shape match must not span two lines. A semicolon alone
+ * does not make a statement - `12  Building target;` is a numbered list in output
+ * that is not SAS - so the line also has to begin with a statement keyword or
+ * carry an assignment or a call before its semicolon.
  */
 const SAS_SHAPE =
-  /^(?:(?:<[^>]*>)+[ \t]*|)(?:(?:ERROR|WARNING|NOTE) +\d+-\d+|\d+ {2,}(?:[%*/]|(?:data|proc|libname|options|filename|ods|title|footnote)\b|[^\n;]*;))/m
+  /^(?:(?:<[^>]*>)+[ \t]*|)(?:(?:ERROR|WARNING|NOTE) +\d+-\d+|\d+ {2,}(?:[%*/]|(?:by|data|filename|footnote|format|if|infile|input|libname|merge|ods|options|output|proc|put|quit|run|set|title|where)\b|[^\n;]*[=(][^\n;]*;))/m
 
 /**
  * The phrases SAS prints about itself, and nothing else does: the version banner,
@@ -381,7 +388,8 @@ export const parseLog = (text: string): LogIssue[] => {
       line: markerLine,
       endLine,
       column: match[1].length,
-      endColumn: endIndex - markerStart,
+      // The whole match is the line's text: `$` stops before the `\r` of a CRLF.
+      endColumn: match[0].length,
       severity,
       message
     }

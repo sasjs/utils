@@ -199,12 +199,16 @@ describe('parseLog', () => {
     expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
-  it('should not fold an indented marker into the issue above it', () => {
-    const [issue] = parseLog('ERROR: first\n  ERROR: second\n')
+  it('should not match a marker across a line break', () => {
+    expect(parseLog('ERROR\n   22-322: Syntax error.\n')).toEqual([])
+  })
 
-    expect(parseLog('ERROR: first\n  ERROR: second\n')).toHaveLength(1)
-    expect(issue.message).toEqual('first')
-    expect(issue.endLine).toEqual(0)
+  it('should not fold an indented marker into the issue above it', () => {
+    const issues = parseLog('ERROR: first\n  ERROR: second\n')
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toEqual('first')
+    expect(issues[0].endLine).toEqual(0)
   })
 
   it('should not fold an indented marker that carries markup', () => {
@@ -276,14 +280,25 @@ describe('parseLog', () => {
   })
 
   it('should read a log written with CRLF line endings', () => {
-    const issues = parseLog('NOTE: one\r\nERROR: two\r\nWARNING: three\r\n')
+    const issues = parseLog(
+      'NOTE: Variable x is uninitialized.\r\n' +
+        'ERROR: File WORK.X.DATA does not exist.\r\n' +
+        'WARNING: Division by zero detected.\r\n'
+    )
 
     expect(
       issues.map((issue) => [issue.line, issue.severity, issue.message])
     ).toEqual([
-      [1, 'error', 'two'],
-      [2, 'warning', 'three']
+      [0, 'note', 'Variable x is uninitialized.'],
+      [1, 'error', 'File WORK.X.DATA does not exist.'],
+      [2, 'warning', 'Division by zero detected.']
     ])
+
+    // The column stops before the carriage return, so it addresses the line the
+    // reader sees rather than the newline after it.
+    expect(issues[1].endColumn).toEqual(
+      'ERROR: File WORK.X.DATA does not exist.'.length
+    )
   })
 
   it('should report the errors, warnings and notable notes of a published corpus', () => {
@@ -445,6 +460,11 @@ describe('isSasLog', () => {
     expect(isSasLog('1    data want')).toBe(true)
     expect(isSasLog('7    proc sql')).toBe(true)
     expect(isSasLog('3    libname mylib "/data"')).toBe(true)
+  })
+
+  it('should not accept a numbered list line that ends in a semicolon', () => {
+    expect(isSasLog('12  Building target;')).toBe(false)
+    expect(isSasLog('12  color: red;')).toBe(false)
   })
 
   it('should not accept a padded number that is not a SAS statement', () => {
