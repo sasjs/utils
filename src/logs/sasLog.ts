@@ -226,17 +226,39 @@ export const isNotableNote = (message: string): boolean =>
 const POINTER_LINE = /^\s*(?:[-_]+\s*$|\d+\s*$)/
 
 /**
+ * A line with the tags that open it removed, so what SAS wrote begins the line.
+ *
+ * ODS HTML writes every physical line as `<font ...>text</font>`, and SAS wraps
+ * a long message inside those tags. The tags are markup the reader never sees,
+ * so both the indentation test and the marker test look past them; the reported
+ * columns still address the raw line, which is what a host underlines.
+ */
+const withoutMarkup = (line: string): string =>
+  line.replace(/^(?:<[^>]*>)+/, '')
+
+/**
  * A line SAS wrapped: indented, and neither a pointer line nor a marker.
  *
- * The marker test is {@link MARKER} itself, applied to the trimmed line, so a
- * continuation is excluded exactly when the line would have been a marker had it
- * begun the line - the markup-prefixed form included. A second, subtly different
- * expression is how an indented marker ends up belonging to neither the message
- * above nor the issue list. Such a marker is dropped rather than reported, which
- * is the rule the parser states: a message begins the line.
+ * The indentation is tested after the tags that open an ODS HTML line are
+ * dropped: SAS wraps a line inside the markup, so the wrapped half of
+ * `<font ...>              RUN, QUIT.</font>` is indented but does not begin
+ * with the whitespace. Reading only the raw line treated every wrapped line of
+ * an HTML log as a new line and left the message truncated at the break.
+ *
+ * The marker test is {@link MARKER} itself, applied to the text of the trimmed
+ * line, so a continuation is excluded exactly when the line would have been a
+ * marker had it begun the line - the markup-prefixed form included. A second,
+ * subtly different expression is how an indented marker ends up belonging to
+ * neither the message above nor the issue list. Such a marker is dropped rather
+ * than reported, which is the rule the parser states: a message begins the line.
  */
-const isWrappedLine = (line: string): boolean =>
-  /^\s+\S/.test(line) && !POINTER_LINE.test(line) && !MARKER.test(line.trim())
+const isWrappedLine = (line: string): boolean => {
+  const text = withoutMarkup(line)
+
+  return (
+    /^\s+\S/.test(text) && !POINTER_LINE.test(text) && !MARKER.test(text.trim())
+  )
+}
 
 /**
  * Whether a character code is printable ASCII and not a space. The fast path in
