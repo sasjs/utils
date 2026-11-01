@@ -248,6 +248,29 @@ describe('parseLog', () => {
     expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
+  it('should fold a wrapped line that carries the markup of an ODS HTML log', () => {
+    const log =
+      '<font size="2">ERROR 22-322: Syntax error, expecting one of the following: ;, CANCEL,</font>\n' +
+      '<font size="2">              RUN, QUIT.</font>'
+    const [error] = parseLog(log)
+
+    expect(error.endLine).toEqual(1)
+    expect(error.code).toEqual('22-322')
+    expect(error.message).toEqual(
+      'Syntax error, expecting one of the following: ;, CANCEL, RUN, QUIT.'
+    )
+  })
+
+  it('should not fold a line of an ODS HTML log that holds only markup', () => {
+    const [error] = parseLog(
+      '<font size="2">ERROR: File WORK.X.DATA does not exist.</font>\n' +
+        '<font size="2"></font>\n' +
+        'NOTE: There were 5 observations read.'
+    )
+
+    expect(error.endLine).toEqual(0)
+  })
+
   it('should take a wrapped line as the message when the marker line is bare', () => {
     const [issue] = parseLog('ERROR:\n   File WORK.X.DATA does not exist.')
 
