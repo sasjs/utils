@@ -331,8 +331,42 @@ describe('parseLog', () => {
 })
 
 describe('isSasLog', () => {
-  it('should accept a SAS log on the notes it prints between steps', () => {
-    expect(isSasLog(PUBLISHED)).toBe(true)
+  it('should accept a log on the banner SAS prints about itself', () => {
+    const log = [
+      'NOTE: Copyright (c) 2025 by SAS Institute Inc., Cary, NC, USA.',
+      'NOTE: SAS (r) Proprietary Software 9.4 (TS1M9 MBCS3170)',
+      'NOTE: This session is executing on the Linux 5.14.0 platform.'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a log on the work-area conversion warning', () => {
+    const log =
+      'You are running SAS 9. Some SAS 9 files will be automatically converted.'
+
+    expect(isSasLog(log)).toBe(true)
+  })
+
+  it('should accept a log whose head is lost but whose step footer survives', () => {
+    const log = [
+      '12       x = 1;',
+      '',
+      'NOTE: DATA statement used (Total process time):'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a listing on its page header', () => {
+    const log = [
+      '1                     The SAS System              Wednesday, October 29, 2025',
+      '',
+      'OBS    NAME',
+      '  1    Alfred'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
   })
 
   it('should accept a SAS log on its padded step numbers', () => {
@@ -349,6 +383,11 @@ describe('isSasLog', () => {
     expect(isSasLog('ERROR 22-322: Syntax error.')).toBe(true)
   })
 
+  it('should reject a log of notes from another tool', () => {
+    expect(isSasLog('NOTE: some other tool writes this\n')).toBe(false)
+    expect(isSasLog(PUBLISHED)).toBe(false)
+  })
+
   it('should reject a Python log, which writes the same markers', () => {
     const log = ['INFO:root:start', 'ERROR:root:boom', 'WARNING:root:careful']
 
@@ -357,6 +396,16 @@ describe('isSasLog', () => {
 
   it('should reject a shell or build log', () => {
     const log = ['ERROR: Command failed with exit code 1', 'npm ERR! path x']
+
+    expect(isSasLog(log.join('\n'))).toBe(false)
+  })
+
+  it('should reject a log that mentions SAS in prose', () => {
+    const log = [
+      '[warn] SASAUTOS was not refreshed.',
+      '[info] running the SASjs CLI against the SAS server',
+      'Done in 4s'
+    ]
 
     expect(isSasLog(log.join('\n'))).toBe(false)
   })

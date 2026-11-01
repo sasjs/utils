@@ -31,7 +31,8 @@
  * {@link isSasLog} answers the different question a host asks before publishing
  * anything: whether this file is a SAS log at all. A Python log and a shell build
  * log both write `ERROR:` at the start of a line, so the marker alone does not
- * say so - the notes, the padded step numbers and the message codes do.
+ * say so - the banner SAS prints about itself does, and so do its message codes
+ * and its padded step numbers.
  *
  * Lines SAS wrapped are folded into the message they belong to, so one problem
  * is one issue rather than one issue per wrapped line, and the keyword search
@@ -102,8 +103,14 @@ const MARKER =
 /** A line SAS numbers at the start, e.g. `1    data want;` - unlike a sequence number, it is padded. */
 const NUMBERED_STEP = /^\d+ {2,}\S/
 
-/** `NOTE:` at the start of a line, which is SAS's own marker and no other tool's. */
-const NOTE_MARKER = /^((?:<[^>]*>)+[ \t]*|)NOTE:[ \t]?/
+/**
+ * The phrases SAS prints about itself, and nothing else does: the version banner,
+ * the licence note, the platform note, the work-area conversion warning, the page
+ * header of a listing and the step footer. Every SAS log carries at least one;
+ * a log that has lost its head usually keeps the step footer.
+ */
+const SAS_BANNER =
+  /(?:The SAS System|^You are running SAS \d|^NOTE: (?:SAS|Copyright .*\bSAS Institute|This session is executing|DATA statement used))/m
 
 /** A coded marker, e.g. `ERROR 22-322:` - SAS's message identifiers, again its own. */
 const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
@@ -113,22 +120,19 @@ const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
  *
  * A marker alone does not say so: Python's logging writes `ERROR:root:boom` and
  * a shell build log writes `ERROR: Command failed with exit code 1`, both at the
- * start of a line. What identifies SAS is the rest of its vocabulary - the notes
- * it prints between steps, its padded step numbers, and its message codes - and
- * one line carrying any of them is enough.
+ * start of a line. Nor does the word SAS - build logs of this estate's own
+ * repositories mention it in prose - so the test is SAS's own vocabulary: the
+ * banner it prints about itself, its message codes, and its padded step numbers.
+ * Each of those is written by SAS and by nothing else.
  *
  * The check is deliberately cheap and runs before a host publishes anything, so
  * a `.log` from another tool is left alone.
  */
 export const isSasLog = (text: string): boolean =>
+  SAS_BANNER.test(text) ||
   text
     .split(/\r?\n/)
-    .some(
-      (line) =>
-        NOTE_MARKER.test(line) ||
-        CODED_MARKER.test(line) ||
-        NUMBERED_STEP.test(line)
-    )
+    .some((line) => CODED_MARKER.test(line) || NUMBERED_STEP.test(line))
 
 /**
  * The notes worth reporting, matched case-insensitively against the folded
