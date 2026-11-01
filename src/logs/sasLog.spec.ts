@@ -231,6 +231,37 @@ describe('parseLog', () => {
     expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
+  it('should take a wrapped line as the message when the marker line is bare', () => {
+    const [issue] = parseLog('ERROR:\n   File WORK.X.DATA does not exist.')
+
+    expect(issue.message).toEqual('File WORK.X.DATA does not exist.')
+    expect(issue.endLine).toEqual(1)
+  })
+
+  it('should read a marker on the last line when the log has no final newline', () => {
+    const issues = parseLog(
+      'NOTE: a note\nERROR: File WORK.X.DATA does not exist.'
+    )
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].line).toEqual(1)
+    expect(issues[0].message).toEqual('File WORK.X.DATA does not exist.')
+    expect(issues[0].endColumn).toEqual(
+      'ERROR: File WORK.X.DATA does not exist.'.length
+    )
+  })
+
+  it('should fold a wrapped line that ends the log with no final newline', () => {
+    const [issue] = parseLog(
+      'ERROR: File WORK.X.DATA does not exist.\n   and the rest'
+    )
+
+    expect(issue.endLine).toEqual(1)
+    expect(issue.message).toEqual(
+      'File WORK.X.DATA does not exist. and the rest'
+    )
+  })
+
   it('should read a log written with CRLF line endings', () => {
     const issues = parseLog('NOTE: one\r\nERROR: two\r\nWARNING: three\r\n')
 

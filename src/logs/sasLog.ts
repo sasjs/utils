@@ -101,12 +101,17 @@ const MARKER =
   /^((?:<[^>]*>)+[ \t]*|)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE)(?:\s+(\d+-\d+))?:[ \t]?)(.*)$/
 
 /**
- * A line SAS numbers at the start: a padded number, then a statement - which
- * begins with a macro call, a comment, or ends in the semicolon SAS statement
- * syntax requires. The padding alone is not evidence: `1   item` is a numbered
- * list in somebody else's output.
+ * The shapes only SAS writes, tested over the whole text in one pass so no line
+ * array is built: a coded marker (`ERROR 22-322:`), or a line SAS numbers at the
+ * start followed by a statement - one that begins with a macro call, a comment,
+ * or ends in the semicolon SAS statement syntax requires. The padded number alone
+ * is not evidence: `1   item` is a numbered list in somebody else's output.
+ *
+ * The statement tail is `[^\n;]*` rather than `[^;]*` because a negated class
+ * matches a newline, and a shape match must not span two lines.
  */
-const NUMBERED_STEP = /^\d+ {2,}(?:[%*/]|[^;]*;)/
+const SAS_SHAPE =
+  /^(?:(?:<[^>]*>)+[ \t]*|)(?:(?:ERROR|WARNING|NOTE) +\d+-\d+|\d+ {2,}(?:[%*/]|[^\n;]*;))/m
 
 /**
  * The phrases SAS prints about itself, and nothing else does: the version banner,
@@ -116,9 +121,6 @@ const NUMBERED_STEP = /^\d+ {2,}(?:[%*/]|[^;]*;)/
  */
 const SAS_BANNER =
   /(?:The SAS System|^You are running SAS \d|^NOTE: (?:SAS|Copyright .*\bSAS Institute|This session is executing|DATA statement used))/m
-
-/** A coded marker, e.g. `ERROR 22-322:` - SAS's message identifiers, again its own. */
-const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
 
 /**
  * Whether a text is a SAS log rather than somebody else's log file.
@@ -144,10 +146,7 @@ const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
  * a `.log` from another tool is left alone.
  */
 export const isSasLog = (text: string): boolean =>
-  SAS_BANNER.test(text) ||
-  text
-    .split(/\r?\n/)
-    .some((line) => CODED_MARKER.test(line) || NUMBERED_STEP.test(line))
+  SAS_BANNER.test(text) || SAS_SHAPE.test(text)
 
 /**
  * The notes worth reporting, matched case-insensitively against the folded
@@ -195,38 +194,66 @@ const NOTE_KEYWORDS = [
   'The SAS System stopped processing this step because of errors'
 ]
 
-const NOTABLE_NOTE_KEYWORDS = NOTE_KEYWORDS.map((keyword) =>
-  keyword.toLowerCase()
-)
+/** `RegExp`-escaping, so a keyword added later cannot change the meaning of the pattern. */
+const escape = (text: string): string =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
+ * The keyword list as one case-insensitive expression. Testing 30 keywords with
+ * `includes` meant lowercasing every note and up to 30 scans of it; a log holds
+ * thousands of notes and this is the second hottest function in the module.
+ */
+const NOTABLE_NOTE = new RegExp(NOTE_KEYWORDS.map(escape).join('|'), 'i')
 
 /** How many wrapped lines one message may absorb, so a malformed log cannot run away. */
 const MAX_WRAPPED_LINES = 10
 
 /** Whether a note's message is one of the notable ones. */
-export const isNotableNote = (message: string): boolean => {
-  const lower = message.toLowerCase()
-
-  return NOTABLE_NOTE_KEYWORDS.some((keyword) => lower.includes(keyword))
-}
+export const isNotableNote = (message: string): boolean =>
+  NOTABLE_NOTE.test(message)
 
 /**
- * A line SAS wrapped: indented, and not one of the pointer lines it prints under
- * source. An indented marker is not a continuation either - continuation lines
- * carry the rest of a message, and a marker on its own line starts the next one -
- * so it is left for the scan to ignore rather than folded into the issue above.
+ * The pointer line SAS prints under the token it complains about: a run of
+ * dashes, or the column number on its own.
+ */
+const POINTER_LINE = /^\s*(?:[-_]+\s*$|\d+\s*$)/
+
+/**
+ * A marker after indentation. Continuation lines carry the rest of a message and
+ * a marker on its own line starts the next one, so an indented marker ends the
+ * message above rather than joining it.
+ */
+const INDENTED_MARKER = /^\s+(?:<[^>]*>\s*)*(?:ERROR|WARNING|NOTE)\b/
+
+/**
+ * A line SAS wrapped: indented, and neither a pointer line nor a marker. Kept to
+ * two tests on the common path - a large log runs this once per issue.
  */
 const isWrappedLine = (line: string): boolean =>
-  /^\s+\S/.test(line) &&
-  !/^\s*[-_]+\s*$/.test(line) &&
-  !/^\s*\d+\s*$/.test(line) &&
-  !MARKER.test(line.trim())
+  /^\s+\S/.test(line) && !POINTER_LINE.test(line) && !INDENTED_MARKER.test(line)
 
-/** Removes markup and collapses the whitespace a wrapped message carries. */
-const clean = (text: string): string =>
-  text
-    .replace(/<[^>]*>/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+/**
+ * Removes markup and collapses the whitespace a wrapped message carries.
+ *
+ * Most messages need neither: a single line with no markup and no run of spaces
+ * is returned as it is, which keeps three passes off the common path - this is
+ * the hottest function in the module on a large log.
+ */
+const clean = (text: string): string => {
+  const plain =
+    text.charCodeAt(0) > 32 &&
+    text.charCodeAt(text.length - 1) > 32 &&
+    text.indexOf('<') < 0 &&
+    text.indexOf('\t') < 0 &&
+    text.indexOf('  ') < 0
+
+  return plain
+    ? text
+    : text
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
 
 /**
  * Finds every ERROR and WARNING in a SAS log, and every notable note.
@@ -237,42 +264,94 @@ const clean = (text: string): string =>
  * behind an option, because a notable note is worth reporting wherever the log
  * is shown.
  */
+/**
+ * The marker expression with the multiline flags, so one call walks the whole
+ * text. `exec` on a line at a time costs a call per line - half a million on a
+ * 16 MB log - where one pass over the string costs a fraction of that, and the
+ * line and column indexes are recovered from the match offsets instead.
+ */
+const SCAN = new RegExp(MARKER.source, 'gm')
+
+/** The index of the line break that ends the line starting at `from`, or -1. */
+const lineEnd = (text: string, from: number): number => text.indexOf('\n', from)
+
+/** A slice of the text with the carriage return of a CRLF line ending removed. */
+const withoutCr = (text: string, from: number, to: number): string =>
+  to > from && text.charCodeAt(to - 1) === 13
+    ? text.slice(from, to - 1)
+    : text.slice(from, to)
+
+/**
+ * Finds every ERROR and WARNING in a SAS log, and every notable note.
+ *
+ * The issue list is in log order. `line` and `column` address the text as
+ * supplied, so a caller can offset a decoration or a diagnostic by them
+ * directly. A host that wants errors only filters on `severity`; nothing is
+ * behind an option, because a notable note is worth reporting wherever the log
+ * is shown.
+ *
+ * The text is never split into lines: a log is often megabytes, and a pass that
+ * builds an array of its lines costs more than the scan and hands the collector
+ * a million strings. One global match walks the text, the line number is counted
+ * forward from the previous match, and only the lines a message needs are sliced.
+ */
 export const parseLog = (text: string): LogIssue[] => {
   if (!text) {
     return []
   }
 
-  const lines = text.split(/\r?\n/)
   const issues: LogIssue[] = []
+  let line = 0
+  let countedTo = 0
+  let match: RegExpExecArray | null
 
-  for (let line = 0; line < lines.length; line++) {
-    const match = MARKER.exec(lines[line])
+  SCAN.lastIndex = 0
 
-    if (!match) {
-      continue
+  while ((match = SCAN.exec(text)) !== null) {
+    const markerStart = match.index
+
+    // Lines between the last block and this marker.
+    for (
+      let index = text.indexOf('\n', countedTo);
+      index !== -1 && index < markerStart;
+      index = text.indexOf('\n', index + 1)
+    ) {
+      line++
     }
 
+    const markerEnd = lineEnd(text, markerStart)
+    const endIndex = markerEnd === -1 ? text.length : markerEnd
     const markerLine = line
-    const parts = [clean(match[7] ?? '')]
+
+    let message = clean(match[7])
     let endLine = markerLine
+    let cursor = endIndex + 1
     let wrapped = 0
 
-    while (
-      wrapped < MAX_WRAPPED_LINES &&
-      endLine + 1 < lines.length &&
-      isWrappedLine(lines[endLine + 1])
-    ) {
+    while (cursor <= text.length && wrapped < MAX_WRAPPED_LINES) {
+      const nextEnd = lineEnd(text, cursor)
+      const sliceEnd = nextEnd === -1 ? text.length : nextEnd
+      const candidate = withoutCr(text, cursor, sliceEnd)
+
+      if (!isWrappedLine(candidate)) {
+        break
+      }
+
+      const part = clean(candidate)
+      if (part !== '') {
+        message = message === '' ? part : `${message} ${part}`
+      }
+
       endLine++
       wrapped++
-      parts.push(clean(lines[endLine]))
+      cursor = sliceEnd + 1
     }
 
-    const severity = (match[2] ?? match[5]).toLowerCase() as LogSeverity
-    const message = parts.filter((part) => part !== '').join(' ')
-
-    // The wrapped lines belong to this message whether or not it is reported, so
-    // the scan resumes after them either way.
-    line = endLine
+    // The lines folded into this message belong to it whether or not it is
+    // reported, so the scan resumes after them either way.
+    SCAN.lastIndex = cursor
+    countedTo = cursor
+    line = endLine + 1
 
     // A marker with nothing after it is not a message: SAS does not print a bare
     // `ERROR` or `ERROR:` line, and an empty issue would reach a host as a blank
@@ -281,21 +360,31 @@ export const parseLog = (text: string): LogIssue[] => {
       continue
     }
 
+    const severity: LogSeverity = match[2]
+      ? match[2] === 'ERROR'
+        ? 'error'
+        : 'warning'
+      : 'note'
+
     if (severity === 'note' && !isNotableNote(message)) {
       continue
     }
 
     const code = match[3] ?? match[6]
-
-    issues.push({
+    const issue: LogIssue = {
       line: markerLine,
       endLine,
       column: match[1].length,
-      endColumn: lines[markerLine].length,
+      endColumn: endIndex - markerStart,
       severity,
-      ...(code ? { code } : {}),
       message
-    })
+    }
+
+    if (code) {
+      issue.code = code
+    }
+
+    issues.push(issue)
   }
 
   return issues
