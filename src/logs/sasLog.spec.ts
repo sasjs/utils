@@ -207,6 +207,19 @@ describe('parseLog', () => {
     expect(issue.endLine).toEqual(0)
   })
 
+  it('should not fold an indented marker that carries markup', () => {
+    const log = [
+      'ERROR: first',
+      '  <font color="red">ERROR: second</font>',
+      ''
+    ].join('\n')
+    const issues = parseLog(log)
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toEqual('first')
+    expect(issues[0].endLine).toEqual(0)
+  })
+
   it('should not absorb the pointer lines SAS prints under a source statement', () => {
     const log = [
       '14       x = age / 0;',
@@ -316,6 +329,12 @@ describe('parseLog', () => {
     ).toEqual(false)
   })
 
+  it('should normalise a message that carries a non-ASCII space', () => {
+    const [issue] = parseLog('ERROR:\u00A0File WORK.X.DATA does not exist.\n')
+
+    expect(issue.message).toEqual('File WORK.X.DATA does not exist.')
+  })
+
   it('should report each notable note as a note, not as a warning', () => {
     const log = [
       'NOTE: Missing values were generated as a result of performing an operation on missing values.',
@@ -420,6 +439,12 @@ describe('isSasLog', () => {
     ]
 
     expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a numbered statement fragment that has no semicolon', () => {
+    expect(isSasLog('1    data want')).toBe(true)
+    expect(isSasLog('7    proc sql')).toBe(true)
+    expect(isSasLog('3    libname mylib "/data"')).toBe(true)
   })
 
   it('should not accept a padded number that is not a SAS statement', () => {

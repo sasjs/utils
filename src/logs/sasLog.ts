@@ -111,7 +111,7 @@ const MARKER =
  * matches a newline, and a shape match must not span two lines.
  */
 const SAS_SHAPE =
-  /^(?:(?:<[^>]*>)+[ \t]*|)(?:(?:ERROR|WARNING|NOTE) +\d+-\d+|\d+ {2,}(?:[%*/]|[^\n;]*;))/m
+  /^(?:(?:<[^>]*>)+[ \t]*|)(?:(?:ERROR|WARNING|NOTE) +\d+-\d+|\d+ {2,}(?:[%*/]|(?:data|proc|libname|options|filename|ods|title|footnote)\b|[^\n;]*;))/m
 
 /**
  * The phrases SAS prints about itself, and nothing else does: the version banner,
@@ -219,18 +219,24 @@ export const isNotableNote = (message: string): boolean =>
 const POINTER_LINE = /^\s*(?:[-_]+\s*$|\d+\s*$)/
 
 /**
- * A marker after indentation. Continuation lines carry the rest of a message and
- * a marker on its own line starts the next one, so an indented marker ends the
- * message above rather than joining it.
- */
-const INDENTED_MARKER = /^\s+(?:<[^>]*>\s*)*(?:ERROR|WARNING|NOTE)\b/
-
-/**
- * A line SAS wrapped: indented, and neither a pointer line nor a marker. Kept to
- * two tests on the common path - a large log runs this once per issue.
+ * A line SAS wrapped: indented, and neither a pointer line nor a marker.
+ *
+ * The marker test is {@link MARKER} itself, applied to the trimmed line, so a
+ * continuation is excluded exactly when the line would have been a marker had it
+ * begun the line - the markup-prefixed form included. A second, subtly different
+ * expression is how an indented marker ends up belonging to neither the message
+ * above nor the issue list. Such a marker is dropped rather than reported, which
+ * is the rule the parser states: a message begins the line.
  */
 const isWrappedLine = (line: string): boolean =>
-  /^\s+\S/.test(line) && !POINTER_LINE.test(line) && !INDENTED_MARKER.test(line)
+  /^\s+\S/.test(line) && !POINTER_LINE.test(line) && !MARKER.test(line.trim())
+
+/**
+ * Whether a character code is printable ASCII and not a space. The fast path in
+ * {@link clean} is limited to ASCII at both ends, so a message carrying one of
+ * the non-ASCII spaces the slow path collapses still takes the slow path.
+ */
+const isPlainCode = (code: number): boolean => code > 32 && code < 127
 
 /**
  * Removes markup and collapses the whitespace a wrapped message carries.
@@ -241,8 +247,8 @@ const isWrappedLine = (line: string): boolean =>
  */
 const clean = (text: string): string => {
   const plain =
-    text.charCodeAt(0) > 32 &&
-    text.charCodeAt(text.length - 1) > 32 &&
+    isPlainCode(text.charCodeAt(0)) &&
+    isPlainCode(text.charCodeAt(text.length - 1)) &&
     text.indexOf('<') < 0 &&
     text.indexOf('\t') < 0 &&
     text.indexOf('  ') < 0
