@@ -199,6 +199,31 @@ describe('parseLog', () => {
     expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
+  it('should not match a marker across a line break', () => {
+    expect(parseLog('ERROR\n   22-322: Syntax error.\n')).toEqual([])
+  })
+
+  it('should not fold an indented marker into the issue above it', () => {
+    const issues = parseLog('ERROR: first\n  ERROR: second\n')
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toEqual('first')
+    expect(issues[0].endLine).toEqual(0)
+  })
+
+  it('should not fold an indented marker that carries markup', () => {
+    const log = [
+      'ERROR: first',
+      '  <font color="red">ERROR: second</font>',
+      ''
+    ].join('\n')
+    const issues = parseLog(log)
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toEqual('first')
+    expect(issues[0].endLine).toEqual(0)
+  })
+
   it('should not absorb the pointer lines SAS prints under a source statement', () => {
     const log = [
       '14       x = age / 0;',
@@ -223,15 +248,57 @@ describe('parseLog', () => {
     expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
+  it('should take a wrapped line as the message when the marker line is bare', () => {
+    const [issue] = parseLog('ERROR:\n   File WORK.X.DATA does not exist.')
+
+    expect(issue.message).toEqual('File WORK.X.DATA does not exist.')
+    expect(issue.endLine).toEqual(1)
+  })
+
+  it('should read a marker on the last line when the log has no final newline', () => {
+    const issues = parseLog(
+      'NOTE: a note\nERROR: File WORK.X.DATA does not exist.'
+    )
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].line).toEqual(1)
+    expect(issues[0].message).toEqual('File WORK.X.DATA does not exist.')
+    expect(issues[0].endColumn).toEqual(
+      'ERROR: File WORK.X.DATA does not exist.'.length
+    )
+  })
+
+  it('should fold a wrapped line that ends the log with no final newline', () => {
+    const [issue] = parseLog(
+      'ERROR: File WORK.X.DATA does not exist.\n   and the rest'
+    )
+
+    expect(issue.endLine).toEqual(1)
+    expect(issue.message).toEqual(
+      'File WORK.X.DATA does not exist. and the rest'
+    )
+  })
+
   it('should read a log written with CRLF line endings', () => {
-    const issues = parseLog('NOTE: one\r\nERROR: two\r\nWARNING: three\r\n')
+    const issues = parseLog(
+      'NOTE: Variable x is uninitialized.\r\n' +
+        'ERROR: File WORK.X.DATA does not exist.\r\n' +
+        'WARNING: Division by zero detected.\r\n'
+    )
 
     expect(
       issues.map((issue) => [issue.line, issue.severity, issue.message])
     ).toEqual([
-      [1, 'error', 'two'],
-      [2, 'warning', 'three']
+      [0, 'note', 'Variable x is uninitialized.'],
+      [1, 'error', 'File WORK.X.DATA does not exist.'],
+      [2, 'warning', 'Division by zero detected.']
     ])
+
+    // The column stops before the carriage return, so it addresses the line the
+    // reader sees rather than the newline after it.
+    expect(issues[1].endColumn).toEqual(
+      'ERROR: File WORK.X.DATA does not exist.'.length
+    )
   })
 
   it('should report the errors, warnings and notable notes of a published corpus', () => {
@@ -275,6 +342,12 @@ describe('parseLog', () => {
     expect(
       issues.some((issue) => issue.message.includes('will be overwritten'))
     ).toEqual(false)
+  })
+
+  it('should normalise a message that carries a non-ASCII space', () => {
+    const [issue] = parseLog('ERROR:\u00A0File WORK.X.DATA does not exist.\n')
+
+    expect(issue.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
   it('should report each notable note as a note, not as a warning', () => {
@@ -381,6 +454,25 @@ describe('isSasLog', () => {
     ]
 
     expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a numbered statement fragment that has no semicolon', () => {
+    expect(isSasLog('1    data want')).toBe(true)
+    expect(isSasLog('7    proc sql')).toBe(true)
+    expect(isSasLog('3    libname mylib "/data"')).toBe(true)
+  })
+
+  it('should not accept a numbered list line that ends in a semicolon', () => {
+    expect(isSasLog('12  Building target;')).toBe(false)
+    expect(isSasLog('12  color: red;')).toBe(false)
+  })
+
+  it('should not accept a padded number that is not a SAS statement', () => {
+    expect(isSasLog('1   item')).toBe(false)
+    expect(isSasLog('12  Building target')).toBe(false)
+    expect(isSasLog(['7  first point', '8  second point'].join('\n'))).toBe(
+      false
+    )
   })
 
   it('should accept a SAS log on a message code alone', () => {
