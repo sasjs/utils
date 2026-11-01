@@ -46,6 +46,7 @@
     "fs/**",
     "input/**",
     "logger/**",
+    "logs/**",
     "macros/**",
     "sasjsCli/**",
     "time/**",

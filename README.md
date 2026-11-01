@@ -20,6 +20,7 @@ import { ServerType } from '@sasjs/utils/types'
 import { prefixMessage } from '@sasjs/utils/error'
 import { isSpecialMissing } from '@sasjs/utils/input/validators'
 import { bytesToSize } from '@sasjs/utils/utils'
+import { parseLog } from '@sasjs/utils/logs'
 ```
 
 The hash and sync helpers - `getHash`, `compareHashes`, `extractHashArray`,
@@ -28,6 +29,20 @@ and `findResourcesNotPresentLocally` - live in `@sasjs/utils/fs`. They hash file
 folders on disk, so they are Node-only, and the barrel does not re-export them: a browser
 bundle that imports the barrel for anything else no longer reaches `crypto`, which used to
 arrive with the whole AES/RSA/ECDSA polyfill suite behind it.
+
+`@sasjs/utils/logs` parses a SAS log: `parseLog(text)` returns every `ERROR`,
+`WARNING` and notable `NOTE` as an issue addressed by line and column, and
+`nextIssue(issues, line, direction)` walks that list for a next/previous problem
+control. It is a pair of pure functions with no imports at all, so it runs
+unchanged in Node, in a browser bundle and in an editor extension, and it lives
+on a subpath so a browser never reaches the barrel's Node dependencies.
+
+Only the notes the log-checking literature chases are reported - an
+uninitialized variable, invalid data, a W.D format too small, values converted to
+another type, repeats of BY values - because a log carries thousands of ordinary
+notes and none of them is what a reader is looking for. The list is
+`NOTE_KEYWORDS` in `src/logs/sasLog.ts`, and adding a keyword is how the scope
+grows.
 
 ## Contributors ✨
 
