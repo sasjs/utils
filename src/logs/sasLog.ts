@@ -23,10 +23,15 @@
  * message identifier and is reported separately, so a host can group by it.
  *
  * NOTES are reported only when they are the ones the log-checking literature
- * flags - see NOTE_KEYWORDS - and only in their colon form. A log carries
- * thousands of ordinary notes and none of them is what a reader is looking for,
- * so the vocabulary is a closed list rather than "any NOTE". INFO lines are not
+ * flags - see NOTE_KEYWORDS - and only in their colon form, because the notes
+ * stream is endless and the notable ones are a closed list. A coded note
+ * (`NOTE 49-169:`) is one of them and keeps its code. INFO lines are not
  * reported at all.
+ *
+ * {@link isSasLog} answers the different question a host asks before publishing
+ * anything: whether this file is a SAS log at all. A Python log and a shell build
+ * log both write `ERROR:` at the start of a line, so the marker alone does not
+ * say so - the notes, the padded step numbers and the message codes do.
  *
  * Lines SAS wrapped are folded into the message they belong to, so one problem
  * is one issue rather than one issue per wrapped line, and the keyword search
@@ -81,14 +86,49 @@ export type IssueDirection = 'next' | 'previous'
  *
  * `NOTE` is a separate shape inside the same expression because it only counts
  * with its colon: matching any line that begins NOTE would put the whole notes
- * stream into the results.
+ * stream into the results. A coded note is a note - `NOTE 49-169:` carries the
+ * same kind of identifier an error does, and two of the notable keywords are
+ * written for coded notes.
  *
- * The tags of an ODS HTML log may lead the marker - they are markup the reader
- * never sees, and the marker still begins the line's text. They are captured so
- * the marker's column is exact, and the code and message are captured separately.
+ * The tags of an ODS HTML log may lead the marker, with or without padding after
+ * them - they are markup the reader never sees, and the marker still begins the
+ * line's text. Padding without markup is not allowed: an indented marker is text
+ * in a listing, not a message. The prefix is captured so the marker's column is
+ * exact, and the code and message are captured separately.
  */
 const MARKER =
-  /^((?:<[^>]*>)*)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE):[ \t]?)(.*)$/
+  /^((?:<[^>]*>)+[ \t]*|)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE)(?:\s+(\d+-\d+))?:[ \t]?)(.*)$/
+
+/** A line SAS numbers at the start, e.g. `1    data want;` - unlike a sequence number, it is padded. */
+const NUMBERED_STEP = /^\d+ {2,}\S/
+
+/** `NOTE:` at the start of a line, which is SAS's own marker and no other tool's. */
+const NOTE_MARKER = /^((?:<[^>]*>)+[ \t]*|)NOTE:[ \t]?/
+
+/** A coded marker, e.g. `ERROR 22-322:` - SAS's message identifiers, again its own. */
+const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
+
+/**
+ * Whether a text is a SAS log rather than somebody else's log file.
+ *
+ * A marker alone does not say so: Python's logging writes `ERROR:root:boom` and
+ * a shell build log writes `ERROR: Command failed with exit code 1`, both at the
+ * start of a line. What identifies SAS is the rest of its vocabulary - the notes
+ * it prints between steps, its padded step numbers, and its message codes - and
+ * one line carrying any of them is enough.
+ *
+ * The check is deliberately cheap and runs before a host publishes anything, so
+ * a `.log` from another tool is left alone.
+ */
+export const isSasLog = (text: string): boolean =>
+  text
+    .split(/\r?\n/)
+    .some(
+      (line) =>
+        NOTE_MARKER.test(line) ||
+        CODED_MARKER.test(line) ||
+        NUMBERED_STEP.test(line)
+    )
 
 /**
  * The notes worth reporting, matched case-insensitively against the folded
@@ -188,7 +228,7 @@ export const parseLog = (text: string): LogIssue[] => {
     }
 
     const markerLine = line
-    const parts = [clean(match[6] ?? '')]
+    const parts = [clean(match[7] ?? '')]
     let endLine = markerLine
     let wrapped = 0
 
@@ -213,7 +253,7 @@ export const parseLog = (text: string): LogIssue[] => {
       continue
     }
 
-    const code = match[3]
+    const code = match[3] ?? match[6]
 
     issues.push({
       line: markerLine,

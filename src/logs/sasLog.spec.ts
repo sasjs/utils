@@ -1,4 +1,4 @@
-import { nextIssue, parseLog } from '.'
+import { isSasLog, nextIssue, parseLog } from '.'
 
 /**
  * A log covering what SAS 9 and Viya print for a step that warns, then fails.
@@ -167,6 +167,34 @@ describe('parseLog', () => {
     expect(parseLog(log)).toEqual([])
   })
 
+  it('should report a coded note and keep its code', () => {
+    const [note] = parseLog(
+      'NOTE 49-169: The meaning of an identifier after a quoted string may change.\n'
+    )
+
+    expect(note.severity).toEqual('note')
+    expect(note.code).toEqual('49-169')
+    expect(note.message).toEqual(
+      'The meaning of an identifier after a quoted string may change.'
+    )
+  })
+
+  it('should not report a coded note that is not on the notable list', () => {
+    const log = 'NOTE 55-151: A step numbering has been restarted.\n'
+
+    expect(parseLog(log)).toEqual([])
+  })
+
+  it('should read a marker that follows markup and its padding', () => {
+    const [error] = parseLog(
+      '<font color="red"> ERROR: File WORK.X.DATA does not exist.</font>\n'
+    )
+
+    expect(error.severity).toEqual('error')
+    expect(error.column).toEqual('<font color="red"> '.length)
+    expect(error.message).toEqual('File WORK.X.DATA does not exist.')
+  })
+
   it('should not absorb the pointer lines SAS prints under a source statement', () => {
     const log = [
       '14       x = age / 0;',
@@ -299,6 +327,43 @@ describe('parseLog', () => {
       'NOTE: The previous step wrote ERROR: File not found. - see the documentation.\n'
 
     expect(parseLog(log)).toEqual([])
+  })
+})
+
+describe('isSasLog', () => {
+  it('should accept a SAS log on the notes it prints between steps', () => {
+    expect(isSasLog(PUBLISHED)).toBe(true)
+  })
+
+  it('should accept a SAS log on its padded step numbers', () => {
+    const log = [
+      '1    data a;',
+      '2      x = 1;',
+      'ERROR Libref X is not assigned.'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a SAS log on a message code alone', () => {
+    expect(isSasLog('ERROR 22-322: Syntax error.')).toBe(true)
+  })
+
+  it('should reject a Python log, which writes the same markers', () => {
+    const log = ['INFO:root:start', 'ERROR:root:boom', 'WARNING:root:careful']
+
+    expect(isSasLog(log.join('\n'))).toBe(false)
+  })
+
+  it('should reject a shell or build log', () => {
+    const log = ['ERROR: Command failed with exit code 1', 'npm ERR! path x']
+
+    expect(isSasLog(log.join('\n'))).toBe(false)
+  })
+
+  it('should reject a text that is not a log at all', () => {
+    expect(isSasLog('')).toBe(false)
+    expect(isSasLog('nothing to see here')).toBe(false)
   })
 })
 
