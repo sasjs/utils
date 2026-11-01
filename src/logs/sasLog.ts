@@ -2,34 +2,38 @@
  * SAS log parsing.
  *
  * A SAS log is a stream of statements and messages, and only the messages
- * matter to a reader looking for trouble: everything SAS prints at the start of
- * a line as `ERROR:`, `WARNING:` or `NOTE:`. This module finds those messages
- * and reports where they are, as line and column indexes into the text it was
- * given, so a host can underline them without re-scanning the log and without
- * rewriting it.
+ * matter to a reader looking for trouble: the ones SAS prints at the start of a
+ * line as `ERROR`, `WARNING` or `NOTE`. This module finds those messages and
+ * reports where they are, as line and column indexes into the text it was given,
+ * so a host can underline them without re-scanning the log and without rewriting
+ * it.
  *
- * What is recognised:
+ * What is recognised - the marker in capitals, beginning the line:
  *
  *   ERROR: Libref X is not assigned.
+ *   ERROR Libref Y is not assigned.
  *   ERROR 22-322: Syntax error, expecting one of the following: ;, CANCEL,
  *                 RUN, QUIT.
  *   WARNING 1-322: Assuming the symbol Y was misspelled.
  *   NOTE: Variable x is uninitialized.
  *
- * The numeric code between the marker and the colon is SAS's own message
- * identifier and is reported separately, so a host can group by it.
+ * An error or a warning needs a colon, or a space, after the marker; `ERROR` on
+ * its own is not a message, and neither is every line that happens to begin with
+ * the word. The numeric code between the marker and the colon is SAS's own
+ * message identifier and is reported separately, so a host can group by it.
  *
  * NOTES are reported only when they are the ones the log-checking literature
- * flags - see NOTE_KEYWORDS. A log carries thousands of ordinary notes and none
- * of them is what a reader is looking for, so the vocabulary is a closed list
- * rather than "any NOTE". INFO lines are not reported at all.
+ * flags - see NOTE_KEYWORDS - and only in their colon form. A log carries
+ * thousands of ordinary notes and none of them is what a reader is looking for,
+ * so the vocabulary is a closed list rather than "any NOTE". INFO lines are not
+ * reported at all.
  *
  * Lines SAS wrapped are folded into the message they belong to, so one problem
  * is one issue rather than one issue per wrapped line, and the keyword search
  * runs on the folded message - a note whose keyword lands on the second line is
- * still found. Lines that merely contain the word ERROR are not matched: the
- * marker has to start the line, which keeps a print of a data set, or a message
- * quoting another log, out of the results.
+ * still found. Nothing indented counts as a marker, and neither does a marker in
+ * lower case: the real one starts the line, which keeps a print of a data set,
+ * or a message quoting another log, out of the results.
  *
  * ODS HTML logs wrap every line in markup. A tag sequence before the marker is
  * skipped and tags are stripped from the reported message, so the same parse
@@ -69,13 +73,22 @@ export interface LogIssue {
 export type IssueDirection = 'next' | 'previous'
 
 /**
- * `ERROR`, `WARNING` or `NOTE` at the start of a line, optionally preceded by
- * the tags of an HTML log, optionally followed by SAS's message identifier,
- * then a colon. The prefix is captured so the marker's column is exact even when
- * tags lead it.
+ * A marker at the start of a line: SAS writes `ERROR:` and `WARNING:` with a
+ * colon, and also writes them with no colon at all - `ERROR Libref X is not
+ * assigned.` - so a run of whitespace ends those two as well. The marker is
+ * uppercase and begins the line, which is what keeps a print of a data set, or a
+ * quotation of another log, out of the results.
+ *
+ * `NOTE` is a separate shape inside the same expression because it only counts
+ * with its colon: matching any line that begins NOTE would put the whole notes
+ * stream into the results.
+ *
+ * The tags of an ODS HTML log may lead the marker - they are markup the reader
+ * never sees, and the marker still begins the line's text. They are captured so
+ * the marker's column is exact, and the code and message are captured separately.
  */
 const MARKER =
-  /^((?:<[^>]*>)*\s*)(ERROR|WARNING|NOTE)(?:\s+(\d+-\d+))?:[ \t]?(.*)$/i
+  /^((?:<[^>]*>)*)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE):[ \t]?)(.*)$/
 
 /**
  * The notes worth reporting, matched case-insensitively against the folded
@@ -175,7 +188,7 @@ export const parseLog = (text: string): LogIssue[] => {
     }
 
     const markerLine = line
-    const parts = [clean(match[4] ?? '')]
+    const parts = [clean(match[6] ?? '')]
     let endLine = markerLine
     let wrapped = 0
 
@@ -189,7 +202,7 @@ export const parseLog = (text: string): LogIssue[] => {
       parts.push(clean(lines[endLine]))
     }
 
-    const severity = match[2].toLowerCase() as LogSeverity
+    const severity = (match[2] ?? match[5]).toLowerCase() as LogSeverity
     const message = parts.filter((part) => part !== '').join(' ')
 
     // The wrapped lines belong to this message whether or not it is reported, so

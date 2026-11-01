@@ -119,6 +119,54 @@ describe('parseLog', () => {
     expect(parseLog(log)).toEqual([])
   })
 
+  it('should report an error that carries no colon', () => {
+    const issues = parseLog('ERROR Libref X is not assigned.\n')
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].severity).toEqual('error')
+    expect(issues[0].message).toEqual('Libref X is not assigned.')
+  })
+
+  it('should report a warning that carries no colon', () => {
+    const [warning] = parseLog('WARNING Cartesian product will be generated.\n')
+
+    expect(warning.severity).toEqual('warning')
+    expect(warning.message).toEqual('Cartesian product will be generated.')
+  })
+
+  it('should report a coded error that carries no colon', () => {
+    const [error] = parseLog('ERROR 22-322 Syntax error.\n')
+
+    expect(error.code).toEqual('22-322')
+    expect(error.message).toEqual('Syntax error.')
+  })
+
+  it('should not match a marker indented from the start of the line', () => {
+    expect(parseLog('  ERROR: indented, so not a message.\n')).toEqual([])
+    expect(parseLog('\tWARNING indented too.\n')).toEqual([])
+  })
+
+  it('should not match a marker in lower or mixed case', () => {
+    expect(parseLog('error: SAS writes its markers in capitals.\n')).toEqual([])
+    expect(parseLog('Warning: and in mixed case.\n')).toEqual([])
+  })
+
+  it('should not match a marker with nothing after it', () => {
+    expect(parseLog('ERROR\n')).toEqual([])
+    expect(parseLog('WARNING\n')).toEqual([])
+  })
+
+  it('should not match a word that merely begins with the marker', () => {
+    expect(parseLog('ERRORS: none.\n')).toEqual([])
+    expect(parseLog('WARNINGS are not errors.\n')).toEqual([])
+  })
+
+  it('should not report a note that carries no colon', () => {
+    const log = 'NOTE Variable x is uninitialized.\n'
+
+    expect(parseLog(log)).toEqual([])
+  })
+
   it('should not absorb the pointer lines SAS prints under a source statement', () => {
     const log = [
       '14       x = age / 0;',
