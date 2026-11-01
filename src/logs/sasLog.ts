@@ -2,34 +2,44 @@
  * SAS log parsing.
  *
  * A SAS log is a stream of statements and messages, and only the messages
- * matter to a reader looking for trouble: everything SAS prints at the start of
- * a line as `ERROR:`, `WARNING:` or `NOTE:`. This module finds those messages
- * and reports where they are, as line and column indexes into the text it was
- * given, so a host can underline them without re-scanning the log and without
- * rewriting it.
+ * matter to a reader looking for trouble: the ones SAS prints at the start of a
+ * line as `ERROR`, `WARNING` or `NOTE`. This module finds those messages and
+ * reports where they are, as line and column indexes into the text it was given,
+ * so a host can underline them without re-scanning the log and without rewriting
+ * it.
  *
- * What is recognised:
+ * What is recognised - the marker in capitals, beginning the line:
  *
  *   ERROR: Libref X is not assigned.
+ *   ERROR Libref Y is not assigned.
  *   ERROR 22-322: Syntax error, expecting one of the following: ;, CANCEL,
  *                 RUN, QUIT.
  *   WARNING 1-322: Assuming the symbol Y was misspelled.
  *   NOTE: Variable x is uninitialized.
  *
- * The numeric code between the marker and the colon is SAS's own message
- * identifier and is reported separately, so a host can group by it.
+ * An error or a warning needs a colon, or a space, after the marker; `ERROR` on
+ * its own is not a message, and neither is every line that happens to begin with
+ * the word. The numeric code between the marker and the colon is SAS's own
+ * message identifier and is reported separately, so a host can group by it.
  *
  * NOTES are reported only when they are the ones the log-checking literature
- * flags - see NOTE_KEYWORDS. A log carries thousands of ordinary notes and none
- * of them is what a reader is looking for, so the vocabulary is a closed list
- * rather than "any NOTE". INFO lines are not reported at all.
+ * flags - see NOTE_KEYWORDS - and only in their colon form, because the notes
+ * stream is endless and the notable ones are a closed list. A coded note
+ * (`NOTE 49-169:`) is one of them and keeps its code. INFO lines are not
+ * reported at all.
+ *
+ * {@link isSasLog} answers the different question a host asks before publishing
+ * anything: whether this file is a SAS log at all. A Python log and a shell build
+ * log both write `ERROR:` at the start of a line, so the marker alone does not
+ * say so - the banner SAS prints about itself does, and so do its message codes
+ * and its padded step numbers.
  *
  * Lines SAS wrapped are folded into the message they belong to, so one problem
  * is one issue rather than one issue per wrapped line, and the keyword search
  * runs on the folded message - a note whose keyword lands on the second line is
- * still found. Lines that merely contain the word ERROR are not matched: the
- * marker has to start the line, which keeps a print of a data set, or a message
- * quoting another log, out of the results.
+ * still found. Nothing indented counts as a marker, and neither does a marker in
+ * lower case: the real one starts the line, which keeps a print of a data set,
+ * or a message quoting another log, out of the results.
  *
  * ODS HTML logs wrap every line in markup. A tag sequence before the marker is
  * skipped and tags are stripped from the reported message, so the same parse
@@ -69,13 +79,70 @@ export interface LogIssue {
 export type IssueDirection = 'next' | 'previous'
 
 /**
- * `ERROR`, `WARNING` or `NOTE` at the start of a line, optionally preceded by
- * the tags of an HTML log, optionally followed by SAS's message identifier,
- * then a colon. The prefix is captured so the marker's column is exact even when
- * tags lead it.
+ * A marker at the start of a line: SAS writes `ERROR:` and `WARNING:` with a
+ * colon, and also writes them with no colon at all - `ERROR Libref X is not
+ * assigned.` - so a run of whitespace ends those two as well. The marker is
+ * uppercase and begins the line, which is what keeps a print of a data set, or a
+ * quotation of another log, out of the results.
+ *
+ * `NOTE` is a separate shape inside the same expression because it only counts
+ * with its colon: matching any line that begins NOTE would put the whole notes
+ * stream into the results. A coded note is a note - `NOTE 49-169:` carries the
+ * same kind of identifier an error does, and two of the notable keywords are
+ * written for coded notes.
+ *
+ * The tags of an ODS HTML log may lead the marker, with or without padding after
+ * them - they are markup the reader never sees, and the marker still begins the
+ * line's text. Padding without markup is not allowed: an indented marker is text
+ * in a listing, not a message. The prefix is captured so the marker's column is
+ * exact, and the code and message are captured separately.
  */
 const MARKER =
-  /^((?:<[^>]*>)*\s*)(ERROR|WARNING|NOTE)(?:\s+(\d+-\d+))?:[ \t]?(.*)$/i
+  /^((?:<[^>]*>)+[ \t]*|)(?:(ERROR|WARNING)(?:\s+(\d+-\d+))?(:[ \t]?|[ \t]+)|(NOTE)(?:\s+(\d+-\d+))?:[ \t]?)(.*)$/
+
+/** A line SAS numbers at the start, e.g. `1    data want;` - unlike a sequence number, it is padded. */
+const NUMBERED_STEP = /^\d+ {2,}\S/
+
+/**
+ * The phrases SAS prints about itself, and nothing else does: the version banner,
+ * the licence note, the platform note, the work-area conversion warning, the page
+ * header of a listing and the step footer. Every SAS log carries at least one;
+ * a log that has lost its head usually keeps the step footer.
+ */
+const SAS_BANNER =
+  /(?:The SAS System|^You are running SAS \d|^NOTE: (?:SAS|Copyright .*\bSAS Institute|This session is executing|DATA statement used))/m
+
+/** A coded marker, e.g. `ERROR 22-322:` - SAS's message identifiers, again its own. */
+const CODED_MARKER = /^((?:<[^>]*>)+[ \t]*|)(?:ERROR|WARNING|NOTE) +\d+-\d+/
+
+/**
+ * Whether a text is a SAS log rather than somebody else's log file.
+ *
+ * A marker alone does not say so: Python's logging writes `ERROR:root:boom` and
+ * a shell build log writes `ERROR: Command failed with exit code 1`, both at the
+ * start of a line. Nor does the word SAS - build logs of this estate's own
+ * repositories mention it in prose - so the test is SAS's own vocabulary: the
+ * banner it prints about itself, its message codes, and its padded step numbers.
+ * Each of those is written by SAS and by nothing else.
+ *
+ * This is a heuristic, and one way only: a true answer means SAS wrote the text,
+ * while a false answer does not prove it did not - a trimmed excerpt of a log,
+ * pasted with only its `ERROR:` lines, carries none of the three and reads as
+ * somebody else's. A host that publishes diagnostics should therefore treat false
+ * as "not obviously SAS" rather than "not SAS".
+ *
+ * Counting marker lines instead was considered and rejected: two `ERROR:` lines is
+ * what a Python log is made of, so it would readmit exactly the files this
+ * predicate exists to keep out.
+ *
+ * The check is deliberately cheap and runs before a host publishes anything, so
+ * a `.log` from another tool is left alone.
+ */
+export const isSasLog = (text: string): boolean =>
+  SAS_BANNER.test(text) ||
+  text
+    .split(/\r?\n/)
+    .some((line) => CODED_MARKER.test(line) || NUMBERED_STEP.test(line))
 
 /**
  * The notes worth reporting, matched case-insensitively against the folded
@@ -175,7 +242,7 @@ export const parseLog = (text: string): LogIssue[] => {
     }
 
     const markerLine = line
-    const parts = [clean(match[4] ?? '')]
+    const parts = [clean(match[7] ?? '')]
     let endLine = markerLine
     let wrapped = 0
 
@@ -189,18 +256,25 @@ export const parseLog = (text: string): LogIssue[] => {
       parts.push(clean(lines[endLine]))
     }
 
-    const severity = match[2].toLowerCase() as LogSeverity
+    const severity = (match[2] ?? match[5]).toLowerCase() as LogSeverity
     const message = parts.filter((part) => part !== '').join(' ')
 
     // The wrapped lines belong to this message whether or not it is reported, so
     // the scan resumes after them either way.
     line = endLine
 
+    // A marker with nothing after it is not a message: SAS does not print a bare
+    // `ERROR` or `ERROR:` line, and an empty issue would reach a host as a blank
+    // line in its problem list.
+    if (message === '') {
+      continue
+    }
+
     if (severity === 'note' && !isNotableNote(message)) {
       continue
     }
 
-    const code = match[3]
+    const code = match[3] ?? match[6]
 
     issues.push({
       line: markerLine,

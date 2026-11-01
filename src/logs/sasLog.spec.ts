@@ -1,4 +1,4 @@
-import { nextIssue, parseLog } from '.'
+import { isSasLog, nextIssue, parseLog } from '.'
 
 /**
  * A log covering what SAS 9 and Viya print for a step that warns, then fails.
@@ -117,6 +117,86 @@ describe('parseLog', () => {
     const log = ' a data step printed ERROR: this is text in a data set\n'
 
     expect(parseLog(log)).toEqual([])
+  })
+
+  it('should report an error that carries no colon', () => {
+    const issues = parseLog('ERROR Libref X is not assigned.\n')
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].severity).toEqual('error')
+    expect(issues[0].message).toEqual('Libref X is not assigned.')
+  })
+
+  it('should report a warning that carries no colon', () => {
+    const [warning] = parseLog('WARNING Cartesian product will be generated.\n')
+
+    expect(warning.severity).toEqual('warning')
+    expect(warning.message).toEqual('Cartesian product will be generated.')
+  })
+
+  it('should report a coded error that carries no colon', () => {
+    const [error] = parseLog('ERROR 22-322 Syntax error.\n')
+
+    expect(error.code).toEqual('22-322')
+    expect(error.message).toEqual('Syntax error.')
+  })
+
+  it('should not match a marker indented from the start of the line', () => {
+    expect(parseLog('  ERROR: indented, so not a message.\n')).toEqual([])
+    expect(parseLog('\tWARNING indented too.\n')).toEqual([])
+  })
+
+  it('should not match a marker in lower or mixed case', () => {
+    expect(parseLog('error: SAS writes its markers in capitals.\n')).toEqual([])
+    expect(parseLog('Warning: and in mixed case.\n')).toEqual([])
+  })
+
+  it('should not match a marker with nothing after it', () => {
+    expect(parseLog('ERROR\n')).toEqual([])
+    expect(parseLog('WARNING\n')).toEqual([])
+    expect(parseLog('ERROR \n')).toEqual([])
+    expect(parseLog('WARNING   \n')).toEqual([])
+    expect(parseLog('ERROR: \n')).toEqual([])
+    expect(parseLog('ERROR:\t\n')).toEqual([])
+  })
+
+  it('should not match a word that merely begins with the marker', () => {
+    expect(parseLog('ERRORS: none.\n')).toEqual([])
+    expect(parseLog('WARNINGS are not errors.\n')).toEqual([])
+  })
+
+  it('should not report a note that carries no colon', () => {
+    const log = 'NOTE Variable x is uninitialized.\n'
+
+    expect(parseLog(log)).toEqual([])
+  })
+
+  it('should report a coded note and keep its code', () => {
+    const [note] = parseLog(
+      'NOTE 49-169: The meaning of an identifier after a quoted string may change.\n'
+    )
+
+    expect(note.severity).toEqual('note')
+    expect(note.code).toEqual('49-169')
+    expect(note.message).toEqual(
+      'The meaning of an identifier after a quoted string may change.'
+    )
+  })
+
+  it('should not report a coded note that is not on the notable list', () => {
+    const log = 'NOTE 55-151: A step numbering has been restarted.\n'
+
+    expect(parseLog(log)).toEqual([])
+  })
+
+  it('should read a marker that follows markup and its padding', () => {
+    const [error] = parseLog(
+      '<font color="red"> ERROR: File WORK.X.DATA does not exist.</font>\n'
+    )
+
+    expect(error.severity).toEqual('error')
+    expect(error.column).toEqual('<font color="red"> '.length)
+    expect(error.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
   it('should not absorb the pointer lines SAS prints under a source statement', () => {
@@ -251,6 +331,92 @@ describe('parseLog', () => {
       'NOTE: The previous step wrote ERROR: File not found. - see the documentation.\n'
 
     expect(parseLog(log)).toEqual([])
+  })
+})
+
+describe('isSasLog', () => {
+  it('should accept a log on the banner SAS prints about itself', () => {
+    const log = [
+      'NOTE: Copyright (c) 2025 by SAS Institute Inc., Cary, NC, USA.',
+      'NOTE: SAS (r) Proprietary Software 9.4 (TS1M9 MBCS3170)',
+      'NOTE: This session is executing on the Linux 5.14.0 platform.'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a log on the work-area conversion warning', () => {
+    const log =
+      'You are running SAS 9. Some SAS 9 files will be automatically converted.'
+
+    expect(isSasLog(log)).toBe(true)
+  })
+
+  it('should accept a log whose head is lost but whose step footer survives', () => {
+    const log = [
+      '12       x = 1;',
+      '',
+      'NOTE: DATA statement used (Total process time):'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a listing on its page header', () => {
+    const log = [
+      '1                     The SAS System              Wednesday, October 29, 2025',
+      '',
+      'OBS    NAME',
+      '  1    Alfred'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a SAS log on its padded step numbers', () => {
+    const log = [
+      '1    data a;',
+      '2      x = 1;',
+      'ERROR Libref X is not assigned.'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(true)
+  })
+
+  it('should accept a SAS log on a message code alone', () => {
+    expect(isSasLog('ERROR 22-322: Syntax error.')).toBe(true)
+  })
+
+  it('should reject a log of notes from another tool', () => {
+    expect(isSasLog('NOTE: some other tool writes this\n')).toBe(false)
+    expect(isSasLog(PUBLISHED)).toBe(false)
+  })
+
+  it('should reject a Python log, which writes the same markers', () => {
+    const log = ['INFO:root:start', 'ERROR:root:boom', 'WARNING:root:careful']
+
+    expect(isSasLog(log.join('\n'))).toBe(false)
+  })
+
+  it('should reject a shell or build log', () => {
+    const log = ['ERROR: Command failed with exit code 1', 'npm ERR! path x']
+
+    expect(isSasLog(log.join('\n'))).toBe(false)
+  })
+
+  it('should reject a log that mentions SAS in prose', () => {
+    const log = [
+      '[warn] SASAUTOS was not refreshed.',
+      '[info] running the SASjs CLI against the SAS server',
+      'Done in 4s'
+    ]
+
+    expect(isSasLog(log.join('\n'))).toBe(false)
+  })
+
+  it('should reject a text that is not a log at all', () => {
+    expect(isSasLog('')).toBe(false)
+    expect(isSasLog('nothing to see here')).toBe(false)
   })
 })
 
