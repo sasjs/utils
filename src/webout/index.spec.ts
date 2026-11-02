@@ -301,8 +301,35 @@ ${weboutFinaliseStatement}`
       'testuser'
     )
 
-    // A host that supplies neither says so, naming the block, rather than
-    // failing later with a bare ReferenceError.
+    // A host whose require('fs') is a stub makes the block fall through to a
+    // usable binding rather than returning the stub.
+    const viaFallback = new Function(
+      'require',
+      'console',
+      'process',
+      'fs',
+      source
+    )
+    expect(() =>
+      viaFallback(() => ({}), quietConsole, process, require('fs'))
+    ).not.toThrow()
+    expect(JSON.parse(readFileSync(weboutPath, 'utf-8')).MF_GETUSER).toEqual(
+      'testuser'
+    )
+    // That host's require('os') is a stub too, so the host facts come from the
+    // browser fallback - which in node answers nothing rather than throwing.
+    expect(JSON.parse(readFileSync(weboutPath, 'utf-8')).SYSHOSTNAME).toEqual(
+      ''
+    )
+
+    // A host that hands back a stub, and no usable binding either, hears what is
+    // missing instead of "Cannot read properties of undefined".
+    const viaStub = new Function('require', 'console', 'process', source)
+    expect(() => viaStub(() => ({}), quietConsole, process)).toThrow(
+      'webout(): this host provides no fs with writeFileSync and appendFileSync'
+    )
+
+    // Nothing at all, including a require that refuses.
     const withoutBoth = new Function('require', 'console', 'process', source)
     expect(() =>
       withoutBoth(
@@ -312,7 +339,9 @@ ${weboutFinaliseStatement}`
         quietConsole,
         process
       )
-    ).toThrow('webout(): this host provides neither require() nor fs')
+    ).toThrow(
+      'webout(): this host provides no fs with writeFileSync and appendFileSync'
+    )
   })
 
   it('writes a program that only assigns _webout, and reports mixing the two', () => {

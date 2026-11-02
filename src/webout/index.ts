@@ -84,19 +84,46 @@ const _sasjs_webout_config = {
 
 /* Resolved here rather than assumed, so a host that emits this block without
    binding fs in the program's scope still works - the alternative is a
-   ReferenceError in the session log at the first webout() call. */
+   ReferenceError in the session log at the first webout() call. What comes back
+   is checked for the two calls this block makes: a host that hands back an empty
+   or partial shim must hear that, not 'appendFileSync of undefined'. */
 const _sasjs_fs = (() => {
-  try { return require('fs'); } catch (_sasjs_no_require) {}
+  const _sasjs_usable = (candidate) =>
+    !!candidate &&
+    typeof candidate.writeFileSync === 'function' &&
+    typeof candidate.appendFileSync === 'function';
+
+  try {
+    const _sasjs_required = require('fs');
+    if (_sasjs_usable(_sasjs_required)) return _sasjs_required;
+  } catch (_sasjs_no_require) {}
+
   /* a program's own later 'const fs' leaves the name in its temporal dead zone
      here, so even the typeof can throw */
-  try { if (typeof fs !== 'undefined') return fs; } catch (_sasjs_fs_unset) {}
-  throw new Error('webout(): this host provides neither require() nor fs');
+  try {
+    if (typeof fs !== 'undefined' && _sasjs_usable(fs)) return fs;
+  } catch (_sasjs_fs_unset) {}
+
+  throw new Error(
+    'webout(): this host provides no fs with writeFileSync and appendFileSync'
+  );
 })();
 
 /* Node modules are absent in a browser host, and a host may refuse them, so the
-   system block falls back to what the browser can answer. */
+   system block falls back to what the browser can answer. The shape is checked
+   for the same reason as fs: a host that hands back a stub must not be taken for
+   a working os module. */
 let _sasjs_os = null;
-try { _sasjs_os = require('os'); } catch (_sasjs_no_os) { _sasjs_os = null; }
+try {
+  const _sasjs_os_module = require('os');
+  if (
+    _sasjs_os_module &&
+    typeof _sasjs_os_module.hostname === 'function' &&
+    typeof _sasjs_os_module.type === 'function' &&
+    typeof _sasjs_os_module.totalmem === 'function'
+  )
+    _sasjs_os = _sasjs_os_module;
+} catch (_sasjs_no_os) { _sasjs_os = null; }
 
 let _sasjs_syserrortext = '';
 let _sasjs_syswarningtext = '';
