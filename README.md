@@ -1,6 +1,7 @@
 # @sasjs/utils
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -43,6 +44,12 @@ another type, repeats of BY values - because a log carries thousands of ordinary
 notes and none of them is what a reader is looking for. The list is
 `NOTE_KEYWORDS` in `src/logs/sasLog.ts`, and adding a keyword is how the scope
 grows.
+
+That list comes from [SASLogChecker](https://github.com/Morioka-Yutaka/SASLogChecker),
+Yutaka Morioka's MIT-licensed log checker: 28 of the 29 keywords appear verbatim
+in its `interact_logchk.sas`. Thanks also to the SAS user-group papers its header
+cites - "Log Checks Made Easy" (SAS Global Forum 2012), "Check Please" (MWSUG 2017) and "You've Got E-Mail" (SUGI 31) - which is where the reasoning behind
+the individual messages comes from.
 
 ## Contributors ✨
 

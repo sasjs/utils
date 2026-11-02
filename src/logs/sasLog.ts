@@ -159,11 +159,19 @@ export const isSasLog = (text: string): boolean =>
  * The notes worth reporting, matched case-insensitively against the folded
  * message. Each is a message SAS prints when something has gone wrong quietly -
  * a variable never set, a row that failed input, a value silently converted, a
- * format too small to hold a number - and each is chased by the log checkers
- * published in the SAS user-group papers: "Log Checks Made Easy" (SAS Global
- * Forum 2012, 042-2012), "Check Please: An Automated Approach to Log Checking"
- * (MWSUG 2017, TT02), "You've Got E-Mail: Automatic Log Checking via E-Mail
- * Notification" (SUGI 31, 128-31) and the note table behind SASLogChecker.
+ * format too small to hold a number.
+ *
+ * The list is taken from SASLogChecker, Yutaka Morioka's log checker
+ * (https://github.com/Morioka-Yutaka/SASLogChecker, MIT): 28 of the 29 keywords
+ * below appear verbatim in its `interact_logchk.sas`, whose author picked them
+ * from practical experience rather than from an exhaustive specification. Its
+ * header also points at the SAS user-group papers on log checking - "Log Checks
+ * Made Easy" (SAS Global Forum 2012, 042-2012), "Check Please: An Automated
+ * Approach to Log Checking" (MWSUG 2017, TT02) and "You've Got E-Mail: Automatic
+ * Log Checking via E-Mail Notification" (SUGI 31, 128-31) - which is where the
+ * reasoning behind the individual messages comes from.
+ *
+ * Credit travels with the data: if you add a keyword, say where it came from.
  *
  * Adding a keyword widens what every host reports, so the list is deliberately
  * short: a message belongs here when a reviewer would want to see it even though
