@@ -9,6 +9,7 @@ export * from './time'
 export * from './types'
 export * from './utils'
 export * from './compileTree'
+export * from './webout'
 // './fs' is deliberately absent: it is the only module here that imports
 // `crypto`, and re-exporting it put that - plus browserify-sign, parse-asn1,
 // asn1.js and vm-browserify, roughly 555 KB of AES/RSA/ECDSA polyfills and a

@@ -52,6 +52,7 @@
     "time/**",
     "types/**",
     "utils/**",
+    "webout/**",
     "README.md"
   ],
   "scripts": {
