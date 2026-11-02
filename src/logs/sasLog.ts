@@ -163,13 +163,18 @@ export const isSasLog = (text: string): boolean =>
  *
  * The list is taken from SASLogChecker, Yutaka Morioka's log checker
  * (https://github.com/Morioka-Yutaka/SASLogChecker, MIT): 28 of the 29 keywords
- * below appear verbatim in its `interact_logchk.sas`, whose author picked them
- * from practical experience rather than from an exhaustive specification. Its
- * header also points at the SAS user-group papers on log checking - "Log Checks
- * Made Easy" (SAS Global Forum 2012, 042-2012), "Check Please: An Automated
- * Approach to Log Checking" (MWSUG 2017, TT02) and "You've Got E-Mail: Automatic
- * Log Checking via E-Mail Notification" (SUGI 31, 128-31) - which is where the
- * reasoning behind the individual messages comes from.
+ * below appear verbatim in its `interact_logchk.sas`, and its first commit
+ * (2025-07-07) already carried them - sixteen months before this parser existed,
+ * so the direction of travel is settled rather than assumed.
+ *
+ * The SAS user-group papers on the same subject carry shorter, differently
+ * worded lists and are background here, not the source: SUGI 31 128-31 (2006)
+ * greps for six strings, SASGF 2017 1173-2017 / MWSUG 2017 TT02 list eight
+ * common messages, SASGF 2012 042-2012 lists ten categories. None of them
+ * contains the statistical notes this list reports - the log axis, thinned tick
+ * values, infinite likelihood, not positive definite, or processing on disk
+ * during summarization - which is the practical-experience part SASLogChecker
+ * adds, and none uses SAS's own message wording for the rest.
  *
  * Credit travels with the data: if you add a keyword, say where it came from.
  *

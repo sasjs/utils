@@ -47,9 +47,16 @@ grows.
 
 That list comes from [SASLogChecker](https://github.com/Morioka-Yutaka/SASLogChecker),
 Yutaka Morioka's MIT-licensed log checker: 28 of the 29 keywords appear verbatim
-in its `interact_logchk.sas`. Thanks also to the SAS user-group papers its header
-cites - "Log Checks Made Easy" (SAS Global Forum 2012), "Check Please" (MWSUG 2017) and "You've Got E-Mail" (SUGI 31) - which is where the reasoning behind
-the individual messages comes from.
+in its `interact_logchk.sas`, and its first commit (July 2025) already carried
+them - sixteen months before this parser existed, so the direction is settled
+rather than assumed.
+
+The SAS user-group papers on log checking are background rather than the source:
+their own lists are shorter and worded differently - SUGI 31 128-31 (2006) greps
+for six strings, SASGF 2017 1173-2017 / MWSUG 2017 TT02 list eight common
+messages, SASGF 2012 042-2012 lists ten categories - and none carries the
+statistical notes this list reports (log axis, thinned tick values, infinite
+likelihood, not positive definite, processing on disk during summarization).
 
 ## Contributors ✨
 
