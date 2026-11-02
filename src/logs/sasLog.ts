@@ -159,11 +159,29 @@ export const isSasLog = (text: string): boolean =>
  * The notes worth reporting, matched case-insensitively against the folded
  * message. Each is a message SAS prints when something has gone wrong quietly -
  * a variable never set, a row that failed input, a value silently converted, a
- * format too small to hold a number - and each is chased by the log checkers
- * published in the SAS user-group papers: "Log Checks Made Easy" (SAS Global
- * Forum 2012, 042-2012), "Check Please: An Automated Approach to Log Checking"
- * (MWSUG 2017, TT02), "You've Got E-Mail: Automatic Log Checking via E-Mail
- * Notification" (SUGI 31, 128-31) and the note table behind SASLogChecker.
+ * format too small to hold a number.
+ *
+ * The list is taken from SASLogChecker, Yutaka Morioka's log checker
+ * (https://github.com/Morioka-Yutaka/SASLogChecker, MIT): the 25 targeted
+ * NOTE / INFO examples in its help header map onto the keywords below, and its
+ * first commit (2025-07-07) already carried them - sixteen months before this
+ * parser existed, so the direction of travel is settled rather than assumed.
+ *
+ * Its matcher greps hex-encoded Japanese messages, because it reads logs from a
+ * Japanese Windows SAS session (SJIS, Unicode, Latin); the English wording here
+ * is its header's description of those messages. This parser matches English
+ * text only, so a Japanese log yields no notable notes from it.
+ *
+ * The SAS user-group papers on the same subject carry shorter, differently
+ * worded lists and are background here, not the source: SUGI 31 128-31 (2006)
+ * greps for six strings, SASGF 2017 1173-2017 / MWSUG 2017 TT02 list eight
+ * common messages, SASGF 2012 042-2012 lists ten categories. None of them
+ * contains the statistical notes this list reports - the log axis, thinned tick
+ * values, infinite likelihood, not positive definite, or processing on disk
+ * during summarization - which is the practical-experience part SASLogChecker
+ * adds, and none uses SAS's own message wording for the rest.
+ *
+ * Credit travels with the data: if you add a keyword, say where it came from.
  *
  * Adding a keyword widens what every host reports, so the list is deliberately
  * short: a message belongs here when a reviewer would want to see it even though
@@ -186,6 +204,7 @@ const NOTE_KEYWORDS = [
   'will be overwritten by data set',
   'repeats of BY values',
   'was not found',
+  'does not exist',
   'reached past the end of a line',
   'LOST CARD',
   'NOEXEC',

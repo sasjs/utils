@@ -1,6 +1,7 @@
 # @sasjs/utils
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -43,6 +44,24 @@ another type, repeats of BY values - because a log carries thousands of ordinary
 notes and none of them is what a reader is looking for. The list is
 `NOTE_KEYWORDS` in `src/logs/sasLog.ts`, and adding a keyword is how the scope
 grows.
+
+That list comes from [SASLogChecker](https://github.com/Morioka-Yutaka/SASLogChecker),
+Yutaka Morioka's MIT-licensed log checker: the 25 targeted NOTE / INFO examples in
+its help header map onto the keywords here, and its first commit (July 2025)
+already carried them - sixteen months before this parser existed, so the
+direction is settled rather than assumed.
+
+Its matcher greps hex-encoded Japanese messages, because it reads logs from a
+Japanese Windows SAS session; the English wording here describes the same
+messages in SAS's English output. This parser matches English text only, so a
+Japanese log yields no notable notes from it.
+
+The SAS user-group papers on log checking are background rather than the source:
+their own lists are shorter and worded differently - SUGI 31 128-31 (2006) greps
+for six strings, SASGF 2017 1173-2017 / MWSUG 2017 TT02 list eight common
+messages, SASGF 2012 042-2012 lists ten categories - and none carries the
+statistical notes this list reports (log axis, thinned tick values, infinite
+likelihood, not positive definite, processing on disk during summarization).
 
 ## Contributors ✨
 

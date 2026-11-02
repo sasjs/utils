@@ -373,6 +373,13 @@ describe('parseLog', () => {
     expect(issue.message).toEqual('File WORK.X.DATA does not exist.')
   })
 
+  it('should report a library that does not exist as a notable note', () => {
+    const [note] = parseLog('NOTE: Library MYLIB does not exist.\n')
+
+    expect(note.severity).toEqual('note')
+    expect(note.message).toEqual('Library MYLIB does not exist.')
+  })
+
   it('should report each notable note as a note, not as a warning', () => {
     const log = [
       'NOTE: Missing values were generated as a result of performing an operation on missing values.',
@@ -384,6 +391,7 @@ describe('parseLog', () => {
       'NOTE: WHERE clause has been replaced.',
       'NOTE: DATA STEP stopped due to looping.',
       'NOTE: The file WORK.X was not found.',
+      'NOTE: Library MYLIB does not exist.',
       'NOTE: SAS went to a new line when INPUT statement reached past the end of a line.',
       'NOTE: LOST CARD.',
       'NOTE: Statement not executed due to NOEXEC option.',
@@ -399,9 +407,9 @@ describe('parseLog', () => {
 
     const issues = parseLog(log)
 
-    expect(issues).toHaveLength(19)
+    expect(issues).toHaveLength(20)
     expect(issues.map((issue) => issue.severity)).toEqual(
-      new Array(19).fill('note')
+      new Array(20).fill('note')
     )
   })
 
