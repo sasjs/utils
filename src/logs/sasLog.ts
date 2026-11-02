@@ -204,6 +204,7 @@ const NOTE_KEYWORDS = [
   'will be overwritten by data set',
   'repeats of BY values',
   'was not found',
+  'does not exist',
   'reached past the end of a line',
   'LOST CARD',
   'NOEXEC',
