@@ -162,10 +162,15 @@ export const isSasLog = (text: string): boolean =>
  * format too small to hold a number.
  *
  * The list is taken from SASLogChecker, Yutaka Morioka's log checker
- * (https://github.com/Morioka-Yutaka/SASLogChecker, MIT): 28 of the 29 keywords
- * below appear verbatim in its `interact_logchk.sas`, and its first commit
- * (2025-07-07) already carried them - sixteen months before this parser existed,
- * so the direction of travel is settled rather than assumed.
+ * (https://github.com/Morioka-Yutaka/SASLogChecker, MIT): the 25 targeted
+ * NOTE / INFO examples in its help header map onto the keywords below, and its
+ * first commit (2025-07-07) already carried them - sixteen months before this
+ * parser existed, so the direction of travel is settled rather than assumed.
+ *
+ * Its matcher greps hex-encoded Japanese messages, because it reads logs from a
+ * Japanese Windows SAS session (SJIS, Unicode, Latin); the English wording here
+ * is its header's description of those messages. This parser matches English
+ * text only, so a Japanese log yields no notable notes from it.
  *
  * The SAS user-group papers on the same subject carry shorter, differently
  * worded lists and are background here, not the source: SUGI 31 128-31 (2006)

@@ -46,10 +46,15 @@ notes and none of them is what a reader is looking for. The list is
 grows.
 
 That list comes from [SASLogChecker](https://github.com/Morioka-Yutaka/SASLogChecker),
-Yutaka Morioka's MIT-licensed log checker: 28 of the 29 keywords appear verbatim
-in its `interact_logchk.sas`, and its first commit (July 2025) already carried
-them - sixteen months before this parser existed, so the direction is settled
-rather than assumed.
+Yutaka Morioka's MIT-licensed log checker: the 25 targeted NOTE / INFO examples in
+its help header map onto the keywords here, and its first commit (July 2025)
+already carried them - sixteen months before this parser existed, so the
+direction is settled rather than assumed.
+
+Its matcher greps hex-encoded Japanese messages, because it reads logs from a
+Japanese Windows SAS session; the English wording here describes the same
+messages in SAS's English output. This parser matches English text only, so a
+Japanese log yields no notable notes from it.
 
 The SAS user-group papers on log checking are background rather than the source:
 their own lists are shorter and worded differently - SUGI 31 128-31 (2006) greps
