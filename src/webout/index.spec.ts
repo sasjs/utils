@@ -267,6 +267,54 @@ webout('CLOSE')`
     expect(parsed.SYSCC).toEqual(8)
   })
 
+  it('resolves fs itself, so a host need not bind it, and says so when neither exists', () => {
+    const dir = mkdtempSync(path.join(tmpdir(), 'sasjs-webout-fs-'))
+    const weboutPath = path.join(dir, 'webout.txt')
+    const headersPath = path.join(dir, 'stpsrv_header.txt')
+    writeFileSync(weboutPath, '')
+    writeFileSync(headersPath, 'content-type: text/html')
+
+    const block = getWeboutPrelude({
+      weboutPath,
+      headersPath,
+      program: '/Public/app/myprogram',
+      debug: '',
+      username: 'testuser',
+      userId: '1',
+      apiServerUrl: 'http://127.0.0.1:5000'
+    })
+    const source = `let _webout = '';
+${block}
+webout('OPEN')
+webout('CLOSE')
+${weboutFinaliseStatement}`
+    const quietConsole = {
+      log: () => undefined,
+      error: () => undefined,
+      warn: () => undefined
+    }
+
+    // A host that supplies require() but binds no fs: the block resolves it.
+    const withRequire = new Function('require', 'console', 'process', source)
+    expect(() => withRequire(require, quietConsole, process)).not.toThrow()
+    expect(JSON.parse(readFileSync(weboutPath, 'utf-8')).MF_GETUSER).toEqual(
+      'testuser'
+    )
+
+    // A host that supplies neither says so, naming the block, rather than
+    // failing later with a bare ReferenceError.
+    const withoutBoth = new Function('require', 'console', 'process', source)
+    expect(() =>
+      withoutBoth(
+        () => {
+          throw new Error('Cannot find module')
+        },
+        quietConsole,
+        process
+      )
+    ).toThrow('webout(): this host provides neither require() nor fs')
+  })
+
   it('writes a program that only assigns _webout, and reports mixing the two', () => {
     const plain = runBlock({ body: '', rawWebout: '<h1>raw</h1>' })
 

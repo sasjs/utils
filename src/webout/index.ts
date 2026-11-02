@@ -56,6 +56,13 @@ const literal = (value: unknown): string =>
  * run inlined as a literal, plus the console tap that feeds SYSERRORTEXT and
  * SYSWARNINGTEXT.
  *
+ * The emitted text resolves what it needs itself, so a host cannot get it wrong:
+ * `require('fs')` is called inside the block, falling back to a host-provided
+ * `fs` binding when `require` is absent, and `require('os')` is optional. The one
+ * binding the block cannot provide is `_webout` itself: the host declares
+ * `let _webout = ''` and hands it to `finalise()`, which is what
+ * `weboutFinaliseStatement` spells out.
+ *
  * `globalThis.webout` is an assignment rather than a declaration so a program
  * that declares its own `webout` shadows it instead of failing to parse, and the
  * runtime keeps its own reference under the reserved `_sasjs_webout` name.
@@ -74,6 +81,17 @@ const _sasjs_webout_config = {
   userId: ${literal(config.userId)},
   apiServerUrl: ${literal(config.apiServerUrl)}
 };
+
+/* Resolved here rather than assumed, so a host that emits this block without
+   binding fs in the program's scope still works - the alternative is a
+   ReferenceError in the session log at the first webout() call. */
+const _sasjs_fs = (() => {
+  try { return require('fs'); } catch (_sasjs_no_require) {}
+  /* a program's own later 'const fs' leaves the name in its temporal dead zone
+     here, so even the typeof can throw */
+  try { if (typeof fs !== 'undefined') return fs; } catch (_sasjs_fs_unset) {}
+  throw new Error('webout(): this host provides neither require() nor fs');
+})();
 
 /* Node modules are absent in a browser host, and a host may refuse them, so the
    system block falls back to what the browser can answer. */
@@ -145,7 +163,7 @@ const _sasjs_memsize = () => {
 };
 
 const _sasjs_append = (text) =>
-  fs.appendFileSync(_sasjs_webout_config.weboutPath, text, 'utf-8');
+  _sasjs_fs.appendFileSync(_sasjs_webout_config.weboutPath, text, 'utf-8');
 
 /* A member of the enclosing object, with its own leading comma so a caller never
    tracks commas between tables. */
@@ -160,14 +178,14 @@ const _sasjs_open = () => {
 
   const now = new Date();
 
-  fs.writeFileSync(
+  _sasjs_fs.writeFileSync(
     _sasjs_webout_config.weboutPath,
     '{"SYSDATE":"' + _sasjs_sas_date(now) + '","SYSTIME":"' + _sasjs_sas_time(now) + '"',
     'utf-8'
   );
   /* The header file is seeded with a text/html line that carries no trailing
      newline, so the leading newline keeps this entry on its own line. */
-  fs.appendFileSync(_sasjs_webout_config.headersPath, '\\ncontent-type: application/json\\n', 'utf-8');
+  _sasjs_fs.appendFileSync(_sasjs_webout_config.headersPath, '\\ncontent-type: application/json\\n', 'utf-8');
 
   _sasjs_opened = true;
   _sasjs_streamed = true;
@@ -240,7 +258,7 @@ _sasjs_webout.finalise = (body) => {
     if (body)
       console.log('webout: _webout was assigned as well as using webout() - the assignment is ignored');
   } else if (body) {
-    fs.writeFileSync(_sasjs_webout_config.weboutPath, body);
+    _sasjs_fs.writeFileSync(_sasjs_webout_config.weboutPath, body);
   }
 
   if (_sasjs_opened)
