@@ -1,7 +1,7 @@
 name: Dependency Staleness
 
-# Dependabot is not enabled on this repo, so nothing surfaces stale
-# dependencies. The audit gate in the test workflow only fails on
+# Dependabot is enabled for GitHub Actions only (.github/dependabot.yml), so
+# nothing surfaces stale npm dependencies. The audit gate in the test workflow only fails on
 # known-vulnerable packages; it says nothing about being behind. This runs
 # weekly and writes the outdated direct dependencies to the run summary.
 #
@@ -14,6 +14,9 @@ on:
     - cron: '0 8 * * 1' # Mondays, 08:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   report:
     runs-on: ubuntu-latest
@@ -21,10 +24,10 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
 
