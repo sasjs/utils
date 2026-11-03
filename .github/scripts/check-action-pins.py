@@ -25,6 +25,13 @@ catch a wrong sha, not to redden an unrelated pull request because the API was
 busy. Re-run the job to confirm; a pin that is genuinely absent answers 404 or 422,
 which does fail.
 
+A token the API refuses is a different matter and does fail. A 401 is a token that
+is wrong, and it will not become right on a retry. A 403 is usually a token that
+lacks the scope, but GitHub also answers 403 when it is throttling the caller, so
+the two are told apart by the response itself: `Retry-After`, an exhausted
+`x-ratelimit-remaining`, or a body that says rate limit means throttling (retry,
+then warn); anything else means refused (fail).
+
 The file is read as text rather than through a YAML parser, because the danger is
 in the string, not the structure: a `uses:` inside a `run: |` block is shell text,
 and a quoted ref carries its quotes into any naive comparison. Both are handled
@@ -103,13 +110,39 @@ def api(path, token):
         return json.load(response)
 
 
+def throttled(error):
+    """True when a 403 is GitHub throttling the caller rather than refusing it.
+
+    A primary or secondary rate limit answers 403 with `Retry-After` or an
+    exhausted remaining budget, and says so in the body; a token without the
+    scope answers 403 with none of that.
+    """
+    headers = {name.lower(): value for name, value in (error.headers or {}).items()}
+
+    if headers.get('retry-after') or headers.get('x-ratelimit-remaining') == '0':
+        return True
+
+    # the body can only be read once, and a retried error is the same object
+    body = getattr(error, '_check_action_pins_body', None)
+
+    if body is None:
+        try:
+            body = error.read()
+        except Exception:
+            body = b''
+        error._check_action_pins_body = body
+
+    return 'rate limit' in body.decode('utf-8', 'replace').lower()
+
+
 def resolves(repo, sha, token):
-    """'ok' when the commit exists, 'bad' when it does not, 'unknown' otherwise.
+    """'ok', 'bad', 'denied' or 'unknown'.
 
     'bad' is only 404 and 422 - the two answers that mean the commit is not in
     that repository. A rate limit, a 5xx or a network error is retried and then
     reported as 'unknown', which the caller turns into a warning: it is not
-    evidence about the pin.
+    evidence about the pin. 'denied' is a token the API refused (401, or a 403
+    that is not throttling), which fails the run because nothing was verified.
     """
     for attempt in range(len(BACKOFF_SECONDS) + 1):
         try:
@@ -118,8 +151,13 @@ def resolves(repo, sha, token):
         except urllib.error.HTTPError as error:
             if error.code in (404, 422):
                 return 'bad'
-            transient = error.code in (401, 403, 429) or error.code >= 500
-            if transient and attempt < len(BACKOFF_SECONDS):
+            if error.code == 401:
+                # a token that is wrong stays wrong; retrying only delays the report
+                return 'denied'
+            if error.code == 403 and not throttled(error):
+                # a 403 the API does not describe as throttling is a scope problem
+                return 'denied'
+            if attempt < len(BACKOFF_SECONDS):
                 time.sleep(BACKOFF_SECONDS[attempt])
                 continue
             return 'unknown'
@@ -146,6 +184,7 @@ def main():
 
     unpinned = []
     unresolved = []
+    denied = []
     unknown = []
     checked = 0
 
@@ -173,6 +212,8 @@ def main():
             status = resolves(repo, sha, token)
             if status == 'bad':
                 unresolved.append((path, number, ref, f'no such commit in {repo}'))
+            elif status == 'denied':
+                denied.append((path, number, ref))
             elif status == 'unknown':
                 unknown.append((path, number, ref))
 
@@ -182,16 +223,22 @@ def main():
     for path, number, ref, why in unresolved:
         print(f'::error file={path},line={number}::uses: {ref} does not resolve - {why}')
 
+    for path, number, ref in denied:
+        print(f'::error file={path},line={number}::uses: {ref} could not be checked - '
+              'the token was refused (HTTP 401, or a 403 that is not a rate limit). '
+              'The pin is unverified, not verified')
+
     for path, number, ref in unknown:
         print(f'::warning file={path},line={number}::uses: {ref} could not be checked - '
               'API rate limit, outage or network. Not evidence about the pin; re-run to confirm')
 
     print(
         f'checked {checked} pinned action(s) in {len(files)} file(s): '
-        f'{len(unpinned)} unpinned, {len(unresolved)} unresolved, {len(unknown)} unverifiable'
+        f'{len(unpinned)} unpinned, {len(unresolved)} unresolved, '
+        f'{len(denied)} refused, {len(unknown)} unverifiable'
     )
 
-    return 1 if (unpinned or unresolved) else 0
+    return 1 if (unpinned or unresolved or denied) else 0
 
 
 if __name__ == '__main__':
