@@ -425,4 +425,155 @@ webout('OBJ', 'rows', [[1, 2]])`
       'use OPEN, ARR, OBJ or CLOSE'
     )
   })
+
+  it('sends showmeta beside the table, in the shape %mp_jsonout writes', () => {
+    const { body, failure } = runBlock({
+      body: `
+const meta = { vars: {
+  ID: { format: 'best.', label: 'Identifier', length: 8, type: 'num' },
+  NAME: { format: '$8.', label: 'Name', length: 8, type: 'char' }
+} }
+webout('OPEN')
+webout('OBJ', 'Users', [{ ID: 1, NAME: 'ann' }], { showmeta: meta })
+webout('CLOSE')`
+    })
+
+    expect(failure).toBeNull()
+
+    const parsed = JSON.parse(body)
+
+    expect(parsed.Users).toEqual([{ ID: 1, NAME: 'ann' }])
+    // %mp_jsonout prefixes the member with $ and lower-cases the label.
+    expect(parsed.$users).toEqual({
+      vars: {
+        ID: { format: 'best.', label: 'Identifier', length: 8, type: 'num' },
+        NAME: { format: '$8.', label: 'Name', length: 8, type: 'char' }
+      }
+    })
+  })
+
+  it('takes the options whatever case they are written in, as SAS does', () => {
+    const { body, failure } = runBlock({
+      body: `
+webout('OPEN')
+webout('OBJ', 'rows', [{ a: 1 }, { a: 2 }, { a: 3 }], { MAXOBS: 2, ShowMeta: { vars: {} } })
+webout('CLOSE')`
+    })
+
+    expect(failure).toBeNull()
+
+    const parsed = JSON.parse(body)
+
+    expect(parsed.rows).toEqual([{ a: 1 }, { a: 2 }])
+    expect(parsed.$rows).toEqual({ vars: {} })
+  })
+
+  it('limits the rows with maxobs, and refuses an unknown option', () => {
+    const limited = runBlock({
+      body: `
+webout('OPEN')
+webout('OBJ', 'rows', [{ a: 1 }, { a: 2 }, { a: 3 }], { maxobs: 1 })
+webout('ARR', 'pairs', [[1, 2], [3, 4]], { maxobs: 1 })
+webout('CLOSE')`
+    })
+
+    expect(limited.failure).toBeNull()
+
+    const parsed = JSON.parse(limited.body)
+
+    expect(parsed.rows).toEqual([{ a: 1 }])
+    expect(parsed.pairs).toEqual([[1, 2]])
+
+    // A name that is not an option at all must fail the call rather than send
+    // every row - a typo has to be loud, or a truncated table looks complete.
+    expect(
+      String(
+        runBlock({
+          body: `
+webout('OPEN')
+webout('OBJ', 'rows', [], { maxRows: 1 })`
+        }).failure
+      )
+    ).toContain("does not know the option 'maxRows'")
+
+    expect(
+      String(
+        runBlock({
+          body: `
+webout('OPEN')
+webout('OBJ', 'rows', [], { fmt: 'Y' })`
+        }).failure
+      )
+    ).toContain('missing=, fmt= and dslabel= have no JS equivalent')
+
+    expect(
+      String(
+        runBlock({
+          body: `
+webout('OPEN')
+webout('OBJ', 'rows', [], { maxobs: 'many' })`
+        }).failure
+      )
+    ).toContain('maxobs takes a whole number of rows')
+
+    // A string of digits and a boolean both coerce to a number, so a wrong type
+    // would silently truncate instead of failing.
+    for (const value of ["'2'", 'true']) {
+      expect(
+        String(
+          runBlock({
+            body: `
+webout('OPEN')
+webout('OBJ', 'rows', [{ a: 1 }], { maxobs: ${value} })`
+          }).failure
+        )
+      ).toContain('maxobs takes a whole number of rows as a number')
+    }
+  })
+
+  it('validates the options before it writes the member', () => {
+    // A rejected call must leave the body as it found it: a caller that catches
+    // the error and closes would otherwise send a table with no metadata, which
+    // reads as a complete response.
+    const { body, printed } = runBlock({
+      body: `
+webout('OPEN')
+try {
+  webout('OBJ', 'rows', [{ a: 1 }], { showmeta: true })
+} catch (err) {
+  console.log('caught: ' + err.message.slice(0, 30))
+}
+webout('OBJ', 'after', [{ b: 2 }])
+webout('CLOSE')`
+    })
+
+    const parsed = JSON.parse(body)
+
+    expect(parsed.rows).toBeUndefined()
+    expect(parsed.$rows).toBeUndefined()
+    expect(parsed.after).toEqual([{ b: 2 }])
+    expect(printed.join('\n')).toContain('caught: ')
+  })
+
+  it('refuses a showmeta it cannot read, rather than inventing one', () => {
+    expect(
+      String(
+        runBlock({
+          body: `
+webout('OPEN')
+webout('OBJ', 'rows', [], { showmeta: true })`
+        }).failure
+      )
+    ).toContain('cannot read showmeta from the rows')
+
+    expect(
+      String(
+        runBlock({
+          body: `
+webout('OPEN')
+webout('OBJ', 'rows', [], { showmeta: [{ vars: {} }] })`
+        }).failure
+      )
+    ).toContain('showmeta takes an object')
+  })
 })
