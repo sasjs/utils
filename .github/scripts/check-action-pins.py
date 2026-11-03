@@ -104,26 +104,38 @@ def api(path, token):
 
 
 def throttled(error):
-    """Whether a 403 is GitHub asking us to slow down rather than refusing us.
+    """Whether a 403 is GitHub asking us to slow down: True, False, or None.
 
-    Both arrive as 403. A primary limit sends Retry-After; a secondary limit says
-    so in the body. Anything else is a refusal: the token cannot read that
-    repository, and retrying will not change it.
+    Both arrive as 403. A primary limit sends Retry-After or an exhausted
+    x-ratelimit-remaining; a secondary limit says so in the body. False is a
+    refusal - the token cannot read that repository, and retrying will not change
+    it. None is no evidence either way: the body could not be read, so the caller
+    reports the pin as unverifiable rather than sending a maintainer to look at a
+    token that may be fine.
     """
     # the answer is cached on the error: a 403 whose body has already been read
     # would otherwise look like a refusal on the retry of the same exception
-    cached = getattr(error, '_pkg_throttled', None)
-    if cached is not None:
-        return cached
+    # hasattr, not a None check: None is a real answer here, and reading the
+    # body a second time would return '' and read as a refusal
+    if hasattr(error, '_pkg_throttled'):
+        return error._pkg_throttled
 
-    if error.headers and error.headers.get('Retry-After'):
+    headers = {
+        name.lower(): value for name, value in (error.headers or {}).items()
+    }
+
+    if headers.get('retry-after') or headers.get('x-ratelimit-remaining') == '0':
         result = True
+    elif getattr(error, 'fp', None) is None:
+        # no body at all: nothing suggests throttling, so this is a refusal
+        result = False
     else:
         try:
             body = error.read().decode('utf-8', 'ignore')
         except Exception:  # noqa: BLE001 - a body we cannot read is not evidence
-            body = ''
-        result = 'rate limit' in body.lower()
+            result = None
+        else:
+            result = 'rate limit' in body.lower()
 
     error._pkg_throttled = result
     return result
@@ -133,11 +145,13 @@ def resolves(repo, sha, token):
     """'ok', 'bad', 'denied' or 'unknown'.
 
     'bad'      - 404 or 422: the commit is not in that repository.
-    'denied'   - 401, or a 403 that is not throttling: the token cannot read it.
+    'denied'   - 401, or a 403 that is a refusal rather than a throttle: the token
+                 cannot read it.
                  Not retried - a refused token does not become accepted - and not
                  a pass, because the check could not run at all.
-    'unknown'  - 429, 5xx, a throttling 403, or a network error that survived the
-                 retries: says nothing about the pin, so the caller warns.
+    'unknown'  - 429, 5xx, a throttling 403, a 403 whose body cannot be read, or a
+                 network error that survived the retries: says nothing about the
+                 pin, so the caller warns.
     """
     for attempt in range(len(BACKOFF_SECONDS) + 1):
         try:
@@ -148,7 +162,8 @@ def resolves(repo, sha, token):
                 return 'bad'
             if error.code == 401:
                 return 'denied'
-            if error.code == 403 and not throttled(error):
+            if error.code == 403 and throttled(error) is False:
+                # a refusal, not a throttle: retrying will not change it
                 return 'denied'
             transient = error.code == 403 or error.code == 429 or error.code >= 500
             if transient and attempt < len(BACKOFF_SECONDS):
