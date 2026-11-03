@@ -231,17 +231,27 @@ const _sasjs_options = (action, options) => {
     out[name] = given[key];
   }
 
+  /* Every option is checked here, before the caller writes anything: a table
+     that is rejected after its member has been appended leaves a half-written
+     body, and a caller that catches the error and closes then sends a table
+     with no metadata - the same 'looks complete' failure maxobs guards against. */
+  if (out.maxobs !== undefined && (typeof out.maxobs !== 'number' ||
+      !Number.isInteger(out.maxobs) || out.maxobs < 0))
+    throw new Error("webout('" + action + "') maxobs takes a whole number of rows as a number, got " +
+      JSON.stringify(out.maxobs));
+
+  if (out.showmeta !== undefined && out.showmeta !== null) {
+    if (out.showmeta === true)
+      throw new Error("webout('" + action + "') cannot read showmeta from the rows - pass the metadata itself, { vars: { COL: { format, label, length, type } } }, the way %mp_jsonout builds it");
+    if (typeof out.showmeta !== 'object' || Array.isArray(out.showmeta))
+      throw new Error("webout('" + action + "') showmeta takes an object, eg { vars: { COL: { format: 'best.', label: 'Col', length: 8, type: 'num' } } }");
+  }
+
   return out;
 };
 
-const _sasjs_maxobs = (action, rows, options) => {
-  if (options.maxobs === undefined) return rows;
-  const maxobs = Number(options.maxobs);
-  if (!Number.isInteger(maxobs) || maxobs < 0)
-    throw new Error("webout('" + action + "') maxobs takes a whole number of rows, got " +
-      JSON.stringify(options.maxobs));
-  return rows.slice(0, maxobs);
-};
+const _sasjs_maxobs = (rows, settings) =>
+  settings.maxobs === undefined ? rows : rows.slice(0, settings.maxobs);
 
 const _sasjs_open = () => {
   if (_sasjs_closed)
@@ -276,8 +286,9 @@ const _sasjs_table = (action, name, rows, options) => {
   if (action === 'OBJ' && rows.some((row) => row === null || typeof row !== 'object' || Array.isArray(row)))
     throw new Error("webout('OBJ') takes rows keyed by column name - one object per row, like the SAS object format. Use webout('ARR') for positional rows.");
 
+  /* validated first: nothing is written for a call that will not be sent */
   const settings = _sasjs_options(action, options);
-  const sent = _sasjs_maxobs(action, rows, settings);
+  const sent = _sasjs_maxobs(rows, settings);
 
   _sasjs_member(name, sent);
 
@@ -285,11 +296,6 @@ const _sasjs_table = (action, name, rows, options) => {
      %mp_jsonout writes from the dictionary tables:
      ,"$mytable":{"vars":{"COL":{"format":"best.","label":"Col","length":8,"type":"num"}}} */
   if (settings.showmeta !== undefined && settings.showmeta !== null) {
-    if (settings.showmeta === true)
-      throw new Error("webout('" + action + "') cannot read showmeta from the rows - pass the metadata itself, { vars: { COL: { format, label, length, type } } }, the way %mp_jsonout builds it");
-    if (typeof settings.showmeta !== 'object' || Array.isArray(settings.showmeta))
-      throw new Error("webout('" + action + "') showmeta takes an object, eg { vars: { COL: { format: 'best.', label: 'Col', length: 8, type: 'num' } } }");
-
     /* %mp_jsonout names the member $<dslabel> in lower case. */
     _sasjs_member('$' + String(name).toLowerCase(), settings.showmeta);
   }

@@ -515,6 +515,44 @@ webout('OBJ', 'rows', [], { maxobs: 'many' })`
         }).failure
       )
     ).toContain('maxobs takes a whole number of rows')
+
+    // A string of digits and a boolean both coerce to a number, so a wrong type
+    // would silently truncate instead of failing.
+    for (const value of ["'2'", 'true']) {
+      expect(
+        String(
+          runBlock({
+            body: `
+webout('OPEN')
+webout('OBJ', 'rows', [{ a: 1 }], { maxobs: ${value} })`
+          }).failure
+        )
+      ).toContain('maxobs takes a whole number of rows as a number')
+    }
+  })
+
+  it('validates the options before it writes the member', () => {
+    // A rejected call must leave the body as it found it: a caller that catches
+    // the error and closes would otherwise send a table with no metadata, which
+    // reads as a complete response.
+    const { body, printed } = runBlock({
+      body: `
+webout('OPEN')
+try {
+  webout('OBJ', 'rows', [{ a: 1 }], { showmeta: true })
+} catch (err) {
+  console.log('caught: ' + err.message.slice(0, 30))
+}
+webout('OBJ', 'after', [{ b: 2 }])
+webout('CLOSE')`
+    })
+
+    const parsed = JSON.parse(body)
+
+    expect(parsed.rows).toBeUndefined()
+    expect(parsed.$rows).toBeUndefined()
+    expect(parsed.after).toEqual([{ b: 2 }])
+    expect(printed.join('\n')).toContain('caught: ')
   })
 
   it('refuses a showmeta it cannot read, rather than inventing one', () => {
