@@ -25,13 +25,6 @@ catch a wrong sha, not to redden an unrelated pull request because the API was
 busy. Re-run the job to confirm; a pin that is genuinely absent answers 404 or 422,
 which does fail.
 
-A token the API refuses is a different matter and does fail. A 401 is a token that
-is wrong, and it will not become right on a retry. A 403 is usually a token that
-lacks the scope, but GitHub also answers 403 when it is throttling the caller, so
-the two are told apart by the response itself: `Retry-After`, an exhausted
-`x-ratelimit-remaining`, or a body that says rate limit means throttling (retry,
-then warn); anything else means refused (fail).
-
 The file is read as text rather than through a YAML parser, because the danger is
 in the string, not the structure: a `uses:` inside a `run: |` block is shell text,
 and a quoted ref carries its quotes into any naive comparison. Both are handled
@@ -111,38 +104,40 @@ def api(path, token):
 
 
 def throttled(error):
-    """True when a 403 is GitHub throttling the caller rather than refusing it.
+    """Whether a 403 is GitHub asking us to slow down rather than refusing us.
 
-    A primary or secondary rate limit answers 403 with `Retry-After` or an
-    exhausted remaining budget, and says so in the body; a token without the
-    scope answers 403 with none of that.
+    Both arrive as 403. A primary limit sends Retry-After; a secondary limit says
+    so in the body. Anything else is a refusal: the token cannot read that
+    repository, and retrying will not change it.
     """
-    headers = {name.lower(): value for name, value in (error.headers or {}).items()}
+    # the answer is cached on the error: a 403 whose body has already been read
+    # would otherwise look like a refusal on the retry of the same exception
+    cached = getattr(error, '_pkg_throttled', None)
+    if cached is not None:
+        return cached
 
-    if headers.get('retry-after') or headers.get('x-ratelimit-remaining') == '0':
-        return True
-
-    # the body can only be read once, and a retried error is the same object
-    body = getattr(error, '_check_action_pins_body', None)
-
-    if body is None:
+    if error.headers and error.headers.get('Retry-After'):
+        result = True
+    else:
         try:
-            body = error.read()
-        except Exception:
-            body = b''
-        error._check_action_pins_body = body
+            body = error.read().decode('utf-8', 'ignore')
+        except Exception:  # noqa: BLE001 - a body we cannot read is not evidence
+            body = ''
+        result = 'rate limit' in body.lower()
 
-    return 'rate limit' in body.decode('utf-8', 'replace').lower()
+    error._pkg_throttled = result
+    return result
 
 
 def resolves(repo, sha, token):
     """'ok', 'bad', 'denied' or 'unknown'.
 
-    'bad' is only 404 and 422 - the two answers that mean the commit is not in
-    that repository. A rate limit, a 5xx or a network error is retried and then
-    reported as 'unknown', which the caller turns into a warning: it is not
-    evidence about the pin. 'denied' is a token the API refused (401, or a 403
-    that is not throttling), which fails the run because nothing was verified.
+    'bad'      - 404 or 422: the commit is not in that repository.
+    'denied'   - 401, or a 403 that is not throttling: the token cannot read it.
+                 Not retried - a refused token does not become accepted - and not
+                 a pass, because the check could not run at all.
+    'unknown'  - 429, 5xx, a throttling 403, or a network error that survived the
+                 retries: says nothing about the pin, so the caller warns.
     """
     for attempt in range(len(BACKOFF_SECONDS) + 1):
         try:
@@ -152,12 +147,11 @@ def resolves(repo, sha, token):
             if error.code in (404, 422):
                 return 'bad'
             if error.code == 401:
-                # a token that is wrong stays wrong; retrying only delays the report
                 return 'denied'
             if error.code == 403 and not throttled(error):
-                # a 403 the API does not describe as throttling is a scope problem
                 return 'denied'
-            if attempt < len(BACKOFF_SECONDS):
+            transient = error.code == 403 or error.code == 429 or error.code >= 500
+            if transient and attempt < len(BACKOFF_SECONDS):
                 time.sleep(BACKOFF_SECONDS[attempt])
                 continue
             return 'unknown'
@@ -213,7 +207,7 @@ def main():
             if status == 'bad':
                 unresolved.append((path, number, ref, f'no such commit in {repo}'))
             elif status == 'denied':
-                denied.append((path, number, ref))
+                denied.append((path, number, ref, repo))
             elif status == 'unknown':
                 unknown.append((path, number, ref))
 
@@ -223,10 +217,9 @@ def main():
     for path, number, ref, why in unresolved:
         print(f'::error file={path},line={number}::uses: {ref} does not resolve - {why}')
 
-    for path, number, ref in denied:
+    for path, number, ref, repo in denied:
         print(f'::error file={path},line={number}::uses: {ref} could not be checked - '
-              'the token was refused (HTTP 401, or a 403 that is not a rate limit). '
-              'The pin is unverified, not verified')
+              f'the token was refused reading {repo}; check GITHUB_TOKEN, not the pin')
 
     for path, number, ref in unknown:
         print(f'::warning file={path},line={number}::uses: {ref} could not be checked - '
