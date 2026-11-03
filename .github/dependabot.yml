@@ -1,0 +1,14 @@
+version: 2
+
+# Only the actions ecosystem. The workflows pin every action to a commit SHA -
+# that is what the scorecard's Pinned-Dependencies check rewards, and it is what
+# makes a compromised tag useless - so something has to move those pins, or they
+# rot into last year's action. npm is deliberately absent: the weekly
+# dependency-staleness report (.github/workflows/dependency-staleness.yml) covers
+# outdated direct dependencies, and two bots reporting the same thing is noise.
+updates:
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
