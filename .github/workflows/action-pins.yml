@@ -27,6 +27,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
+      - name: The checker reads an answer the way the API means it
+        # what this check gets wrong is its reading of something - a `uses:` in a
+        # block scalar, a flow-style step, a refused token counted as unverifiable
+        run: python3 .github/scripts/check-action-pins.test.py
+
       - name: Every action is pinned to a commit, and that commit exists
         env:
           GITHUB_TOKEN: ${{ github.token }}
