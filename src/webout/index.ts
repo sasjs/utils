@@ -15,6 +15,15 @@
  * name for `OBJ`, which is how `%mp_jsonout()` shapes them. `CLOSE` appends the
  * system block and closes the object.
  *
+ * A table call takes a fourth argument, an options object, for the parts of
+ * `%ms_webout()` that carry over to a JS row: `maxobs` limits the rows sent,
+ * and `showmeta` travels beside the table as `$<name>` in the `{ vars: {...} }`
+ * shape `%mp_jsonout()` writes from the dictionary tables - pass the metadata
+ * itself, because a JS program has no dictionary to read formats from. The
+ * other `%ms_webout()` arguments are deliberately absent: `fmt=` and `missing=`
+ * exist to render SAS formats and special missing values into a value, which a
+ * JS row already is, and `dslabel=` IS the member name.
+ *
  * The block is emitted INTO the program rather than required from a file, which
  * is the same choice `sasjs compile` makes when it embeds the macros a SAS
  * service declares: the program runs on any host that can run it, a person
@@ -192,10 +201,47 @@ const _sasjs_memsize = () => {
 const _sasjs_append = (text) =>
   _sasjs_fs.appendFileSync(_sasjs_webout_config.weboutPath, text, 'utf-8');
 
+/* The options a table takes here, and the %ms_webout ones that have no
+   equivalent: a JS row already carries its final value, so there is nothing to
+   format (fmt=) and no special missing to render (missing=), and the member name
+   IS the label (dslabel=). */
+const _sasjs_option_names = ['showmeta', 'maxobs'];
+
 /* A member of the enclosing object, with its own leading comma so a caller never
    tracks commas between tables. */
 const _sasjs_member = (name, value) =>
   _sasjs_append(',' + JSON.stringify(String(name)) + ':' + JSON.stringify(value));
+
+const _sasjs_options = (action, options) => {
+  const given = options === undefined || options === null ? {} : options;
+  if (typeof given !== 'object' || Array.isArray(given))
+    throw new Error("webout('" + action + "') takes its options as one object, eg { maxobs: 100 }");
+
+  const out = {};
+
+  /* SAS keyword arguments are case-insensitive, so a call ported from
+     %ms_webout(showmeta=YES) still means showmeta. An unknown name is refused
+     rather than ignored: a typo in maxObs would otherwise send every row. */
+  for (const key of Object.keys(given)) {
+    const name = String(key).toLowerCase();
+    if (_sasjs_option_names.indexOf(name) < 0)
+      throw new Error("webout('" + action + "') does not know the option '" + key +
+        "' - use " + _sasjs_option_names.join(' or ') +
+        ' (missing=, fmt= and dslabel= have no JS equivalent)');
+    out[name] = given[key];
+  }
+
+  return out;
+};
+
+const _sasjs_maxobs = (action, rows, options) => {
+  if (options.maxobs === undefined) return rows;
+  const maxobs = Number(options.maxobs);
+  if (!Number.isInteger(maxobs) || maxobs < 0)
+    throw new Error("webout('" + action + "') maxobs takes a whole number of rows, got " +
+      JSON.stringify(options.maxobs));
+  return rows.slice(0, maxobs);
+};
 
 const _sasjs_open = () => {
   if (_sasjs_closed)
@@ -218,7 +264,7 @@ const _sasjs_open = () => {
   _sasjs_streamed = true;
 };
 
-const _sasjs_table = (action, name, rows) => {
+const _sasjs_table = (action, name, rows, options) => {
   if (!_sasjs_opened)
     throw new Error("webout('" + action + "') requires webout('OPEN') first");
   if (!name)
@@ -230,7 +276,23 @@ const _sasjs_table = (action, name, rows) => {
   if (action === 'OBJ' && rows.some((row) => row === null || typeof row !== 'object' || Array.isArray(row)))
     throw new Error("webout('OBJ') takes rows keyed by column name - one object per row, like the SAS object format. Use webout('ARR') for positional rows.");
 
-  _sasjs_member(name, rows);
+  const settings = _sasjs_options(action, options);
+  const sent = _sasjs_maxobs(action, rows, settings);
+
+  _sasjs_member(name, sent);
+
+  /* The metadata travels beside its table under a $ prefix, in the shape
+     %mp_jsonout writes from the dictionary tables:
+     ,"$mytable":{"vars":{"COL":{"format":"best.","label":"Col","length":8,"type":"num"}}} */
+  if (settings.showmeta !== undefined && settings.showmeta !== null) {
+    if (settings.showmeta === true)
+      throw new Error("webout('" + action + "') cannot read showmeta from the rows - pass the metadata itself, { vars: { COL: { format, label, length, type } } }, the way %mp_jsonout builds it");
+    if (typeof settings.showmeta !== 'object' || Array.isArray(settings.showmeta))
+      throw new Error("webout('" + action + "') showmeta takes an object, eg { vars: { COL: { format: 'best.', label: 'Col', length: 8, type: 'num' } } }");
+
+    /* %mp_jsonout names the member $<dslabel> in lower case. */
+    _sasjs_member('$' + String(name).toLowerCase(), settings.showmeta);
+  }
 };
 
 const _sasjs_close = () => {
@@ -267,11 +329,11 @@ const _sasjs_close = () => {
   _sasjs_closed = true;
 };
 
-const _sasjs_webout = (action, name, rows) => {
+const _sasjs_webout = (action, name, rows, options) => {
   const requested = String(action === undefined || action === null ? '' : action).toUpperCase();
 
   if (requested === 'OPEN') return _sasjs_open();
-  if (requested === 'ARR' || requested === 'OBJ') return _sasjs_table(requested, name, rows);
+  if (requested === 'ARR' || requested === 'OBJ') return _sasjs_table(requested, name, rows, options);
   if (requested === 'CLOSE') return _sasjs_close();
 
   throw new Error("webout: unknown action '" + action + "' - use OPEN, ARR, OBJ or CLOSE");
