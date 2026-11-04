@@ -164,8 +164,16 @@ class ResolvesTest(unittest.TestCase):
         self.assertEqual(len(self.calls), 1)
 
     def test_a_403_that_is_not_throttling_is_a_refused_token(self):
+        # a permission 403 answers with a body, and it does not say "rate limit"
         self.assertEqual(self.answer(urllib.error.HTTPError(
-            'https://api.github.com', 403, 'Forbidden', {}, None)), 'denied')
+            'https://api.github.com', 403, 'Forbidden', {},
+            io.BytesIO(b'{"message": "Resource not accessible by integration"}'))), 'denied')
+
+    def test_a_403_with_no_body_at_all_is_not_a_refusal(self):
+        # nothing to read is missing evidence: a body consumed before this function
+        # saw it looks identical, and that must not fail the run
+        self.assertEqual(self.answer(urllib.error.HTTPError(
+            'https://api.github.com', 403, 'Forbidden', {}, None)), 'unknown')
 
     def test_a_403_that_says_rate_limit_is_unverifiable(self):
         throttled = urllib.error.HTTPError(
