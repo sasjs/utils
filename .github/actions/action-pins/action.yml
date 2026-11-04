@@ -1,0 +1,36 @@
+name: Action pins
+description: >-
+  Fail when a workflow uses an action that is not pinned to a commit, or is pinned to
+  a commit that does not exist in that repository.
+author: sasjs
+
+inputs:
+  root:
+    description: Directory to read workflows and composite actions from.
+    required: false
+    default: .github
+  python:
+    description: Interpreter that runs the checker.
+    required: false
+    default: python3
+
+runs:
+  using: composite
+  steps:
+    # the checker's own suite runs first: it is 27 cases and takes milliseconds, and
+    # a checker that misreads an answer either reddens a good pull request or hides a
+    # bad pin
+    - name: The checker behaves as its tests say
+      shell: bash
+      run: |
+        work="$RUNNER_TEMP/action-pins-self-test"
+        mkdir -p "$work"
+        cp "${{ github.action_path }}/check-action-pins.py" "$work/"
+        cp "${{ github.action_path }}/test_check_action_pins.py" "$work/"
+        ( cd "$work" && ${{ inputs.python }} test_check_action_pins.py )
+
+    - name: Every action is pinned to a commit, and that commit exists
+      shell: bash
+      env:
+        ROOT: ${{ inputs.root }}
+      run: ${{ inputs.python }} "${{ github.action_path }}/check-action-pins.py" "$ROOT"
