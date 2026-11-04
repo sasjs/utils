@@ -1,9 +1,11 @@
 # Fails a pull request - and a push to the default branch - when an action this
 # repository uses is not pinned to a commit, or is pinned to one that does not exist.
 #
-# The check itself is .github/actions/action-pins. It is a composite action so that
-# every sasjs repository calls the same implementation and the same 27-case suite,
-# rather than holding a copy that drifts.
+# This repository hosts the checker as a composite action under
+# .github/actions/action-pins, and every other sasjs repository calls it at a pinned
+# commit. Here the action is run from the working tree, which is the one place that
+# needs the base-branch copy: a pull request that edits the checker must not be the
+# thing that decides whether its own edits pass.
 name: Action pins
 
 on:
@@ -19,15 +21,48 @@ permissions:
 jobs:
   resolve:
     runs-on: ubuntu-latest
-    # the checker retries a rate-limited or 5xx lookup (5s then 10s per ref, or the
-    # Retry-After the API asks for, capped at 30s), so the job has to outlast its own
-    # retry budget rather than being killed midway
+    # the checker retries a busy API (5s then 10s per pin, or the Retry-After it asks
+    # for), bounded by a 120s total across the run
     timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the gating copy of the checker comes from the base branch
+          fetch-depth: 0
+
+      - name: The checker is the one from the base branch, not from this change
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          target="$RUNNER_TEMP/gating-action-pins"
+          mkdir -p "$target"
+          if [ -z "$BASE_REF" ]; then
+            echo "not a pull request - using the copy in this change"
+            cp .github/actions/action-pins/*.py "$target/"
+            exit 0
+          fi
+          ref="origin/${BASE_REF}"
+          if ! git rev-parse --verify --quiet "$ref" > /dev/null; then
+            echo "::error::$ref is not in this checkout, so the reviewed copy of the checker cannot be read"
+            exit 1
+          fi
+          if git cat-file -e "$ref:.github/actions/action-pins/check-action-pins.py" 2>/dev/null; then
+            git show "$ref:.github/actions/action-pins/check-action-pins.py" > "$target/check-action-pins.py"
+            git show "$ref:.github/actions/action-pins/test_check_action_pins.py" > "$target/test_check_action_pins.py"
+            echo "using the checker from $ref"
+          else
+            echo "$ref has no checker yet - using the copy in this change, which is the PR that adds it"
+            cp .github/actions/action-pins/*.py "$target/"
+          fi
+
+      - name: The copy that gates behaves as its tests say
+        run: ( cd "$RUNNER_TEMP/gating-action-pins" && python3 test_check_action_pins.py )
+
+      - name: The copy in this change behaves as its tests say
+        run: ( cd .github/actions/action-pins && python3 test_check_action_pins.py )
 
       - name: Every action is pinned to a commit, and that commit exists
-        uses: ./.github/actions/action-pins
         env:
           GITHUB_TOKEN: ${{ github.token }}
+        run: python3 "$RUNNER_TEMP/gating-action-pins/check-action-pins.py" .github

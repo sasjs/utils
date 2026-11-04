@@ -47,6 +47,13 @@ BACKOFF_SECONDS = (5, 10)
 # unverifiable rather than holding a runner for the rest of the hour.
 MAX_RETRY_AFTER = 30
 
+# ...and the total time this run will spend waiting, across every pin. The per-pin
+# budget does not bound the job: twenty unverifiable pins at 30s each is ten minutes.
+MAX_TOTAL_WAIT = 120
+
+# seconds left in that budget; main() resets it, resolves() spends from it
+WAIT_BUDGET = {'left': MAX_TOTAL_WAIT}
+
 BLOCK_USES = re.compile(r'^(\s*)(?:-\s+)?uses:\s*(.+?)\s*$')
 FLOW_USES = re.compile(r'[{,]\s*uses:\s*([^,}\n]+)')
 UNPINNED = re.compile(r'^[^@\s]+@[0-9a-fA-F]{40}$')
@@ -70,7 +77,6 @@ def refs_in(path):
     """(line number, ref) for every `uses:` in a workflow or action file."""
     refs = []
     block_indent = None
-    scalar_indent = None
 
     for number, line in enumerate(path.read_text(errors='ignore').splitlines(), 1):
         stripped = line.strip()
@@ -79,12 +85,8 @@ def refs_in(path):
 
         indent = len(line) - len(line.lstrip())
 
-        # inside a block scalar (`run: |`) everything is text until the indentation
-        # returns to the key that opened it
-        if scalar_indent is not None:
-            if indent > scalar_indent:
-                continue
-            scalar_indent = None
+        # inside a block scalar (`run: |`, `description: >-`) everything is text
+        # until the indentation returns to the key that opened it
         if block_indent is not None:
             if indent > block_indent:
                 continue
@@ -93,7 +95,9 @@ def refs_in(path):
         if stripped.startswith('#'):
             continue
 
-        if re.match(r'^(?:-\s+)?(?:run|script|with):\s*[|>]', stripped):
+        # any key can open a block scalar, not just the ones that usually do: a
+        # `description: |` in a composite action is the case that bites
+        if re.match(r'^(?:-\s+)?[\w.-]+:\s*[|>]', stripped):
             block_indent = indent
             continue
 
@@ -207,19 +211,28 @@ def resolves(repo, sha, token):
             transient = error.code == 403 or error.code == 429 or error.code >= 500
             if transient and attempt < len(BACKOFF_SECONDS):
                 # honour Retry-After: retrying on our own schedule is what sustains
-                # a secondary limit
-                time.sleep(retry_after(error) or BACKOFF_SECONDS[attempt])
+                # a secondary limit. The total budget is what stops a run of
+                # unverifiable pins from outlasting the job.
+                wait = retry_after(error) or BACKOFF_SECONDS[attempt]
+                if WAIT_BUDGET['left'] <= 0:
+                    return 'unknown'
+                wait = min(wait, WAIT_BUDGET['left'])
+                WAIT_BUDGET['left'] -= wait
+                time.sleep(wait)
                 continue
             return 'unknown'
         except (urllib.error.URLError, TimeoutError):
-            if attempt < len(BACKOFF_SECONDS):
-                time.sleep(BACKOFF_SECONDS[attempt])
+            if attempt < len(BACKOFF_SECONDS) and WAIT_BUDGET['left'] > 0:
+                wait = min(BACKOFF_SECONDS[attempt], WAIT_BUDGET['left'])
+                WAIT_BUDGET['left'] -= wait
+                time.sleep(wait)
                 continue
             return 'unknown'
     return 'unknown'
 
 
 def main():
+    WAIT_BUDGET['left'] = MAX_TOTAL_WAIT
     root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else '.github')
     token = os.environ.get('GITHUB_TOKEN')
     if not token:
@@ -234,7 +247,7 @@ def main():
     pins = []
     for path in files:
         for number, ref in refs_in(path):
-            if ref.startswith(LOCAL) or ref.startswith('docker://'):
+            if ref.startswith(LOCAL):
                 # a local action or a container image: not a pin this check owns
                 continue
             pins.append((path, number, ref))
@@ -245,10 +258,15 @@ def main():
     unknown = []
     checked = 0
 
+    malformed = []
+
     for path, number, ref in pins:
         repo, _, sha = ref.partition('@')
         if not UNPINNED.match(ref):
             unpinned.append((path, number, ref))
+            continue
+        if len([part for part in repo.split('/') if part]) < 2:
+            malformed.append((path, number, ref))
             continue
         checked += 1
         status = resolves(repo, sha, token)
@@ -261,6 +279,10 @@ def main():
 
     for path, number, ref in unpinned:
         print(f'::error file={path},line={number}::uses: {ref} is not pinned to a commit sha')
+
+    for path, number, ref in malformed:
+        print(f'::error file={path},line={number}::uses: {ref} is not an owner/repo action '
+              f'reference, so there is nothing to look up')
 
     for path, number, ref, why in unresolved:
         print(f'::error file={path},line={number}::uses: {ref} - {why}')
@@ -280,11 +302,11 @@ def main():
 
     print(
         f'checked {checked} pinned action(s) in {len(files)} file(s): '
-        f'{len(unpinned)} unpinned, {len(unresolved)} unresolved, '
+        f'{len(unpinned)} unpinned, {len(malformed)} malformed, {len(unresolved)} unresolved, '
         f'{len(denied)} refused, {len(unknown)} unverifiable'
     )
 
-    return 1 if (unpinned or unresolved or denied or everything_unverified) else 0
+    return 1 if (unpinned or malformed or unresolved or denied or everything_unverified) else 0
 
 
 if __name__ == '__main__':

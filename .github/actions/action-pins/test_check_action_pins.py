@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The pin checker's own reading of a workflow, and its reading of the API.
 
-    python3 .github/scripts/test_check_action_pins.py
+    python3 .github/actions/action-pins/test_check_action_pins.py
 
 The invariants these cases pin:
 
@@ -107,6 +107,22 @@ class RefsInTest(unittest.TestCase):
                       uses: alsonot@v2
                       EOF
                   - uses: actions/checkout@v4
+                """
+            ),
+            ['actions/checkout@v4'],
+        )
+
+    def test_any_key_can_open_a_block_scalar(self):
+        # a composite action's `description: |` is text, not a list of steps
+        self.assertEqual(
+            refs(
+                """\
+                description: |
+                  This is prose.
+                  uses: notanaction@v1
+                runs:
+                  steps:
+                    - uses: actions/checkout@v4
                 """
             ),
             ['actions/checkout@v4'],
@@ -244,6 +260,22 @@ class ResolvesTest(unittest.TestCase):
         error.read = unreadable
         self.assertEqual(self.answer(error), 'unknown')
 
+    def test_the_total_wait_budget_stops_the_backoff(self):
+        # a run of unverifiable pins must not outlast the job
+        CHECKER.WAIT_BUDGET['left'] = 2
+        try:
+            self.slept.clear()
+            self.assertEqual(self.answer(urllib.error.HTTPError(
+                'https://api.github.com', 429, 'Too Many Requests', {}, None)), 'unknown')
+            self.assertEqual(sum(self.slept), 2)
+            self.assertEqual(CHECKER.WAIT_BUDGET['left'], 0)
+            self.slept.clear()
+            self.assertEqual(self.answer(urllib.error.HTTPError(
+                'https://api.github.com', 429, 'Too Many Requests', {}, None)), 'unknown')
+            self.assertEqual(self.slept, [], 'nothing may be waited once the budget is spent')
+        finally:
+            CHECKER.WAIT_BUDGET['left'] = CHECKER.MAX_TOTAL_WAIT
+
     def test_429_and_5xx_and_network_blips_are_unverifiable(self):
         self.assertEqual(self.answer(urllib.error.HTTPError(
             'https://api.github.com', 429, 'Too Many Requests', {}, None)), 'unknown')
@@ -301,6 +333,29 @@ class MainTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn('::warning', output)
         self.assertIn('1 unverifiable', output)
+
+    def test_a_ref_without_an_owner_is_malformed(self):
+        original_refs = CHECKER.refs_in
+        original_token = CHECKER.os.environ.get('GITHUB_TOKEN')
+        CHECKER.refs_in = lambda path: [(1, f'checkout@{SHA}')]
+        CHECKER.os.environ['GITHUB_TOKEN'] = 'token'
+        printed = io.StringIO()
+        original_argv = CHECKER.sys.argv
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                pathlib.Path(directory, 'workflow.yml').write_text('steps:\n')
+                CHECKER.sys.argv = ['check-action-pins.py', directory]
+                with contextlib.redirect_stdout(printed):
+                    code = CHECKER.main()
+        finally:
+            CHECKER.refs_in = original_refs
+            CHECKER.sys.argv = original_argv
+            if original_token is None:
+                CHECKER.os.environ.pop('GITHUB_TOKEN', None)
+            else:
+                CHECKER.os.environ['GITHUB_TOKEN'] = original_token
+        self.assertEqual(code, 1)
+        self.assertIn('is not an owner/repo action reference', printed.getvalue())
 
     def test_a_run_that_verified_nothing_fails(self):
         # a green job that checked nothing reads as a pass; it must not
