@@ -47,6 +47,16 @@ export interface WeboutPreludeConfig {
   userId: string
   /** The address the program is running on, for SYSTCPIPHOSTNAME. */
   apiServerUrl: string
+  /**
+   * What programs see as SYSSITE - the site a licence key is issued for.
+   *
+   * SAS has this as a global macro variable set on the server, so a SAS service
+   * reads it without being told anything. A JS program has no such variable, so
+   * the host passes its configured site in here; the default is `123`, the site
+   * the SASjs demo estate and the SAS9 test server use. Pass an empty string to
+   * report no site at all.
+   */
+  siteId?: string
 }
 
 /**
@@ -55,6 +65,13 @@ export interface WeboutPreludeConfig {
  * the message is kept because it carries the actual cause.
  */
 const MAX_SYSTEM_TEXT = 2000
+
+/**
+ * SYSSITE when a host has not configured one. It matches the site the SASjs demo
+ * estate and the SAS9 test server use, so a program that checks SYSSITE against
+ * a licence key behaves the same on the JS runtimes as it does on SAS.
+ */
+export const DEFAULT_SITE_ID = '123'
 
 /** A JavaScript string literal that cannot be broken out of. */
 const literal = (value: unknown): string =>
@@ -88,7 +105,8 @@ const _sasjs_webout_config = {
   debug: ${literal(config.debug)},
   username: ${literal(config.username)},
   userId: ${literal(config.userId)},
-  apiServerUrl: ${literal(config.apiServerUrl)}
+  apiServerUrl: ${literal(config.apiServerUrl)},
+  siteId: ${literal(config.siteId === undefined ? DEFAULT_SITE_ID : config.siteId)}
 };
 
 /* Resolved here rather than assumed, so a host that emits this block without
@@ -321,7 +339,7 @@ const _sasjs_close = () => {
   _sasjs_member('SYSPROCESSNAME', _sasjs_os ? 'NodeJS' : 'Browser');
   _sasjs_member('SYSJOBID', _sasjs_pid());
   _sasjs_member('SYSSCPL', _sasjs_platform());
-  _sasjs_member('SYSSITE', '');
+  _sasjs_member('SYSSITE', _sasjs_webout_config.siteId);
   _sasjs_member('SYSTCPIPHOSTNAME', _sasjs_webout_config.apiServerUrl);
   _sasjs_member('SYSUSERID', _sasjs_webout_config.userId);
   _sasjs_member('SYSVLONG', _sasjs_vlong());
