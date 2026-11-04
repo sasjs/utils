@@ -18,6 +18,7 @@ const runBlock = (options: {
   browser?: boolean
   rawWebout?: string
   seedHeader?: string
+  siteId?: string
 }) => {
   const dir = mkdtempSync(path.join(tmpdir(), 'sasjs-webout-'))
   const weboutPath = path.join(dir, 'webout.txt')
@@ -36,7 +37,8 @@ const runBlock = (options: {
     debug: '',
     username: 'testuser',
     userId: '507f1f77bcf86cd799439011',
-    apiServerUrl: 'http://127.0.0.1:5000'
+    apiServerUrl: 'http://127.0.0.1:5000',
+    ...(options.siteId === undefined ? {} : { siteId: options.siteId })
   })
 
   const printed: string[] = []
@@ -136,6 +138,9 @@ webout('CLOSE')`
     expect(parsed.SYSUSERID).toEqual('507f1f77bcf86cd799439011')
     expect(parsed._PROGRAM).toEqual('/Public/app/myprogram')
     expect(parsed.SYSTCPIPHOSTNAME).toEqual('http://127.0.0.1:5000')
+    // SAS has SYSSITE as a global macro variable; a JS program has no such
+    // variable, so the host's site is what it reports, and 123 is the default.
+    expect(parsed.SYSSITE).toEqual('123')
     expect(parsed.SYSCC).toEqual(0)
     expect(parsed.SYSPROCESSNAME).toEqual('NodeJS')
     expect(parsed.SYSVLONG).toEqual('v99.0.0')
@@ -240,6 +245,28 @@ ${weboutFinaliseStatement}`
     expect(JSON.parse(readFileSync(weboutPath, 'utf-8')).MF_GETUSER).toEqual(
       hostile
     )
+  })
+
+  it('reports the configured site as SYSSITE, and an empty one as empty', () => {
+    const configured = runBlock({
+      body: `
+webout('OPEN')
+webout('CLOSE')`,
+      siteId: 'SITE1'
+    })
+    expect(configured.failure).toBeNull()
+    expect(JSON.parse(configured.body).SYSSITE).toEqual('SITE1')
+
+    // An explicit empty string is honoured: a host that has no site must not be
+    // given the default.
+    const none = runBlock({
+      body: `
+webout('OPEN')
+webout('CLOSE')`,
+      siteId: ''
+    })
+    expect(none.failure).toBeNull()
+    expect(JSON.parse(none.body).SYSSITE).toEqual('')
   })
 
   it('falls back to the browser for the host facts', () => {
