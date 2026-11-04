@@ -177,14 +177,34 @@ try {
 
 const _sasjs_pad = (value) => String(value).padStart(2, '0');
 
+/**
+ * &SYSDATE is DATE7 - ddMMMyy, with a two-digit year - and %mm_webout writes it
+ * as it stands. A four-digit year here is DATE9, a format the SAS side never
+ * emits, and a consumer that parses the field as DATE7 reads it wrong.
+ */
 const _sasjs_sas_date = (date) => {
   const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
     'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  return _sasjs_pad(date.getDate()) + months[date.getMonth()] + date.getFullYear();
+  return _sasjs_pad(date.getDate()) + months[date.getMonth()] +
+    _sasjs_pad(date.getFullYear() % 100);
 };
 
+/** &SYSTIME is TIME5 - hh:mm. The seconds stay in the log, not in this field. */
 const _sasjs_sas_time = (date) =>
-  _sasjs_pad(date.getHours()) + ':' + _sasjs_pad(date.getMinutes()) + ':' + _sasjs_pad(date.getSeconds());
+  _sasjs_pad(date.getHours()) + ':' + _sasjs_pad(date.getMinutes());
+
+/**
+ * END_DTTM is %sysfunc(datetime(),E8601DT26.6): local time, six fraction
+ * digits, no zone suffix. toISOString() was UTC with a trailing Z and three
+ * digits, so a consumer parsing both sides saw different instants on any estate
+ * that is not at UTC. Date carries milliseconds only; the last three digits are
+ * zeros rather than invented.
+ */
+const _sasjs_e8601dt = (date) =>
+  date.getFullYear() + '-' + _sasjs_pad(date.getMonth() + 1) + '-' +
+  _sasjs_pad(date.getDate()) + 'T' + _sasjs_pad(date.getHours()) + ':' +
+  _sasjs_pad(date.getMinutes()) + ':' + _sasjs_pad(date.getSeconds()) + '.' +
+  String(date.getMilliseconds() * 1000).padStart(6, '0');
 
 const _sasjs_hostname = () =>
   _sasjs_os ? _sasjs_os.hostname() : (typeof location !== 'undefined' ? location.hostname : '');
@@ -329,7 +349,7 @@ const _sasjs_close = () => {
   _sasjs_member('_PROGRAM', _sasjs_webout_config.program);
   _sasjs_member('AUTOEXEC', '');
   _sasjs_member('MF_GETUSER', _sasjs_webout_config.username);
-  _sasjs_member('SYSCC', _sasjs_syserrortext ? 8 : 0);
+  _sasjs_member('SYSCC', String(_sasjs_syserrortext ? 8 : 0));
   _sasjs_member('SYSENCODING', 'utf-8');
   _sasjs_member('SYSERRORTEXT', _sasjs_syserrortext);
   _sasjs_member('SYSHOSTINFOLONG', _sasjs_hostinfo());
@@ -344,7 +364,7 @@ const _sasjs_close = () => {
   _sasjs_member('SYSUSERID', _sasjs_webout_config.userId);
   _sasjs_member('SYSVLONG', _sasjs_vlong());
   _sasjs_member('SYSWARNINGTEXT', _sasjs_syswarningtext);
-  _sasjs_member('END_DTTM', new Date().toISOString());
+  _sasjs_member('END_DTTM', _sasjs_e8601dt(new Date()));
   _sasjs_member('MEMSIZE', _sasjs_memsize());
 
   _sasjs_append('}');

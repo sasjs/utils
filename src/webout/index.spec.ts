@@ -132,8 +132,8 @@ webout('CLOSE')`
       [1, 2],
       [3, 4]
     ])
-    expect(parsed.SYSDATE).toMatch(/^\d{2}[A-Z]{3}\d{4}$/)
-    expect(parsed.SYSTIME).toMatch(/^\d{2}:\d{2}:\d{2}$/)
+    expect(parsed.SYSDATE).toMatch(/^\d{2}[A-Z]{3}\d{2}$/)
+    expect(parsed.SYSTIME).toMatch(/^\d{2}:\d{2}$/)
     expect(parsed.MF_GETUSER).toEqual('testuser')
     expect(parsed.SYSUSERID).toEqual('507f1f77bcf86cd799439011')
     expect(parsed._PROGRAM).toEqual('/Public/app/myprogram')
@@ -141,10 +141,42 @@ webout('CLOSE')`
     // SAS has SYSSITE as a global macro variable; a JS program has no such
     // variable, so the host's site is what it reports, and 123 is the default.
     expect(parsed.SYSSITE).toEqual('123')
-    expect(parsed.SYSCC).toEqual(0)
+    expect(parsed.SYSCC).toEqual('0')
     expect(parsed.SYSPROCESSNAME).toEqual('NodeJS')
     expect(parsed.SYSVLONG).toEqual('v99.0.0')
-    expect(parsed.END_DTTM).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+    expect(parsed.END_DTTM).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}$/
+    )
+  })
+
+  it('writes the dates in the SAS formats %mm_webout uses', () => {
+    const { body, failure } = runBlock({
+      body: `
+webout('OPEN')
+webout('CLOSE')`
+    })
+
+    expect(failure).toBeNull()
+
+    const parsed = JSON.parse(body)
+
+    // &SYSDATE is DATE7, &SYSTIME is TIME5: seven and five characters, not the
+    // ten-character DATE9 and eight-character TIME8 a four-digit year and
+    // seconds would produce.
+    expect(parsed.SYSDATE).toMatch(/^\d{2}[A-Z]{3}\d{2}$/)
+    expect(parsed.SYSTIME).toMatch(/^\d{2}:\d{2}$/)
+
+    // END_DTTM is %sysfunc(datetime(),E8601DT26.6): local time, six fraction
+    // digits, and no zone suffix - toISOString() wrote UTC with a trailing Z.
+    expect(parsed.END_DTTM).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}$/
+    )
+    expect(parsed.END_DTTM.endsWith('Z')).toBe(false)
+
+    // SYSCC is text: %mm_webout writes "&syscc", and a consumer comparing it to
+    // '0' must not meet a number.
+    expect(typeof parsed.SYSCC).toBe('string')
+    expect(parsed.SYSCC).toEqual('0')
   })
 
   it('carries the last console error and warning, as SAS carries the last one', () => {
@@ -164,7 +196,7 @@ webout('CLOSE')`
     expect(parsed.SYSERRORTEXT).toEqual('the failure that matters')
     // An error logged before CLOSE raises SYSCC the way the SAS engine does;
     // a warning alone does not.
-    expect(parsed.SYSCC).toEqual(8)
+    expect(parsed.SYSCC).toEqual('8')
   })
 
   it('leaves SYSCC at 0 when only warnings were logged, and still forwards them', () => {
@@ -179,7 +211,7 @@ webout('CLOSE')`
 
     expect(parsed.SYSWARNINGTEXT).toEqual('just a warning')
     expect(parsed.SYSERRORTEXT).toEqual('')
-    expect(parsed.SYSCC).toEqual(0)
+    expect(parsed.SYSCC).toEqual('0')
     // The console tap must not swallow the program's own output.
     expect(printed).toContain('warn: just a warning')
   })
@@ -291,7 +323,7 @@ webout('CLOSE')`
     // Nothing in a browser host to report for these.
     expect(parsed.SYSENCODING).toEqual('utf-8')
     expect(parsed.SYSERRORTEXT).toEqual('browser error')
-    expect(parsed.SYSCC).toEqual(8)
+    expect(parsed.SYSCC).toEqual('8')
   })
 
   it('resolves fs itself, so a host need not bind it, and says so when neither exists', () => {
