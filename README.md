@@ -1,9 +1,6 @@
 # @sasjs/utils
 
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sasjs/utils/badge)](https://scorecard.dev/viewer/?uri=github.com/sasjs/utils)
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/sasjs/utils/badge)](https://scorecard.dev/viewer/?uri=github.com/sasjs/utils) [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 
 A library of utilities and types for SASjs written in TypeScript.
 
