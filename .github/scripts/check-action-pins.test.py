@@ -179,6 +179,26 @@ class ResolvesTest(unittest.TestCase):
             io.BytesIO(b'{"message": "You have exceeded a secondary rate limit"}'))
         self.assertEqual(self.answer(error), 'unknown')
 
+    def test_a_primary_rate_limit_is_unverifiable(self):
+        # the primary limit answers 403 with x-ratelimit-remaining: 0 and no
+        # Retry-After, and the body may say nothing useful
+        limit = urllib.error.HTTPError(
+            'https://api.github.com', 403, 'Forbidden',
+            {'x-ratelimit-remaining': '0'}, None)
+        self.assertEqual(self.answer(limit), 'unknown')
+
+    def test_a_403_whose_body_cannot_be_read_is_not_a_refusal(self):
+        class Unreadable:
+            def read(self):
+                raise OSError('connection reset')
+
+            def close(self):
+                pass
+
+        error = urllib.error.HTTPError(
+            'https://api.github.com', 403, 'Forbidden', {}, Unreadable())
+        self.assertEqual(self.answer(error), 'unknown')
+
     def test_429_and_5xx_and_network_blips_are_unverifiable(self):
         self.assertEqual(self.answer(urllib.error.HTTPError(
             'https://api.github.com', 429, 'Too Many Requests', {}, None)), 'unknown')
