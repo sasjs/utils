@@ -104,38 +104,39 @@ def api(path, token):
 
 
 def throttled(error):
-    """Whether a 403 is GitHub asking us to slow down: True, False, or None.
+    """Whether a 403 is GitHub asking us to slow down rather than refusing us.
 
-    Both arrive as 403. A primary limit sends Retry-After or an exhausted
-    x-ratelimit-remaining; a secondary limit says so in the body. False is a
-    refusal - the token cannot read that repository, and retrying will not change
-    it. None is no evidence either way: the body could not be read, so the caller
-    reports the pin as unverifiable rather than sending a maintainer to look at a
-    token that may be fine.
+    Both arrive as 403. A secondary limit sends Retry-After, a primary limit sends
+    x-ratelimit-remaining: 0, and either way the body usually says "rate limit".
+    None of those means the token is wrong, so none of them may fail the run.
+
+    Returns True (throttled), False (refused) or None (no way to tell).
     """
     # the answer is cached on the error: a 403 whose body has already been read
-    # would otherwise look like a refusal on the retry of the same exception
-    # hasattr, not a None check: None is a real answer here, and reading the
-    # body a second time would return '' and read as a refusal
-    if hasattr(error, '_pkg_throttled'):
-        return error._pkg_throttled
+    # would otherwise look different on the retry of the same exception
+    cached = getattr(error, '_pkg_throttled', 'missing')
+    if cached != 'missing':
+        return cached
 
-    headers = {
-        name.lower(): value for name, value in (error.headers or {}).items()
-    }
+    def header(name):
+        # a real HTTPMessage is case-insensitive; a plain dict is not
+        for key, value in (error.headers or {}).items():
+            if key.lower() == name:
+                return value
+        return None
 
-    if headers.get('retry-after') or headers.get('x-ratelimit-remaining') == '0':
+    if header('retry-after') or header('x-ratelimit-remaining') == '0':
         result = True
     elif getattr(error, 'fp', None) is None:
-        # no body at all: nothing suggests throttling, so this is a refusal
+        # nothing to read, and nothing in the headers: this is a refusal
         result = False
     else:
         try:
             body = error.read().decode('utf-8', 'ignore')
         except Exception:  # noqa: BLE001 - a body we cannot read is not evidence
-            result = None
-        else:
-            result = 'rate limit' in body.lower()
+            error._pkg_throttled = None
+            return None
+        result = 'rate limit' in body.lower()
 
     error._pkg_throttled = result
     return result
@@ -145,13 +146,11 @@ def resolves(repo, sha, token):
     """'ok', 'bad', 'denied' or 'unknown'.
 
     'bad'      - 404 or 422: the commit is not in that repository.
-    'denied'   - 401, or a 403 that is a refusal rather than a throttle: the token
-                 cannot read it.
+    'denied'   - 401, or a 403 that is not throttling: the token cannot read it.
                  Not retried - a refused token does not become accepted - and not
                  a pass, because the check could not run at all.
-    'unknown'  - 429, 5xx, a throttling 403, a 403 whose body cannot be read, or a
-                 network error that survived the retries: says nothing about the
-                 pin, so the caller warns.
+    'unknown'  - 429, 5xx, a throttling 403, or a network error that survived the
+                 retries: says nothing about the pin, so the caller warns.
     """
     for attempt in range(len(BACKOFF_SECONDS) + 1):
         try:
@@ -162,9 +161,13 @@ def resolves(repo, sha, token):
                 return 'bad'
             if error.code == 401:
                 return 'denied'
-            if error.code == 403 and throttled(error) is False:
-                # a refusal, not a throttle: retrying will not change it
-                return 'denied'
+            if error.code == 403:
+                answer = throttled(error)
+                if answer is False:
+                    return 'denied'
+                if answer is None:
+                    # an unreadable body says nothing about the token either way
+                    return 'unknown'
             transient = error.code == 403 or error.code == 429 or error.code >= 500
             if transient and attempt < len(BACKOFF_SECONDS):
                 time.sleep(BACKOFF_SECONDS[attempt])
