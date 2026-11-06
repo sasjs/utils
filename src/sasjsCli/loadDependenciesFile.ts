@@ -8,6 +8,7 @@ import {
   getPreCode
 } from './'
 import { CompileTree } from '../compileTree'
+import { removeHeader } from '../compileTree/removeHeader'
 import { throwIfDoxygenHeaderClosesEarly } from '../compileTree/doxygenHeader'
 import { readFile } from '../file'
 
@@ -48,10 +49,6 @@ export const loadDependenciesFile = async ({
       buildSourceFolder,
       compileTree
     })
-
-  if (type !== SASJsFileType.file) {
-    fileContent = `\n* ${type} start;\n${fileContent}\n* ${type} end;`
-  }
 
   const fileDependencyPaths = await getDependencyPaths(
     `${fileContent}\n${init}\n${term}`,
@@ -132,8 +129,17 @@ export const loadDependenciesFile = async ({
       .filter((content: string) => content.length)
       .join('\n')
   } else {
+    // A compiled artefact carries the program, not its documentation: the header
+    // has been read for its <h4> sections and @li entries above, so it is
+    // dropped here. Dependencies and the init/term programs are already
+    // header-free - they are stripped when they are read into the compile tree.
+    const program = `\n* ${type} start;\n${removeHeader(
+      fileContent,
+      filePath
+    )}\n* ${type} end;`
+
     fileContent = `* SAS Macros start;\n${initProgramDependencies}\n${termProgramDependencies}\n${dependenciesContent}\n* SAS Macros end;\n* SAS Includes start;\n${programDependencies}\n* SAS Includes end;\n* Binary Files start;\n${binariesDeps}\n* Binary Files end;\n
-${init}${fileContent}${term}`
+${init}${program}${term}`
 
     fileContent = `* ${type} Variables start;\n${startUpVars}\n* ${type} Variables end;\n${fileContent}`
   }
