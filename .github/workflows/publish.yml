@@ -13,14 +13,12 @@ on:
   # the release reachable from the Actions UI or the API when that happens.
   workflow_dispatch:
 
-# One release at a time. Both triggers publish, and the push trigger fires on
-# every release commit @semantic-release/git pushes back to main, so a
-# dispatched recovery run can interleave with a push-triggered one. Two
-# semantic-release processes racing the same tag and the same npm publish is a
-# new way to strand a release - the state the retry below exists to recover.
-# `cancel-in-progress: false` queues the second run rather than cancelling the
-# first, because cancelling a run midway through a release is itself a way to
-# leave a tag pushed and the release missing.
+# One release at a time. Both triggers publish - a merge to main and a
+# dispatched recovery run - and the two can overlap, so two semantic-release
+# processes can race the same tag and the same npm publish, which is a new way
+# to strand a release. `cancel-in-progress: false` queues the second run rather
+# than cancelling the first, because cancelling a run midway through a release
+# is itself a way to leave a tag pushed and the release missing.
 concurrency:
   group: publish
   cancel-in-progress: false
@@ -51,7 +49,8 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      # Checkout using the app token so the release commit can be pushed
+      # Checkout using the app token: main requires a pull request, so the
+      # release writes the version tag and the GitHub release, never a commit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ steps.app-token.outputs.token }}
@@ -106,22 +105,22 @@ jobs:
         run: npm ci --prefix release --ignore-scripts
 
       - name: Semantic Release
-        # semantic-release pushes twice: @semantic-release/git pushes the release
-        # commit to the branch, then core pushes the tag in a second, tags-only
-        # push. When that second push is rejected the branch keeps the release
-        # commit - package.json at the new version - with no tag: no GitHub
-        # release, no npm publish, and every later run dying in the exec plugin's
-        # `npm version` with "Version not changed", a state only a hand repair
-        # clears. sasjs/adapter hit exactly that on 2026-10-17.
+        # semantic-release pushes once: the version tag. @semantic-release/git is
+        # deliberately not configured. It pushes the release commit
+        # (`chore(release): x.y.z`) straight to the branch, and main requires a
+        # pull request, so that push is rejected as a repository rule violation
+        # before the tag is ever created - no tag, no GitHub release, no npm
+        # publish, and nothing for the retry below to work with. The repo's
+        # package.json therefore keeps the last committed version; the published
+        # version comes from the exec plugin's `npm version` in the prepare step.
         #
-        # The tag push runs after the tag exists locally and after the branch is
-        # updated, so one more attempt has only the tag to push. Retry exactly
-        # that case: a local tag alone does not identify it, because the tag is
-        # also there when the failure came later (the GitHub release), and
-        # retrying that finds the tag restored by semantic-release's own fetch,
-        # decides there is nothing to release, exits 0 and leaves the step green
-        # with the release still missing - so require the tag to be absent from
-        # the remote as well.
+        # What remains to fail is the tag push: the tag exists locally but not on
+        # the remote. Retry exactly that case - a local tag alone does not
+        # identify it, because the tag is also there when the failure came later
+        # (the GitHub release), and retrying that finds the tag restored by
+        # semantic-release's own fetch, decides there is nothing to release,
+        # exits 0 and leaves the step green with the release still missing - so
+        # require the tag to be absent from the remote as well.
         #
         # Only a definitive answer counts. `git ls-remote --exit-code` exits 2 for
         # an absent ref but 128 when the query itself fails (network, auth,
@@ -139,6 +138,11 @@ jobs:
           fi
 
           version=$(node -p "require('./package.json').version")
+
+          if [ "$version" = "0.0.0-semantically-released" ]; then
+            echo "semantic-release did not reach the prepare step (package.json still holds the placeholder version) - not retrying." >&2
+            exit 1
+          fi
 
           if ! git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
             echo "No local v$version tag, so the failure came before the tag was created - not retrying." >&2
@@ -171,12 +175,25 @@ jobs:
       # npm rejects with "You cannot publish over the previously published
       # versions". Compare against the registry instead, and publish only when
       # there is something new.
+      #
+      # package.json carries the placeholder version between releases (as
+      # sasjs/lint and sasjs/adapter do), so a run that cut no release leaves it
+      # in place - that is the "nothing to publish" signal now. The registry
+      # comparison stays for the other half of the case: a release whose version
+      # is already on npm.
       - name: Publish to npm with trusted publisher
         id: publish
         if: success()
         run: |
+          placeholder=0.0.0-semantically-released
           local_version=$(node -p "require('./package.json').version")
           published_version=$(npm view @sasjs/utils version 2>/dev/null || echo "")
+
+          if [ "$local_version" = "$placeholder" ]; then
+            echo "released=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing to publish - semantic-release cut no release, package.json still holds $placeholder"
+            exit 0
+          fi
 
           if [ "$local_version" = "$published_version" ]; then
             echo "released=false" >> "$GITHUB_OUTPUT"
