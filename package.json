@@ -20,15 +20,6 @@
           "prepareCmd": "npm version ${nextRelease.version} --no-git-tag-version --allow-same-version"
         }
       ],
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "package.json",
-            "package-lock.json"
-          ]
-        }
-      ],
       "@semantic-release/github"
     ]
   },
@@ -97,5 +88,5 @@
     "jwt-decode": "4.0.0",
     "prompts": "2.4.2"
   },
-  "version": "4.8.0"
+  "version": "0.0.0-semantically-released"
 }
