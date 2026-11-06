@@ -431,6 +431,83 @@ describe('loadDependenciesFile', () => {
     )
   })
 
+  describe('doxygen headers', () => {
+    const header = `/**
+  @file order.sas
+  @brief Places an order
+  @details The header documents the source program only.
+  <h4> SAS Macros </h4>
+  @li examplemacro.sas
+**/`
+
+    const body = `data _null_;
+  %examplemacro()
+run;`
+
+    const compile = (content: string, type: SASJsFileType) =>
+      loadDependenciesFile({
+        target,
+        configuration,
+        fileContent: content,
+        macroFolders: [path.join(testFiles, './macros')],
+        programFolders: [
+          path.join(testFiles, './'),
+          path.join(testFiles, './services')
+        ],
+        type,
+        buildSourceFolder,
+        macroCorePath,
+        binaryFolders: [],
+        compileTree
+      })
+
+    const occurrences = (haystack: string, needle: string) =>
+      haystack.split(needle).length - 1
+
+    it.each([SASJsFileType.service, SASJsFileType.job, SASJsFileType.test])(
+      'strips the header from a compiled %s',
+      async (type) => {
+        mockGetProgram(internalModule, '', '')
+
+        const dependencies = await compile(`${header}\n\n${body}`, type)
+
+        expect(dependencies).not.toContain('@brief Places an order')
+        expect(dependencies).not.toContain('@li examplemacro.sas')
+        // counted, not `toContain`, so a second wrapper cannot slip through
+        expect(occurrences(dependencies, `* ${type} start;`)).toEqual(1)
+        expect(occurrences(dependencies, `* ${type} end;`)).toEqual(1)
+        expect(dependencies).toContain(body)
+        // the @li list is read before the header is dropped, so the macro is
+        // still inlined
+        expect(dependencies).toContain('%macro examplemacro')
+      }
+    )
+
+    it('emits SASJsFileType.file content verbatim, header included', async () => {
+      mockGetProgram(internalModule, '', '')
+
+      const content = `${header}\n\n${body}`
+      const dependencies = await compile(content, SASJsFileType.file)
+
+      // the CLI strips a file's header before calling in, so this layer leaves
+      // both the content and its header exactly as given
+      expect(dependencies).toContain('@brief Places an order')
+      expect(dependencies.endsWith(content)).toEqual(true)
+      expect(occurrences(dependencies, '* file start;')).toEqual(0)
+    })
+
+    it('keeps a header that does not open the program', async () => {
+      mockGetProgram(internalModule, '', '')
+
+      const dependencies = await compile(
+        `options nosource;\n\n${header}\n\n${body}`,
+        SASJsFileType.service
+      )
+
+      expect(dependencies).toContain('@brief Places an order')
+    })
+  })
+
   it(
     'should not add any comments to file content if the SASJsFileType=' +
       SASJsFileType.file,
