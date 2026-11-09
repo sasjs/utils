@@ -344,6 +344,15 @@ export const validateStreamConfig = (
     )
   }
 
+  if (
+    streamConfig.mockWebBasePath !== undefined &&
+    typeof streamConfig.mockWebBasePath !== 'string'
+  ) {
+    throw new Error(
+      'Invalid stream config: `mockWebBasePath` cannot be a non-string value.'
+    )
+  }
+
   // `webSourcePath` is optional: the schema documents `dist` as its default and
   // most projects build into ./dist or ./build, so it is filled in below when a
   // switch needs it. A value that is present but blank is a typo rather than a

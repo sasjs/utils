@@ -597,6 +597,14 @@
           "default": "sasjsbuild/mock",
           "examples": ["sasjsbuild/mock"]
         },
+        "mockWebBasePath": {
+          "$id": "#/properties/streamConfig/properties/mockWebBasePath",
+          "type": "string",
+          "title": "The streamConfig mockWebBasePath",
+          "description": "The folder the browser build is published in, as a path from the site root (for example `/demo`). A leading slash is optional - the build adds it - and dot segments are refused, because the folder has to name a place inside the site. Unset, the site is served from the origin root. Set it when the site lives in a folder of a larger site - a demonstration site beside its own documentation - so the worker's scope, the files it fetches and the app's API calls all follow that folder.",
+          "pattern": "^(?:\\/)?(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9._~-]+(?:\\/(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9._~-]+)*$",
+          "examples": ["/demo"]
+        },
         "webSourcePath": {
           "$id": "#/properties/streamConfig/properties/webSourcePath",
           "type": "string",
