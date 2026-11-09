@@ -85,6 +85,16 @@ export interface StreamConfig {
    * Defaults to `<buildDestinationFolder>/mock`.
    */
   mockWebFolder?: string
+  /**
+   * The folder the browser build is published in, as a path from the site root
+   * (`/demo`), with no trailing slash. Unset means the origin root.
+   *
+   * A host has one site per repository, so a demonstration site often shares
+   * its docs site and lives in a folder of it. The build names that folder here
+   * and the worker's scope, the files it fetches and the app's own API calls
+   * all follow it.
+   */
+  mockWebBasePath?: string
 }
 
 export interface AuthConfig {

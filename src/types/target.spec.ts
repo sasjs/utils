@@ -374,6 +374,23 @@ describe('Target', () => {
     ).toThrowError(/mockWeb/)
   })
 
+  it('should reject a non-string mockWebBasePath', () => {
+    expect(
+      () =>
+        new Target({
+          name: 'test',
+          serverUrl: '',
+          serverType: ServerType.Sasjs,
+          appLoc: '/test',
+          streamConfig: {
+            webSourcePath: 'dist',
+            mockWeb: true,
+            mockWebBasePath: 42 as any
+          }
+        })
+    ).toThrowError(/mockWebBasePath/)
+  })
+
   it('should reject an empty webSourcePath when mockWeb is true', () => {
     expect(
       () =>
