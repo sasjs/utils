@@ -7,22 +7,6 @@
   "engines": {
     "node": ">=22"
   },
-  "release": {
-    "branches": [
-      "main"
-    ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "@semantic-release/exec",
-        {
-          "prepareCmd": "npm version ${nextRelease.version} --no-git-tag-version --allow-same-version"
-        }
-      ],
-      "@semantic-release/github"
-    ]
-  },
   "typings": "./index.d.ts",
   "files": [
     "index.js",
@@ -55,7 +39,8 @@
     "test": "jest --config=jest.config.js --coverage",
     "lint:fix": "npx prettier --write \"{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}\"",
     "lint": "npx prettier --check \"{src,test}/**/*.{ts,tsx,js,jsx,html,css,sass,less,json,yml,md,graphql}\"",
-    "setup": "git config core.hooksPath ./.git-hooks"
+    "setup": "git config core.hooksPath ./.git-hooks",
+    "prepublishOnly": "node -e \"const v=require('./package.json').version; if (/^0\\.0\\.0/.test(v)) { console.error('refusing to publish ' + v + ': the version is stamped from the tag (npm version <tag> --no-git-tag-version)'); process.exit(1) }\""
   },
   "repository": {
     "type": "git",
@@ -88,7 +73,7 @@
     "jwt-decode": "4.0.0",
     "prompts": "2.4.2"
   },
-  "version": "0.0.0-semantically-released",
+  "version": "0.0.0",
   "overrides": {
     "handlebars": "4.7.10"
   }
