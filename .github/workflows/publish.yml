@@ -176,10 +176,11 @@ jobs:
             echo "already=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: The version is the tag, not the placeholder
-        # `.npmrc` sets ignore-scripts=true, which makes npm skip prepublishOnly -
-        # so the guard in package.json cannot be what stops a placeholder
-        # reaching the registry. Asserted here, where it cannot be skipped.
+      - name: The version is the tag's
+        # prepublishOnly refuses the 0.0.0 placeholder, and the publish step below
+        # re-enables it with --ignore-scripts=false, so that case is already
+        # covered. This checks what prepublishOnly cannot see: that the version
+        # npm is about to read is the tag's, not merely non-placeholder.
         if: steps.tag.outputs.skip != 'true' && steps.existing.outputs.already != 'true'
         env:
           VERSION: ${{ steps.tag.outputs.version }}
@@ -191,9 +192,6 @@ jobs:
             echo "::error::package.json states $stamped but the tag names $VERSION"
             exit 1
           fi
-          case "$stamped" in
-            0.0.0*) echo "::error::refusing to publish the placeholder $stamped"; exit 1 ;;
-          esac
 
       - name: Publish to npm with trusted publisher
         if: steps.tag.outputs.skip != 'true' && steps.existing.outputs.already != 'true'
