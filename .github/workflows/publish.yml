@@ -25,7 +25,10 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to publish (blank = the tag that triggered it)
+        description: >-
+          Release tag to publish. Required when dispatched; when this runs from
+          the Release workflow, leave it blank and the tag that run created is
+          used. Must be on main.
         required: false
         default: ''
       republish:
@@ -70,12 +73,13 @@ jobs:
         id: tag
         env:
           EVENT: ${{ github.event_name }}
-          RELEASED: ${{ github.event.release.tag_name }}
           REQUESTED: ${{ inputs.tag }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          tag="${REQUESTED:-$RELEASED}"
+          # there is deliberately no `github.event.release` fallback: neither
+          # trigger is `release`, and there cannot be one (see the header)
+          tag="$REQUESTED"
 
           if [ -z "$tag" ] && [ "$EVENT" = "workflow_run" ]; then
             # the tag the release run just created, at the commit it released
@@ -88,7 +92,15 @@ jobs:
           fi
 
           if [ -z "$tag" ]; then
-            echo "::error::no tag - dispatch this with one, or run it from the Release workflow"
+            echo "::error::no tag - dispatch this with the tag to publish"
+            exit 1
+          fi
+
+          # a dispatch can name any tag in the repository; only one cut from a
+          # commit on the default branch is a release this pipeline made
+          git fetch --quiet --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+          if ! git merge-base --is-ancestor "${tag}^{commit}" refs/remotes/origin/main; then
+            echo "::error::$tag is not on main - refusing to publish it"
             exit 1
           fi
 
@@ -164,8 +176,30 @@ jobs:
             echo "already=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: The version is the tag, not the placeholder
+        # `.npmrc` sets ignore-scripts=true, which makes npm skip prepublishOnly -
+        # so the guard in package.json cannot be what stops a placeholder
+        # reaching the registry. Asserted here, where it cannot be skipped.
+        if: steps.tag.outputs.skip != 'true' && steps.existing.outputs.already != 'true'
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          stamped="$(node -p "require('./package.json').version")"
+          echo "stamped $stamped, tag says $VERSION"
+          if [ "$stamped" != "$VERSION" ]; then
+            echo "::error::package.json states $stamped but the tag names $VERSION"
+            exit 1
+          fi
+          case "$stamped" in
+            0.0.0*) echo "::error::refusing to publish the placeholder $stamped"; exit 1 ;;
+          esac
+
       - name: Publish to npm with trusted publisher
         if: steps.tag.outputs.skip != 'true' && steps.existing.outputs.already != 'true'
         # no NODE_AUTH_TOKEN: the OIDC token is exchanged for a short-lived
-        # credential, so there is no long-lived secret in this repository
-        run: npm publish --access public
+        # credential, so there is no long-lived secret in this repository.
+        # --ignore-scripts=false re-enables this package's own prepublishOnly,
+        # which .npmrc disables for every other command; nothing is installed at
+        # publish time, so no dependency's script can run from it.
+        run: npm publish --access public --ignore-scripts=false

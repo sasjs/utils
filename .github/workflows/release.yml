@@ -42,14 +42,15 @@ jobs:
         with:
           node-version: 22
 
-      # pinned, not floating: a release tool that changed under the release path
-      # would be a change nothing in this repository reviewed. Run from npx
-      # rather than a devDependency so the tool's own tree is not part of this
-      # package's dependency graph or its audit.
+      # The tool is a devDependency, so the lockfile pins the bytes as well as
+      # the version: `npx @sasjs/release@x.y.z` resolves a version at release
+      # time and runs whatever the registry serves then, with contents: write.
+      # A bump is therefore a reviewable diff in package-lock.json.
+      - name: Install the release tool
+        run: npm ci
+
       - name: Tag and release, if there is anything to release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          npx --yes @sasjs/release@0.1.2
-          --host github --release --output "$GITHUB_OUTPUT"
+        run: npm run release -- --host github --release --output "$GITHUB_OUTPUT"
