@@ -1,76 +1,135 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-
 name: SASjs Build and Publish
 
+# Publishes the version the release names, and only that.
+#
+# This file is the one npm's trusted publisher is registered against, because the
+# registry validates the workflow that actually runs `npm publish` (the OIDC
+# `job_workflow_ref` claim) - not the workflow that triggered it. Keeping the tag
+# in release.yml means neither job holds the other's permission: the release job
+# never sees id-token, and this job never sees contents: write.
+#
+# A `release: published` trigger would not work and would fail silently: a release
+# created with the pipeline's own GITHUB_TOKEN fires no events, because GitHub
+# suppresses them to stop recursion. workflow_run is not suppressed, so publishing
+# is chained off the Release workflow finishing.
+#
+# Nothing is committed. The tag is the version; it is stamped into the working
+# tree because npm reads package.json, and the tree is thrown away.
 on:
-  push:
-    branches:
-      - main
-  # A release should not depend on the push trigger firing. On 2026-10-05 the
-  # merge of #277 produced no workflow run at all - no run, no check run - so
-  # nothing was published and there was no way to trigger it by hand. This makes
-  # the release reachable from the Actions UI or the API when that happens.
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+    branches: [main]
+  # a publish that failed can be retried: the release event fires once, and
+  # re-creating the release to republish is exactly the state to avoid
   workflow_dispatch:
+    inputs:
+      tag:
+        description: >-
+          Release tag to publish. Required when dispatched; when this runs from
+          the Release workflow, leave it blank and the tag that run created is
+          used. Must be on main.
+        required: false
+        default: ''
+      republish:
+        description: Publish even when the registry already serves this version
+        required: false
+        type: boolean
+        default: false
 
-# One release at a time. Both triggers publish - a merge to main and a
-# dispatched recovery run - and the two can overlap, so two semantic-release
-# processes can race the same tag and the same npm publish, which is a new way
-# to strand a release. `cancel-in-progress: false` queues the second run rather
-# than cancelling the first, because cancelling a run midway through a release
-# is itself a way to leave a tag pushed and the release missing.
+# read-only by default; this job asks only for the identity it publishes with
+permissions:
+  contents: read
+  id-token: write # trusted publishing: the OIDC token is the credential
+
+# one publish at a time: a dispatched retry must not interleave with a run that
+# the Release workflow started
 concurrency:
   group: publish
   cancel-in-progress: false
 
-# read-only by default; the build job asks for the writes it needs, and a job's
-# block replaces this one rather than adding to it
-permissions: read-all
-
 jobs:
   build:
+    # a fork must not publish one of the org's packages, and a release run that
+    # failed has nothing to publish
+    if: |
+      github.repository == 'sasjs/utils' &&
+      (github.event_name == 'workflow_dispatch' ||
+       github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write       # required for npm provenance (trusted publisher)
-      issues: write         # optional: lets @semantic-release/github comment on issues
-      pull-requests: write  # optional: lets @semantic-release/github comment on PRs
-
     strategy:
       matrix:
         node-version: [22]
 
     steps:
-      # Mint a short-lived GitHub App token (bypass-capable)
-      - name: Generate token
-        id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      # Checkout using the app token: main requires a pull request, so the
-      # release writes the version tag and the GitHub release, never a commit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          persist-credentials: true
-          fetch-depth: 0      # semantic-release needs full history + tags
+          # the tag is how this workflow learns what to publish: the release run
+          # created it at the commit it released
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve the tag
+        id: tag
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.tag }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          # there is deliberately no `github.event.release` fallback: neither
+          # trigger is `release`, and there cannot be one (see the header)
+          tag="$REQUESTED"
+
+          if [ -z "$tag" ] && [ "$EVENT" = "workflow_run" ]; then
+            # the tag the release run just created, at the commit it released
+            tag="$(git tag --points-at "$SHA" --sort=-v:refname | head -1)"
+            if [ -z "$tag" ]; then
+              echo "::notice::no tag at $SHA - that release had nothing to publish"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          if [ -z "$tag" ]; then
+            echo "::error::no tag - dispatch this with the tag to publish"
+            exit 1
+          fi
+
+          # a dispatch can name any tag in the repository; only one cut from a
+          # commit on the default branch is a release this pipeline made
+          git fetch --quiet --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
+          if ! git merge-base --is-ancestor "${tag}^{commit}" refs/remotes/origin/main; then
+            echo "::error::$tag is not on main - refusing to publish it"
+            exit 1
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          echo "publishing $tag (version ${tag#v})"
+
+      - name: Check out the tag
+        if: steps.tag.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: git checkout -q "refs/tags/$TAG"
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.tag.outputs.skip != 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
 
-      # Node 22 ships npm 10.x — OIDC trusted publishing needs npm >= 11.5.1
+      # Node 22 ships npm 10.x - OIDC trusted publishing needs npm >= 11.5.1
       - name: Update npm
+        if: steps.tag.outputs.skip != 'true'
         run: npm install -g npm@latest
 
-        # Restore npm cache manually
       - name: Restore npm cache
+        if: steps.tag.outputs.skip != 'true'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        id: npm-cache
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -78,128 +137,67 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install Dependencies
+        if: steps.tag.outputs.skip != 'true'
         run: npm ci
 
+      # the version npm reads is the tag, stamped into the tree and not committed.
+      # Before the build, while the tree is still clean enough for npm version to
+      # accept it.
+      - name: Stamp the version
+        if: steps.tag.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: npm version "$VERSION" --no-git-tag-version --allow-same-version
+
       - name: Check code style
+        if: steps.tag.outputs.skip != 'true'
         run: npm run lint
 
       - name: Build Project
+        if: steps.tag.outputs.skip != 'true'
         run: npm run build
 
       - name: Clean up ready for publishing
+        if: steps.tag.outputs.skip != 'true'
         run: npm run publishInit
 
-      - name: Audit the release toolchain
-        # Its own scope: the toolchain is not shipped, so it must not gate the
-        # package, but it runs with publish credentials, so it must not be
-        # invisible either. Fails on anything outside the named exemptions in
-        # release/audit.mjs.
-        run: node release/audit.mjs
-
-      - name: Install the release tooling
-        # Its own locked tree, installed here rather than carried as a
-        # devDependency: that tree is where the unfixable advisories live, so
-        # keeping it out of the package's dependencies keeps it out of the
-        # package's `npm audit`. Locked, so the resolved versions and their
-        # integrity hashes are pinned rather than fetched fresh at release time.
-        run: npm ci --prefix release --ignore-scripts
-
-      - name: Semantic Release
-        # semantic-release pushes once: the version tag. @semantic-release/git is
-        # deliberately not configured. It pushes the release commit
-        # (`chore(release): x.y.z`) straight to the branch, and main requires a
-        # pull request, so that push is rejected as a repository rule violation
-        # before the tag is ever created - no tag, no GitHub release, no npm
-        # publish, and nothing for the retry below to work with. The repo's
-        # package.json therefore keeps the last committed version; the published
-        # version comes from the exec plugin's `npm version` in the prepare step.
-        #
-        # What remains to fail is the tag push: the tag exists locally but not on
-        # the remote. Retry exactly that case - a local tag alone does not
-        # identify it, because the tag is also there when the failure came later
-        # (the GitHub release), and retrying that finds the tag restored by
-        # semantic-release's own fetch, decides there is nothing to release,
-        # exits 0 and leaves the step green with the release still missing - so
-        # require the tag to be absent from the remote as well.
-        #
-        # Only a definitive answer counts. `git ls-remote --exit-code` exits 2 for
-        # an absent ref but 128 when the query itself fails (network, auth,
-        # unreachable remote), and treating every non-zero exit as "absent" would
-        # retry on the transient GitHub-side failures that are the very class of
-        # incident this retry repairs. So 2 retries, 0 and anything else fail the
-        # step.
-        run: |
-          run_release() {
-            release/node_modules/.bin/semantic-release
-          }
-
-          if run_release; then
-            exit 0
-          fi
-
-          version=$(node -p "require('./package.json').version")
-
-          if [ "$version" = "0.0.0-semantically-released" ]; then
-            echo "semantic-release did not reach the prepare step (package.json still holds the placeholder version) - not retrying." >&2
-            exit 1
-          fi
-
-          if ! git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
-            echo "No local v$version tag, so the failure came before the tag was created - not retrying." >&2
-            exit 1
-          fi
-
-          ls_rc=0
-          git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null 2>&1 || ls_rc=$?
-
-          if [ "$ls_rc" -eq 0 ]; then
-            echo "v$version is already on the remote, so the failure came after the tag push - not retrying." >&2
-            exit 1
-          fi
-
-          if [ "$ls_rc" -ne 2 ]; then
-            echo "Could not establish whether v$version is on the remote (git ls-remote exited $ls_rc) - not retrying." >&2
-            exit 1
-          fi
-
-          echo "Retrying: v$version exists locally but not on the remote, so the tag push is what failed."
-          git tag -d "v$version"
-          run_release
+      - name: Already on the registry?
+        id: existing
+        if: steps.tag.outputs.skip != 'true'
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}   # <-- app token, not secrets.GITHUB_TOKEN
-
-      # semantic-release only releases when it finds a releasable commit, and the
-      # angular convention this repo is configured with does not treat `chore:` or
-      # `docs:` as one. This step ran on `if: success()` regardless, so a merge with
-      # no releasable commit published the version already in package.json, which
-      # npm rejects with "You cannot publish over the previously published
-      # versions". Compare against the registry instead, and publish only when
-      # there is something new.
-      #
-      # package.json carries the placeholder version between releases (as
-      # sasjs/lint and sasjs/adapter do), so a run that cut no release leaves it
-      # in place - that is the "nothing to publish" signal now. The registry
-      # comparison stays for the other half of the case: a release whose version
-      # is already on npm.
-      - name: Publish to npm with trusted publisher
-        id: publish
-        if: success()
+          VERSION: ${{ steps.tag.outputs.version }}
         run: |
-          placeholder=0.0.0-semantically-released
-          local_version=$(node -p "require('./package.json').version")
-          published_version=$(npm view @sasjs/utils version 2>/dev/null || echo "")
-
-          if [ "$local_version" = "$placeholder" ]; then
-            echo "released=false" >> "$GITHUB_OUTPUT"
-            echo "Nothing to publish - semantic-release cut no release, package.json still holds $placeholder"
-            exit 0
+          set -euo pipefail
+          published="$(npm view "@sasjs/utils@${VERSION}" version --prefer-online 2>/dev/null || true)"
+          if [ "$published" = "$VERSION" ] && [ "${{ inputs.republish }}" != "true" ]; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "$VERSION is already on the registry - nothing to publish"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
           fi
 
-          if [ "$local_version" = "$published_version" ]; then
-            echo "released=false" >> "$GITHUB_OUTPUT"
-            echo "Nothing to publish - $local_version is already on npm"
-            exit 0
+      - name: The version is the tag's
+        # prepublishOnly refuses the 0.0.0 placeholder, and the publish step below
+        # re-enables it with --ignore-scripts=false, so that case is already
+        # covered. This checks what prepublishOnly cannot see: that the version
+        # npm is about to read is the tag's, not merely non-placeholder.
+        if: steps.tag.outputs.skip != 'true' && steps.existing.outputs.already != 'true'
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          stamped="$(node -p "require('./package.json').version")"
+          echo "stamped $stamped, tag says $VERSION"
+          if [ "$stamped" != "$VERSION" ]; then
+            echo "::error::package.json states $stamped but the tag names $VERSION"
+            exit 1
           fi
 
-          npm publish --access public
-          echo "released=true" >> "$GITHUB_OUTPUT"
+      - name: Publish to npm with trusted publisher
+        if: steps.tag.outputs.skip != 'true' && steps.existing.outputs.already != 'true'
+        # no NODE_AUTH_TOKEN: the OIDC token is exchanged for a short-lived
+        # credential, so there is no long-lived secret in this repository.
+        # --ignore-scripts=false re-enables this package's own prepublishOnly,
+        # which .npmrc disables for every other command; nothing is installed at
+        # publish time, so no dependency's script can run from it.
+        run: npm publish --access public --ignore-scripts=false

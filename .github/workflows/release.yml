@@ -1,0 +1,56 @@
+name: Release
+
+# Cuts the tag and the GitHub release from the conventional commits merged
+# since the last tag. Nothing is committed and no branch is written: the tag is
+# created by the release API at the commit being released, so this job holds
+# contents: write and no git credential.
+#
+# Several years of tags are the version history (v4.11.0 at the time of
+# writing), so the next version is worked out from the newest one - the version
+# in package.json is a placeholder and stays one.
+#
+# The publish runs in publish.yml, chained off this workflow completing, because
+# a release created with the pipeline's own GITHUB_TOKEN fires no events. That
+# also keeps npm's trusted publisher registered against publish.yml, which is
+# the workflow that actually runs `npm publish`.
+on:
+  push:
+    branches: [main]
+  # a manual run releases whatever has been merged since the last tag
+  workflow_dispatch:
+
+permissions:
+  contents: write # the tag and the release
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # the range is classified from tags: a shallow clone sees one commit
+          # and invents a version
+          fetch-depth: 0
+          # the tag is created over the API, so the checkout token does not
+          # need to stay in the git config
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      # The tool is a devDependency, so the lockfile pins the bytes as well as
+      # the version: `npx @sasjs/release@x.y.z` resolves a version at release
+      # time and runs whatever the registry serves then, with contents: write.
+      # A bump is therefore a reviewable diff in package-lock.json.
+      - name: Install the release tool
+        run: npm ci
+
+      - name: Tag and release, if there is anything to release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run release -- --host github --release --output "$GITHUB_OUTPUT"
