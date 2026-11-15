@@ -726,6 +726,60 @@
         ]
       ]
     },
+    "release": {
+      "$id": "#/properties/release",
+      "type": "object",
+      "title": "release",
+      "description": "What a release publishes.  Read by `@sasjs/release`, the release tool: the files a release job attaches, kept beside the build that produces them rather than in the workflow.",
+      "default": {},
+      "examples": [
+        {
+          "assets": [
+            {
+              "path": "sasjsbuild/server.json.zip",
+              "label": "SASjs Streamed App"
+            },
+            {
+              "path": "sasjsbuild/sas9.sas",
+              "label": "SAS 9 EBI Deployment Program"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "assets": {
+          "$id": "#/properties/release/properties/assets",
+          "type": "array",
+          "title": "The release assets",
+          "description": "Files attached to the release after it is cut, in the order given.  `path` is relative to the repository root.  `label` is what a reader sees on the release page; the file keeps its own name either way.",
+          "default": [],
+          "examples": [
+            [
+              {
+                "path": "sasjsbuild/server.json.zip",
+                "label": "SASjs Streamed App"
+              }
+            ]
+          ],
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "title": "The file to attach",
+                "examples": ["sasjsbuild/server.json.zip"]
+              },
+              "label": {
+                "type": "string",
+                "title": "What the release page calls it",
+                "examples": ["SASjs Streamed App"]
+              }
+            }
+          }
+        }
+      }
+    },
     "targets": {
       "$id": "#/properties/targets",
       "type": "array",

@@ -56,6 +56,25 @@ export interface DeployConfig {
   deployScripts: string[]
 }
 
+/**
+ * A file a release attaches, and the name its release page shows it under.
+ *
+ * Read by `@sasjs/release` from `sasjsconfig.json`, so the list of what a release
+ * publishes lives beside the build that produces it rather than in the workflow.
+ */
+export interface ReleaseAsset {
+  /** The file, relative to the repository root. */
+  path: string
+  /** What the release page calls it. The file keeps its own name either way. */
+  label?: string
+}
+
+/** What `@sasjs/release` publishes: the files a release job attaches. */
+export interface ReleaseConfig {
+  /** Attached after the release is cut, in the order given. */
+  assets?: ReleaseAsset[]
+}
+
 export interface StreamConfig {
   assetPaths: string[]
   /**
