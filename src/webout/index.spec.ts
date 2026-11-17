@@ -173,7 +173,6 @@ describe('the webout() prelude', () => {
         { N: null, C: '.' },
         { N: 0, C: 'Case' }
       ]
-      expect(new Set(expected.slice(0, 28).map(({ N }) => N)).size).toBe(28)
       const fetchContext =
         transport === 'upload'
           ? {
@@ -192,7 +191,56 @@ describe('the webout() prelude', () => {
         body: `_webout = JSON.stringify(webout('FETCH'))`
       })
       expect(result.failure).toBeNull()
-      expect(JSON.parse(result.body).T).toEqual(expected)
+      const rows = JSON.parse(result.body).T
+      expect(
+        new Set(rows.slice(0, 28).map(({ N }: { N: unknown }) => N)).size
+      ).toBe(28)
+      expect(rows).toEqual(expected)
+    }
+  )
+
+  it.each([
+    [false, 'upload'],
+    [false, 'parameter'],
+    [true, 'upload'],
+    [true, 'parameter']
+  ] as const)(
+    'FETCH preserves uppercase numeric special missings from direct CSV on browser=%s via %s',
+    (browser, transport) => {
+      // Direct CSV input, not adapter output: the adapter emits numeric
+      // special-missing letters in lowercase, even for uppercase inputs.
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      const csv = [
+        'N:best.',
+        '.',
+        '._',
+        ...Array.from(letters, (c) => `.${c}`)
+      ].join('\r\n')
+      const fetchContext =
+        transport === 'upload'
+          ? {
+              tables: [
+                {
+                  name: 'T',
+                  filename: 'T.csv',
+                  csv: browser ? csv : Buffer.from(csv)
+                }
+              ]
+            }
+          : { params: { sasjs_tables: 'T', sasjs1data: csv } }
+      const result = runBlock({
+        browser,
+        fetchContext,
+        body: `_webout = JSON.stringify(webout('FETCH'))`
+      })
+      expect(result.failure).toBeNull()
+      const rows = JSON.parse(result.body).T
+      expect(new Set(rows.map(({ N }: { N: unknown }) => N)).size).toBe(28)
+      expect(rows).toEqual([
+        { N: null },
+        { N: '._' },
+        ...Array.from(letters, (letter) => ({ N: `.${letter}` }))
+      ])
     }
   )
 
