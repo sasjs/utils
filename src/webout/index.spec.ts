@@ -121,9 +121,12 @@ describe('the webout() prelude', () => {
   ] as const)(
     'FETCH preserves all numeric missing states from a representative CSV fixture on browser=%s via %s',
     (browser, transport) => {
-      // Representative adapter 6.1.2 output, checked separately against the
-      // released converter. Numeric inputs: '.', '._', '.A'–'.Z', 'A', '.a',
-      // null, '', 0. Character inputs include '.A', '.a', null, '', '.', 'Case'.
+      // Representative CSV checked separately against adapter 6.1.2. Original
+      // numeric JS inputs were '.', '._', '.A'–'.Z', 'A', '.a', null, '', 0;
+      // character inputs include '.A', '.a', null, '', '.', 'Case'. The adapter
+      // emits '.a' for '.A', '.a' and 'A', and '.' for numeric null and ''.
+      // Thus N in this CSV contains '.', '._', '.a'–'.z' and 0, not uppercase
+      // special missings. The direct-CSV test below covers uppercase N values.
       const csv = [
         'N:best. C:$char8.',
         '.,.A',
