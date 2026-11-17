@@ -47,10 +47,9 @@ jobs:
       - name: Check Code Style
         run: npm run lint
 
-      - name: Test the coverage ratchet
-        # node's own runner: this needs no dependencies beyond the node the job
-        # already sets up, and it runs in well under a second
-        run: node --test .github/scripts/coverage-ratchet.test.mjs
+      - name: Test the CI scripts
+        # The discovery fixture uses git and the @sasjs/release installed by npm ci.
+        run: PUBLISH_WORKFLOW=.github/workflows/publish.yml node --test .github/scripts/coverage-ratchet.test.mjs .github/scripts/publish-discovery.test.mjs
 
       - name: Run Unit Tests
         # produces coverage/coverage-summary.json, which the ratchet reads
