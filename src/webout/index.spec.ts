@@ -2,6 +2,7 @@ import { createHash } from 'crypto'
 import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import path from 'path'
+import { convertToCSV } from '@sasjs/adapter/utils/convertToCsv'
 import { getWeboutPrelude, weboutFinaliseStatement } from '.'
 
 /**
@@ -113,6 +114,72 @@ ${weboutFinaliseStatement}`
 }
 
 describe('the webout() prelude', () => {
+  it.each([false, true])(
+    'FETCH preserves all numeric missing states from released adapter CSV on browser=%s',
+    (browser) => {
+      const cases: Array<{
+        input: string | number | null
+        wire: string
+        result: string | number | null
+        char: string | null
+        charResult: string
+      }> = [
+        { input: '.', wire: '.', result: null, char: '.A', charResult: '.A' },
+        { input: '._', wire: '._', result: '._', char: null, charResult: '' },
+        ...Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ', (letter) => ({
+          input: `.${letter}`,
+          wire: `.${letter.toLowerCase()}`,
+          result: `.${letter.toLowerCase()}`,
+          char: letter === 'A' ? '.a' : '',
+          charResult: letter === 'A' ? '.a' : ''
+        })),
+        { input: 'A', wire: '.a', result: '.a', char: '.A', charResult: '.A' },
+        { input: '.a', wire: '.a', result: '.a', char: null, charResult: '' },
+        { input: null, wire: '.', result: null, char: '.a', charResult: '.a' },
+        { input: '', wire: '.', result: null, char: '.', charResult: '.' },
+        { input: 0, wire: '0', result: 0, char: 'Case', charResult: 'Case' }
+      ]
+      expect(new Set(cases.slice(0, 28).map(({ result }) => result)).size).toBe(
+        28
+      )
+      const csv = convertToCSV(
+        {
+          T: cases.map(({ input, char }) => ({ N: input, C: char })),
+          $T: { formats: { N: 'best.', C: '$char8.' } }
+        },
+        'T'
+      )
+      expect(csv).toBe(
+        'N:best. C:$char8.\r\n' +
+          cases
+            .map(({ wire, charResult }) => `${wire},${charResult}`)
+            .join('\r\n')
+      )
+      for (const fetchContext of [
+        {
+          tables: [
+            {
+              name: 'T',
+              filename: 'T.csv',
+              csv: browser ? csv : Buffer.from(csv)
+            }
+          ]
+        },
+        { params: { sasjs_tables: 'T', sasjs1data: csv } }
+      ]) {
+        const result = runBlock({
+          browser,
+          fetchContext,
+          body: `_webout = JSON.stringify(webout('FETCH'))`
+        })
+        expect(result.failure).toBeNull()
+        expect(JSON.parse(result.body).T).toEqual(
+          cases.map(({ result, charResult }) => ({ N: result, C: charResult }))
+        )
+      }
+    }
+  )
+
   it.each([false, true])(
     'FETCH reads an uploaded adapter table on browser=%s',
     (browser) => {
