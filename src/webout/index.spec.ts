@@ -149,6 +149,8 @@ describe('the webout() prelude', () => {
         },
         'T'
       )
+      // Pin the adapter's serialization: a failure here may be an adapter change,
+      // not a webout regression.
       expect(csv).toBe(
         'N:best. C:$char8.\r\n' +
           cases
