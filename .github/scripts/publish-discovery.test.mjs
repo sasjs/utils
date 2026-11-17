@@ -9,7 +9,7 @@ import http from 'node:http'
 import yaml from 'js-yaml'
 
 const exec = promisify(execFile)
-const workflowPath = process.env.PUBLISH_WORKFLOW || '.github/workflows/npmpublish.yml'
+const workflowPath = process.env.PUBLISH_WORKFLOW || '.github/workflows/publish.yml'
 const workflow = readFileSync(workflowPath, 'utf8')
 function script(id, source = workflow) {
   const jobs = yaml.safeLoad(source)?.jobs
