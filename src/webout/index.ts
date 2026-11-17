@@ -15,6 +15,39 @@
  * name for `OBJ`, which is how `%mp_jsonout()` shapes them. `CLOSE` appends the
  * system block and closes the object.
  *
+ * `webout('FETCH')` reads adapter input tables without affecting response state.
+ * The host declares `const _sasjs_fetch_context = { params, tables }` in the same
+ * lexical scope as this prelude. `params` holds form fields (including repeated
+ * fields as ordered arrays), and `tables` holds `{ name, filename, csv }` uploads;
+ * `csv` is a UTF-8 Node Buffer or a browser string. Omit the binding for no
+ * inputs. Hosts must pass request data as values, not generated executable code.
+ *
+ * FETCH returns fresh null-prototype objects and row arrays, preserving table and
+ * column casing and the input data. Upload field `name` is the table name, not
+ * `filename`. Uploads are parsed before parameter tables in `sasjs_tables` order;
+ * exact duplicate names are last-wins. Parameter tables use `sasjs{N}data`, or
+ * `sasjs{N}data0` as chunk count and `sasjs{N}data1..N` in order. Array-valued
+ * chunks are joined without separators. Parameter names are case-insensitive;
+ * case-colliding names, mixed direct and numbered forms, and missing, extra or
+ * noncanonical chunks throw. Duplicate or invalid SAS column names also throw,
+ * ignoring case when detecting duplicates.
+ *
+ * Uploads without a `name:informat` adapter-like header token are skipped, so
+ * normal files remain usable. This is necessarily heuristic: an arbitrary file
+ * containing that pattern in its first line is indistinguishable from an adapter
+ * table and is parsed or rejected. A format-looking token contains a dot or digit, starts
+ * with `$`, or is `best`. Explicit parameter tables are always parsed. Supported
+ * informats are `$charN.`, `$N.`, `best.`, `bestN.`, `N.`, and `N.d`
+ * (case-insensitive); numeric widths are 1-32 and d is 0-31. Unsupported
+ * informats, malformed CSV and nonnumeric or nonfinite numeric cells throw.
+ * Character values are strings; numeric cells are numbers, empty or `.` becomes
+ * null, and `.a`-`.z` / `._` remain strings. For N.d, values without a decimal
+ * point are divided by 10 to the power d, as in SAS modified list input.
+ * Quoted commas, doubled quotes and embedded newlines work.
+ * Adapter CSV has no terminal record separator, so a trailing separator denotes
+ * an empty final one-column row; it cannot be distinguished from a terminator.
+ * A header without any line break means no rows.
+ *
  * A table call takes a fourth argument, an options object, for the parts of
  * `%ms_webout()` that carry over to a JS row: `maxobs` limits the rows sent,
  * and `showmeta` travels beside the table as `$<name>` in the `{ vars: {...} }`
@@ -65,6 +98,178 @@ export interface WeboutPreludeConfig {
  * the message is kept because it carries the actual cause.
  */
 const MAX_SYSTEM_TEXT = 2000
+
+const FETCH_SOURCE = String.raw`
+const _sasjs_fetch = () => {
+  const context = typeof _sasjs_fetch_context === 'undefined' ? {} : (_sasjs_fetch_context || {});
+  const result = Object.create(null);
+  const sourceParams = context.params || {};
+  const params = Object.create(null);
+  // Index numbered keys while detecting case collisions: each table then visits
+  // only its own chunks, rather than rescanning every request parameter.
+  const numbered = Object.create(null);
+  for (const key of Object.keys(sourceParams)) {
+    const match = /^(sasjs\d+data)(\d*)$/i.exec(key);
+    if (match || /^sasjs_tables$/i.test(key)) {
+      const lower = key.toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(params, lower))
+        throw new Error("webout('FETCH'): ambiguous parameter " + lower);
+      params[lower] = sourceParams[key];
+      if (match && match[2]) {
+        const base = match[1].toLowerCase();
+        if (!numbered[base]) numbered[base] = [];
+        numbered[base].push({ param: lower, suffix: match[2] });
+      }
+    }
+  }
+  const own = (key) => Object.prototype.hasOwnProperty.call(params, key);
+  const textOf = (value) => Array.isArray(value) ? value.map(String).join('') : String(value);
+  const names = own('sasjs_tables') ? textOf(params.sasjs_tables).trim().split(/\s+/).filter(Boolean) : [];
+  const parameterTables = names.map((name, index) => {
+    const key = 'sasjs' + (index + 1) + 'data';
+    if (own(key)) {
+      if (numbered[key])
+        throw new Error("webout('FETCH'): ambiguous parameter forms for " + name);
+      return { name, csv: textOf(params[key]) };
+    }
+    const countValue = params[key + '0'];
+    const count = typeof countValue === 'number' ? countValue :
+      typeof countValue === 'string' && /^[1-9]\d*$/.test(countValue) ? Number(countValue) : NaN;
+    if (!own(key + '0') || !Number.isSafeInteger(count) || count < 1)
+      throw new Error("webout('FETCH'): missing or invalid chunk count for " + name);
+    for (const { param, suffix } of numbered[key] || []) {
+      if (suffix === '0') continue;
+      const chunk = Number(suffix);
+      if (!Number.isSafeInteger(chunk) || chunk < 1 || String(chunk) !== suffix || chunk > count)
+        throw new Error("webout('FETCH'): unexpected chunk " + param + ' for ' + name);
+    }
+    const chunks = [];
+    for (let i = 1; i <= count; i++) {
+      if (!own(key + i)) throw new Error("webout('FETCH'): missing chunk " + i + ' for ' + name);
+      chunks.push(textOf(params[key + i]));
+    }
+    return { name, csv: chunks.join('') };
+  });
+  /* Each digit is visited once; an optional decimal point must not split a
+     digit run between two overlapping quantifiers on a failed match. */
+  const numeric = (text) => {
+    let i = 0;
+    const digit = () => i < text.length && text.charCodeAt(i) >= 48 && text.charCodeAt(i) <= 57;
+    if (text[i] === '+' || text[i] === '-') i++;
+    const start = i;
+    while (digit()) i++;
+    const integerDigits = i - start;
+    let fractionDigits = 0;
+    if (text[i] === '.') {
+      i++;
+      const fractionStart = i;
+      while (digit()) i++;
+      fractionDigits = i - fractionStart;
+    }
+    if (!integerDigits && !fractionDigits) return false;
+    if (text[i] === 'e' || text[i] === 'E') {
+      i++;
+      if (text[i] === '+' || text[i] === '-') i++;
+      const exponentStart = i;
+      while (digit()) i++;
+      if (i === exponentStart) return false;
+    }
+    return i === text.length;
+  };
+  const uploads = context.tables || [];
+  for (const [index, table] of [...uploads, ...parameterTables].entries()) {
+    const text = String(table.csv);
+    const end = text.search(/[\r\n]/);
+    const header = end < 0 ? text : text.slice(0, end);
+    /* Scan each whitespace-delimited candidate once. The format may end at a
+       comma; malformed or missing names still identify an adapter-like header. */
+    const adapterHeader = () => {
+      let i = 0;
+      while (i < header.length) {
+        while (i < header.length && /\s/.test(header[i])) i++;
+        let nameValid = true;
+        while (i < header.length && !/\s/.test(header[i]) && header[i] !== ':') {
+          if (header[i] === ',') nameValid = false;
+          i++;
+        }
+        if (i < header.length && header[i] === ':' && nameValid) {
+          const start = ++i;
+          let valid = true, marker = false;
+          while (i < header.length && !/\s/.test(header[i]) && header[i] !== ',') {
+            const char = header[i++];
+            if (!/[A-Za-z0-9_$.]/.test(char)) valid = false;
+            if (/[.0-9]/.test(char)) marker = true;
+          }
+          if (valid && (marker || header[start] === '$' || header.slice(start, i).toLowerCase() === 'best')) return true;
+        }
+        while (i < header.length && !/\s/.test(header[i])) i++;
+      }
+      return false;
+    };
+    if (index < uploads.length && !adapterHeader()) continue;
+    const columnNames = new Set();
+    const columns = header.trim().split(/\s+/).map((item) => {
+      const match = /^([^:]+):([^\s]+)$/.exec(item);
+      if (!match) throw new Error("webout('FETCH'): invalid header " + item);
+      if (!/^[A-Za-z_][A-Za-z0-9_]{0,31}$/.test(match[1]))
+        throw new Error("webout('FETCH'): invalid column name " + match[1]);
+      const columnName = match[1].toLowerCase();
+      if (columnNames.has(columnName))
+        throw new Error("webout('FETCH'): duplicate column " + match[1] + ' in ' + table.name);
+      columnNames.add(columnName);
+      if (!/^(?:\$(?:char)?\d+\.|best(?:[1-9]|[12]\d|3[0-2])?\.|(?:[1-9]|[12]\d|3[0-2])\.(?:[0-9]|[12]\d|3[01])?)$/i.test(match[2]))
+        throw new Error("webout('FETCH'): unsupported informat " + match[2]);
+      const decimal = /^\d+\.(\d+)$/.exec(match[2]);
+      return { name: match[1], character: match[2].startsWith('$'), decimal: decimal ? Number(decimal[1]) : 0 };
+    });
+    const rows = [];
+    let row = [], value = '', quoted = false, started = false, closedQuote = false;
+    const record = () => {
+      row.push(value);
+      if (row.length !== columns.length)
+        throw new Error("webout('FETCH'): wrong column count in " + table.name);
+      const obj = Object.create(null);
+      columns.forEach((column, i) => {
+        const cell = row[i];
+        if (column.character) obj[column.name] = cell;
+        else if (cell.trim() === '' || cell.trim() === '.') obj[column.name] = null;
+        else if (/^\.[a-z_]$/i.test(cell.trim())) obj[column.name] = cell.trim();
+        else if (numeric(cell.trim())) {
+          const number = Number(cell.trim());
+          if (!Number.isFinite(number)) throw new Error("webout('FETCH'): unsupported numeric value in " + table.name + '.' + column.name);
+          obj[column.name] = cell.includes('.') ? number : number / 10 ** column.decimal;
+        }
+        else throw new Error("webout('FETCH'): unsupported numeric value in " + table.name + '.' + column.name);
+      });
+      rows.push(obj);
+      row = []; value = ''; started = false; closedQuote = false;
+    };
+    const body = end < 0 ? '' : text.slice(end + (text.slice(end, end + 2) === '\r\n' ? 2 : 1));
+    for (let i = 0; i < body.length; i++) {
+      const char = body[i];
+      if (quoted) {
+        if (char === '"' && body[i + 1] === '"') { value += '"'; i++; }
+        else if (char === '"') { quoted = false; closedQuote = true; }
+        else value += char;
+      } else if (char === '"') {
+        if (value !== '' || closedQuote) throw new Error("webout('FETCH'): invalid quote in " + table.name);
+        quoted = true; started = true;
+      } else if (char === ',') { row.push(value); value = ''; started = true; closedQuote = false; }
+      else if (char === '\r' || char === '\n') {
+        if (char === '\r' && body[i + 1] === '\n') i++;
+        record();
+      } else {
+        if (closedQuote) throw new Error("webout('FETCH'): invalid quote in " + table.name);
+        value += char; started = true;
+      }
+    }
+    if (quoted) throw new Error("webout('FETCH'): unterminated quote in " + table.name);
+    if (started || row.length || end >= 0) record();
+    result[table.name] = rows;
+  }
+  return result;
+};
+`
 
 /**
  * SYSSITE when a host has not configured one. It matches the site the SASjs demo
@@ -373,9 +578,12 @@ const _sasjs_close = () => {
   _sasjs_closed = true;
 };
 
+${FETCH_SOURCE}
+
 const _sasjs_webout = (action, name, rows, options) => {
   const requested = String(action === undefined || action === null ? '' : action).toUpperCase();
 
+  if (requested === 'FETCH') return _sasjs_fetch();
   if (requested === 'OPEN') return _sasjs_open();
   if (requested === 'ARR' || requested === 'OBJ') return _sasjs_table(requested, name, rows, options);
   if (requested === 'CLOSE') return _sasjs_close();
