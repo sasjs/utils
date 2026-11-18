@@ -272,6 +272,56 @@ describe('the webout() prelude', () => {
   )
 
   it.each([false, true])(
+    'FETCH reads a table whose text ends with a line terminator on browser=%s',
+    (browser) => {
+      /* A CSV written to a file ends with a terminator, and SAS reads that
+         text as one record - infile dsd yields no row for the final break. The
+         adapter happens to send no terminator, so a program fed a table from a
+         file is the caller this protects. */
+      const csv = 'Name:$char20. Count:best.\r\n"a,b",2\r\n'
+      const result = runBlock({
+        browser,
+        fetchContext: {
+          tables: [
+            {
+              name: 'Trailed',
+              filename: 'table.csv',
+              csv: browser ? csv : Buffer.from(csv)
+            }
+          ]
+        },
+        body: `_webout = JSON.stringify(webout('FETCH'))`
+      })
+      expect(result.failure).toBeNull()
+      expect(JSON.parse(result.body)).toEqual({
+        Trailed: [{ Name: 'a,b', Count: 2 }]
+      })
+    }
+  )
+
+  it.each([false, true])(
+    'FETCH reads a table with a header and no rows on browser=%s',
+    (browser) => {
+      const csv = 'Name:$char20. Count:best.\r\n'
+      const result = runBlock({
+        browser,
+        fetchContext: {
+          tables: [
+            {
+              name: 'Empty',
+              filename: 'table.csv',
+              csv: browser ? csv : Buffer.from(csv)
+            }
+          ]
+        },
+        body: `_webout = JSON.stringify(webout('FETCH'))`
+      })
+      expect(result.failure).toBeNull()
+      expect(JSON.parse(result.body)).toEqual({ Empty: [] })
+    }
+  )
+
+  it.each([false, true])(
     'FETCH joins repeated and numbered parameter chunks in order on browser=%s',
     (browser) => {
       const result = runBlock({
@@ -677,8 +727,11 @@ finally { RegExp.prototype.exec = originalExec; }`
         body: `_webout = JSON.stringify(webout('FETCH'))`
       })
       expect(result.failure).toBeNull()
+      /* the text ends with the terminator after '.', so there are nine records:
+         a break closes the record before it and does not open another. SAS reads
+         the same file as nine observations (infile dsd, firstobs=2). */
       expect(JSON.parse(result.body).T).toEqual(
-        [1, -2, 1, 0.5, -0.5, 125, 0.01, '._', null, null].map((N) => ({ N }))
+        [1, -2, 1, 0.5, -0.5, 125, 0.01, '._', null].map((N) => ({ N }))
       )
       for (const value of [
         '+',
@@ -938,11 +991,18 @@ _webout = JSON.stringify(fetched);`
     expect(context.params.sasjs1data).toEqual(['X:$100.\r\n', hostile])
   })
 
-  it('FETCH preserves adapter empty-row versus header-only semantics', () => {
+  it('FETCH reads a blank record as a row and a trailing break as none', () => {
+    /* SAS semantics, checked on the estate (infile dsd termstr=crlf
+       firstobs=2): a header alone is no observations, `x` followed by a break
+       is one, and a further break - a blank line - is a second observation with
+       the value missing. A break at the very end closes its record and opens
+       nothing, so a file that ends with one holds the same rows as the same
+       file without it. */
     const tables = [
       { name: 'NoRows', filename: 'a.csv', csv: 'Col:$8.' },
-      { name: 'EmptyRow', filename: 'b.csv', csv: 'Col:$8.\r\n' },
-      { name: 'TwoRows', filename: 'c.csv', csv: 'Col:$8.\r\nx\r\n' }
+      { name: 'HeaderOnly', filename: 'b.csv', csv: 'Col:$8.\r\n' },
+      { name: 'OneRow', filename: 'c.csv', csv: 'Col:$8.\r\nx\r\n' },
+      { name: 'BlankRecord', filename: 'd.csv', csv: 'Col:$8.\r\nx\r\n\r\n' }
     ]
     const result = runBlock({
       fetchContext: { tables },
@@ -951,8 +1011,9 @@ _webout = JSON.stringify(fetched);`
     expect(result.failure).toBeNull()
     expect(JSON.parse(result.body)).toEqual({
       NoRows: [],
-      EmptyRow: [{ Col: '' }],
-      TwoRows: [{ Col: 'x' }, { Col: '' }]
+      HeaderOnly: [],
+      OneRow: [{ Col: 'x' }],
+      BlankRecord: [{ Col: 'x' }, { Col: '' }]
     })
   })
 

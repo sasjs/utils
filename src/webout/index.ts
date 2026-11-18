@@ -274,7 +274,12 @@ const _sasjs_fetch = () => {
       }
     }
     if (quoted) throw new Error("webout('FETCH'): unterminated quote in " + table.name);
-    if (started || row.length || end >= 0) record();
+    /* A record is pending only when text was read for it: a body that ends with
+       a terminator - a CSV written to a file does - has already recorded its
+       last row, and recording again would push an empty cell and fail the
+       column count. A header with no rows therefore also yields no rows, which
+       is what infile dsd gives for the same text. */
+    if (started || row.length) record();
     result[table.name] = rows;
   }
   return result;
