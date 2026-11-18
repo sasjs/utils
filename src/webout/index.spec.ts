@@ -113,6 +113,140 @@ ${weboutFinaliseStatement}`
 }
 
 describe('the webout() prelude', () => {
+  it.each([
+    [false, 'upload'],
+    [false, 'parameter'],
+    [true, 'upload'],
+    [true, 'parameter']
+  ] as const)(
+    'FETCH preserves all numeric missing states from a representative CSV fixture on browser=%s via %s',
+    (browser, transport) => {
+      // Representative CSV checked separately against adapter 6.1.2. Original
+      // numeric JS inputs were '.', '._', '.A'–'.Z', 'A', '.a', null, '', 0;
+      // character inputs include '.A', '.a', null, '', '.', 'Case'. The adapter
+      // emits '.a' for '.A', '.a' and 'A', and '.' for numeric null and ''.
+      // Thus N in this CSV contains '.', '._', '.a'–'.z' and 0, not uppercase
+      // special missings. The direct-CSV test below covers uppercase N values.
+      const csv = [
+        'N:best. C:$char8.',
+        '.,.A',
+        '._,',
+        '.a,.a',
+        '.b,',
+        '.c,',
+        '.d,',
+        '.e,',
+        '.f,',
+        '.g,',
+        '.h,',
+        '.i,',
+        '.j,',
+        '.k,',
+        '.l,',
+        '.m,',
+        '.n,',
+        '.o,',
+        '.p,',
+        '.q,',
+        '.r,',
+        '.s,',
+        '.t,',
+        '.u,',
+        '.v,',
+        '.w,',
+        '.x,',
+        '.y,',
+        '.z,',
+        '.a,.A',
+        '.a,',
+        '.,.a',
+        '.,.',
+        '0,Case'
+      ].join('\r\n')
+      const expected = [
+        { N: null, C: '.A' },
+        { N: '._', C: '' },
+        ...Array.from('abcdefghijklmnopqrstuvwxyz', (letter) => ({
+          N: `.${letter}`,
+          C: letter === 'a' ? '.a' : ''
+        })),
+        { N: '.a', C: '.A' },
+        { N: '.a', C: '' },
+        { N: null, C: '.a' },
+        { N: null, C: '.' },
+        { N: 0, C: 'Case' }
+      ]
+      const fetchContext =
+        transport === 'upload'
+          ? {
+              tables: [
+                {
+                  name: 'T',
+                  filename: 'T.csv',
+                  csv: browser ? csv : Buffer.from(csv)
+                }
+              ]
+            }
+          : { params: { sasjs_tables: 'T', sasjs1data: csv } }
+      const result = runBlock({
+        browser,
+        fetchContext,
+        body: `_webout = JSON.stringify(webout('FETCH'))`
+      })
+      expect(result.failure).toBeNull()
+      const rows = JSON.parse(result.body).T
+      expect(
+        new Set(rows.slice(0, 28).map(({ N }: { N: unknown }) => N)).size
+      ).toBe(28)
+      expect(rows).toEqual(expected)
+    }
+  )
+
+  it.each([
+    [false, 'upload'],
+    [false, 'parameter'],
+    [true, 'upload'],
+    [true, 'parameter']
+  ] as const)(
+    'FETCH preserves uppercase numeric special missings from direct CSV on browser=%s via %s',
+    (browser, transport) => {
+      // Direct CSV input, not adapter output: the adapter emits numeric
+      // special-missing letters in lowercase, even for uppercase inputs.
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      const csv = [
+        'N:best.',
+        '.',
+        '._',
+        ...Array.from(letters, (c) => `.${c}`)
+      ].join('\r\n')
+      const fetchContext =
+        transport === 'upload'
+          ? {
+              tables: [
+                {
+                  name: 'T',
+                  filename: 'T.csv',
+                  csv: browser ? csv : Buffer.from(csv)
+                }
+              ]
+            }
+          : { params: { sasjs_tables: 'T', sasjs1data: csv } }
+      const result = runBlock({
+        browser,
+        fetchContext,
+        body: `_webout = JSON.stringify(webout('FETCH'))`
+      })
+      expect(result.failure).toBeNull()
+      const rows = JSON.parse(result.body).T
+      expect(new Set(rows.map(({ N }: { N: unknown }) => N)).size).toBe(28)
+      expect(rows).toEqual([
+        { N: null },
+        { N: '._' },
+        ...Array.from(letters, (letter) => ({ N: `.${letter}` }))
+      ])
+    }
+  )
+
   it.each([false, true])(
     'FETCH reads an uploaded adapter table on browser=%s',
     (browser) => {

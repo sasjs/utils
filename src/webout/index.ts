@@ -23,7 +23,7 @@
  * inputs. Hosts must pass request data as values, not generated executable code.
  *
  * FETCH returns fresh null-prototype objects and row arrays, preserving table and
- * column casing and the input data. Upload field `name` is the table name, not
+ * column casing and decoded values. Upload field `name` is the table name, not
  * `filename`. Uploads are parsed before parameter tables in `sasjs_tables` order;
  * exact duplicate names are last-wins. Parameter tables use `sasjs{N}data`, or
  * `sasjs{N}data0` as chunk count and `sasjs{N}data1..N` in order. Array-valued
@@ -41,8 +41,18 @@
  * (case-insensitive); numeric widths are 1-32 and d is 0-31. Unsupported
  * informats, malformed CSV and nonnumeric or nonfinite numeric cells throw.
  * Character values are strings; numeric cells are numbers, empty or `.` becomes
- * null, and `.a`-`.z` / `._` remain strings. For N.d, values without a decimal
- * point are divided by 10 to the power d, as in SAS modified list input.
+ * null, and `.a`-`.z` / `._` remain strings (with the CSV's letter case). Thus
+ * all 28 SAS numeric missing states have distinct JS values: ordinary `.` is
+ * null, and `._` and `.A`-`.Z` are represented by their dot strings. The adapter
+ * writes special numeric missings in lowercase, so their original JS spelling
+ * and case cannot be recovered. With adapter `best.` serialization, numeric
+ * null, empty string and `.` all produce `.`; character null and empty string
+ * both produce an empty string. FETCH rows contain no column-type metadata, so
+ * a character string such as `.a` is indistinguishable from numeric missing
+ * `.A` without an external schema. This is a representation of decoded values,
+ * not a guarantee of full SAS runtime input, type or formatting semantics.
+ * For N.d, values without a decimal point are divided by 10 to the power d, as
+ * in SAS modified list input.
  * Quoted commas, doubled quotes and embedded newlines work.
  * Adapter CSV has no terminal record separator, so a trailing separator denotes
  * an empty final one-column row; it cannot be distinguished from a terminator.
