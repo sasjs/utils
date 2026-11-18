@@ -60,6 +60,24 @@ messages, SASGF 2012 042-2012 lists ten categories - and none carries the
 statistical notes this list reports (log axis, thinned tick values, infinite
 likelihood, not positive definite, processing on disk during summarization).
 
+## FETCH input records
+
+The generated `webout('FETCH')` prelude discards zero-length records between
+CRLF, LF or CR separators. A final separator terminates the preceding record;
+it does not create another one. This applies to uploaded and parameter tables.
+An adapter-serialized one-column empty row has no characters and is therefore
+lost, including an intentionally submitted empty row. A trailing empty row is
+indistinguishable from a final terminator. Applications relying on those rows
+must change their data representation before upgrading the host's utils.
+
+This rule concerns the **encoded record**, not whether all decoded fields are
+empty: `""` is a quoted empty field and `,` is a two-field record, so both are
+retained. Whitespace-only records are also retained. Explicit numeric `.` is a
+row with `null`; `._` and `.A`–`.Z` remain distinct dot strings. Quoted commas,
+doubled quotes and embedded line breaks remain part of their fields. This
+policy intentionally differs from SAS `infile dsd`, which can produce an
+observation for a blank physical record; it is not a claim of SAS parity.
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
