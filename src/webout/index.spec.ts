@@ -991,13 +991,7 @@ _webout = JSON.stringify(fetched);`
     expect(context.params.sasjs1data).toEqual(['X:$100.\r\n', hostile])
   })
 
-  it('FETCH reads a blank record as a row and a trailing break as none', () => {
-    /* SAS semantics, checked on the estate (infile dsd termstr=crlf
-       firstobs=2): a header alone is no observations, `x` followed by a break
-       is one, and a further break - a blank line - is a second observation with
-       the value missing. A break at the very end closes its record and opens
-       nothing, so a file that ends with one holds the same rows as the same
-       file without it. */
+  it('FETCH discards blank physical records and treats a trailing break as a terminator', () => {
     const tables = [
       { name: 'NoRows', filename: 'a.csv', csv: 'Col:$8.' },
       { name: 'HeaderOnly', filename: 'b.csv', csv: 'Col:$8.\r\n' },
@@ -1013,9 +1007,88 @@ _webout = JSON.stringify(fetched);`
       NoRows: [],
       HeaderOnly: [],
       OneRow: [{ Col: 'x' }],
-      BlankRecord: [{ Col: 'x' }, { Col: '' }]
+      BlankRecord: [{ Col: 'x' }]
     })
   })
+
+  it.each([
+    [false, 'upload'],
+    [false, 'parameter'],
+    [true, 'upload'],
+    [true, 'parameter']
+  ])(
+    'FETCH skips blank records without discarding explicit fields: browser=%s via %s',
+    (browser, via) => {
+      for (const separator of ['\r\n', '\n', '\r']) {
+        const csv = [
+          'Text:$char40. N:best.',
+          '',
+          '"line 1\r\n\r\nline 2, ""quoted""",.A',
+          '',
+          '"",.',
+          ',',
+          ' ,._',
+          ''
+        ].join(separator)
+        const fetchContext =
+          via === 'upload'
+            ? {
+                tables: [
+                  {
+                    name: 'T',
+                    filename: 't.csv',
+                    csv: browser ? csv : Buffer.from(csv)
+                  }
+                ]
+              }
+            : { params: { sasjs_tables: 'T', sasjs1data: csv } }
+        const result = runBlock({
+          browser,
+          fetchContext,
+          body: `_webout = JSON.stringify(webout('FETCH'))`
+        })
+        expect(result.failure).toBeNull()
+        expect(JSON.parse(result.body)).toEqual({
+          T: [
+            { Text: 'line 1\r\n\r\nline 2, "quoted"', N: '.A' },
+            { Text: '', N: null },
+            { Text: '', N: null },
+            { Text: ' ', N: '._' }
+          ]
+        })
+      }
+    }
+  )
+
+  it.each([false, true])(
+    'FETCH keeps quoted empty and explicit numeric missing records: browser=%s',
+    (browser) => {
+      const tables = [
+        {
+          name: 'Text',
+          filename: 'text.csv',
+          csv: 'X:$8.\r\n\r\n""\r\n\r\nx\r\n\r\n'
+        },
+        {
+          name: 'Numbers',
+          filename: 'numbers.csv',
+          csv: 'N:best.\r\n\r\n.\r\n._\r\n.Z\r\n\r\n'
+        },
+        { name: 'OnlyBlank', filename: 'blank.csv', csv: 'X:$8.\r\n\r\n\r\n' }
+      ]
+      const result = runBlock({
+        browser,
+        fetchContext: { tables },
+        body: `_webout = JSON.stringify(webout('FETCH'))`
+      })
+      expect(result.failure).toBeNull()
+      expect(JSON.parse(result.body)).toEqual({
+        Text: [{ X: '' }, { X: 'x' }],
+        Numbers: [{ N: null }, { N: '._' }, { N: '.Z' }],
+        OnlyBlank: []
+      })
+    }
+  )
 
   it('writes one JSON object, with the content type set', () => {
     const { body, headers, failure } = runBlock({

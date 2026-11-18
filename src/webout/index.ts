@@ -53,10 +53,15 @@
  * not a guarantee of full SAS runtime input, type or formatting semantics.
  * For N.d, values without a decimal point are divided by 10 to the power d, as
  * in SAS modified list input.
- * Quoted commas, doubled quotes and embedded newlines work.
- * Adapter CSV has no terminal record separator, so a trailing separator denotes
- * an empty final one-column row; it cannot be distinguished from a terminator.
- * A header without any line break means no rows.
+ * Quoted commas, doubled quotes and embedded newlines work. FETCH discards
+ * zero-length physical records between record separators (CRLF, LF or CR).
+ * A final separator is a terminator, not another row. Consequently an adapter
+ * one-column empty row encoded as a blank record is lost, including an intended
+ * trailing empty row. A quoted empty field (`""`), whitespace-only field, or
+ * record containing a comma is not a blank physical record and is retained.
+ * Numeric `.` and special missing tokens remain explicit records. This policy
+ * differs from SAS infile DSD, which can read a blank physical record as an
+ * observation. A header without any line break means no rows.
  *
  * A table call takes a fourth argument, an options object, for the parts of
  * `%ms_webout()` that carry over to a JS row: `maxobs` limits the rows sent,
@@ -267,7 +272,7 @@ const _sasjs_fetch = () => {
       } else if (char === ',') { row.push(value); value = ''; started = true; closedQuote = false; }
       else if (char === '\r' || char === '\n') {
         if (char === '\r' && body[i + 1] === '\n') i++;
-        record();
+        if (started || row.length) record();
       } else {
         if (closedQuote) throw new Error("webout('FETCH'): invalid quote in " + table.name);
         value += char; started = true;
