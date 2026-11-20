@@ -49,7 +49,7 @@ jobs:
 
       - name: Test the CI scripts
         # The discovery fixture uses git and the @sasjs/release installed by npm ci.
-        run: PUBLISH_WORKFLOW=.github/workflows/publish.yml node --test .github/scripts/coverage-ratchet.test.mjs .github/scripts/publish-discovery.test.mjs
+        run: PUBLISH_WORKFLOW=.github/workflows/publish.yml node --test .github/scripts/publish-discovery.test.mjs
 
       - name: Run Unit Tests
         # produces coverage/coverage-summary.json, which the ratchet reads
@@ -145,16 +145,16 @@ jobs:
         id: ratchet
         # continue-on-error so the comment below is posted either way; the
         # "Fail on a coverage regression" step turns the outcome into the job's
-        # result. See the script's header for why the comparison is the gate.
+        # result. `sasjs-release --help` says why the comparison is the gate.
         continue-on-error: true
         if: github.event_name == 'pull_request'
         run: >-
-          node .github/scripts/coverage-ratchet.mjs
-          --head coverage/coverage-summary.json
-          --base coverage-base/coverage-summary.json
-          --markdown coverage-comment.md
-          --missing-baseline ${{ steps.coverage-baseline.outputs.missing }}
-          --note "Compared against ${{ steps.coverage-baseline.outputs.source }}."
+          npm run release -- --coverage-ratchet
+          --coverage-head coverage/coverage-summary.json
+          --coverage-base coverage-base/coverage-summary.json
+          --coverage-markdown coverage-comment.md
+          --coverage-missing-baseline ${{ steps.coverage-baseline.outputs.missing }}
+          --coverage-note "Compared against ${{ steps.coverage-baseline.outputs.source }}."
 
       - name: Report the coverage
         # one comment per pull request, edited in place on each push
