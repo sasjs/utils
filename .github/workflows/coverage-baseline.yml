@@ -30,8 +30,11 @@ concurrency:
 
 jobs:
   baseline:
-    # v0.17.0: the merge commit, since a tag is not a pin and the action-pins check
+    # v0.18.0: the merge commit, since a tag is not a pin and the action-pins check
     # demands one for every external `uses:`
-    uses: sasjs/release/.github/workflows/coverage-baseline.yml@9f59ac3cc06b63ff50591d9b2e10c625c94c95e7 # v0.17.0
+    uses: sasjs/release/.github/workflows/coverage-baseline.yml@daaf6bd774f022b4a16e62504e63661b6319a8f2 # v0.18.0
     with:
+      # required: the toolchain the head summary is measured with has to match
+      runs-on: ubuntu-latest
+      node-version: 22
       timeout-minutes: 30
