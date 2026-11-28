@@ -1,5 +1,6 @@
 import { readFile, createFile } from './file'
 import { writeToString, Row } from '@fast-csv/format'
+import { parseString } from '@fast-csv/parse'
 
 /**
  * reads a CSV file and returns parsed data
@@ -9,10 +10,15 @@ import { writeToString, Row } from '@fast-csv/format'
 export const readCsv = async (csvFilePath: string): Promise<string[][]> => {
   const csvContent = await readFile(csvFilePath)
 
-  return csvContent
-    .split('\n')
-    .filter((row) => row.length)
-    .map((data) => data.split(','))
+  return new Promise((resolve, reject) => {
+    const rows: string[][] = []
+    parseString(csvContent)
+      .on('error', reject)
+      .on('data', (row: string[]) => {
+        if (row.length) rows.push(row)
+      })
+      .on('end', () => resolve(rows))
+  })
 }
 
 /**
@@ -50,8 +56,10 @@ export const updateCsv = async (
     prependId
   )
 
+  if (csvData.length) csvData.shift()
+
   if (prependId) {
-    const newId = csvData.length === 0 ? 1 : csvData.length
+    const newId = csvData.length + 1
 
     const idIndexInColumns = columns.findIndex((col) => col === prependId)
 
@@ -87,10 +95,16 @@ const validateInput = async (
     throw new Error('a record can not have more fields than provided columns')
   }
 
-  const csvData = await readCsv(csvFilePath).catch((_) => [] as string[][])
+  const csvData = await readCsv(csvFilePath).catch((error) => {
+    if (error.code === 'ENOENT') return [] as string[][]
+    throw error
+  })
   const columnsInFile = csvData[0]
 
   if (columnsInFile) {
+    if (csvData.some((row) => row.length > columnsInFile.length)) {
+      throw new Error('existing record has more fields than existing columns')
+    }
     if (columnsProvided.length > columnsInFile.length) {
       throw new Error(
         'number of provided columns are greater than number of existing columns'
